@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-01T15:58-07:00",
+ "generated": "2026-11-01T16:00-07:00",
  "midc_last_delivery": "2026-10-28",
  "us5_bias": 205.7,
  "periods": {
@@ -45,7 +45,7 @@
    "expected_hours": 16,
    "label": "November 2026 to date",
    "start": "2026-11-01T00:00:00-07:00",
-   "end": "2026-11-01T15:58:54.781144-07:00"
+   "end": "2026-11-01T16:00:47.580620-07:00"
   },
   "prev_month": {
    "us": {
@@ -133,7 +133,7 @@
    "expected_hours": 7311,
    "label": "2026 to date",
    "start": "2026-01-01T00:00:00-08:00",
-   "end": "2026-11-01T15:58:54.781144-07:00",
+   "end": "2026-11-01T16:00:47.580620-07:00",
    "same_period_last_year": {
     "exp_mwh": 2000397,
     "imp_mwh": 6439657,
@@ -1016,11 +1016,11 @@
    "cad_mwh": 44.92
   },
   "aeso": {
-   "as_of_mpt": "2026-11-01 16:58",
-   "bc_to_ab_mw": 477,
+   "as_of_mpt": "2026-11-01 17:00",
+   "bc_to_ab_mw": 474,
    "ties_into_ab_mw": {
-    "British Columbia": 477,
-    "Montana": 68,
+    "British Columbia": 474,
+    "Montana": 66,
     "Saskatchewan": -101
    }
   }
