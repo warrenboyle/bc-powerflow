@@ -45,7 +45,7 @@
    "expected_hours": 15,
    "label": "November 2026 to date",
    "start": "2026-11-01T00:00:00-07:00",
-   "end": "2026-11-01T15:35:27.908280-07:00"
+   "end": "2026-11-01T15:35:48.130127-07:00"
   },
   "prev_month": {
    "us": {
@@ -133,7 +133,7 @@
    "expected_hours": 7310,
    "label": "2026 to date",
    "start": "2026-01-01T00:00:00-08:00",
-   "end": "2026-11-01T15:35:27.908280-07:00",
+   "end": "2026-11-01T15:35:48.130127-07:00",
    "same_period_last_year": {
     "exp_mwh": 2000397,
     "imp_mwh": 6437842,
@@ -1016,11 +1016,11 @@
    "cad_mwh": 44.92
   },
   "aeso": {
-   "as_of_mpt": "2026-11-01 16:34",
-   "bc_to_ab_mw": 453,
+   "as_of_mpt": "2026-11-01 16:35",
+   "bc_to_ab_mw": 443,
    "ties_into_ab_mw": {
-    "British Columbia": 453,
-    "Montana": 43,
+    "British Columbia": 443,
+    "Montana": 47,
     "Saskatchewan": -101
    }
   }
