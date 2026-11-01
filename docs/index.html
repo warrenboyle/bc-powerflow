@@ -1,18 +1,117 @@
-<!doctype html><html><head><meta charset="utf-8"><title>BC Hydro intertie flows (proof of concept)</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>body{font-family:system-ui;max-width:900px;margin:2em auto;padding:0 1em}small{color:#666}</style></head>
-<body><h1>BC ⇄ US intertie flow and estimated value</h1><div id="sum"></div><canvas id="c"></canvas><h2>BC ⇄ Alberta (AESO)</h2><div id="ab"></div><canvas id="p"></canvas><p><small id="src"></small></p>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BC electricity trade: rolling totals</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1d2330;--mute:#6b7280;--exp:#0f8a5f;--imp:#c2410c;--us:#2563eb;--ab:#d97706;--line:#e5e7eb}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+main{max-width:1150px;margin:0 auto;padding:18px}
+h1{font-size:1.5rem;margin:0 0 4px}h2{font-size:1.05rem;margin:26px 0 10px}
+.sub{color:var(--mute);font-size:.9rem}
+.live{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+.pill{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:.88rem}
+.pill b{font-size:1.05rem}
+.tabs{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card);margin:6px 0 12px}
+.tabs button{border:0;background:none;padding:8px 14px;font-size:.9rem;cursor:pointer;color:var(--ink)}
+.tabs button.on{background:var(--ink);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card h3{margin:0;font-size:.95rem;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.big{font-size:1.75rem;font-weight:700;margin:8px 0 0}.pos{color:var(--exp)}.neg{color:var(--imp)}
+.k{color:var(--mute);font-size:.8rem}
+table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:8px}td{padding:3px 0}td:last-child{text-align:right}
+.badge{font-size:.7rem;font-weight:600;padding:2px 7px;border-radius:99px;background:#fef3c7;color:#92400e;white-space:nowrap}
+.badge.p{background:#e0e7ff;color:#3730a3}
+.cmp{font-size:.8rem;margin-top:6px;color:var(--mute)}
+.chart{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;height:340px}
+.notes{font-size:.85rem;color:#374151;line-height:1.5}.notes li{margin-bottom:4px}
+a{color:var(--us)}
+</style></head>
+<body><main>
+<h1>BC electricity trade: rolling totals</h1>
+<div class="sub">BC Hydro intertie flows with the US and Alberta, valued at wholesale market prices (Mid-C and AESO pool price). <span id="upd"></span></div>
+<div class="live" id="live"></div>
+
+<div class="tabs" id="tabs"><button data-v="total" class="on">All interties</button><button data-v="us">BC ⇄ US</button><button data-v="ab">BC ⇄ Alberta</button></div>
+<div class="grid" id="cards"></div>
+
+<h2>Monthly net value (C$, + = BC earned on net exports)</h2>
+<div class="chart"><canvas id="mval"></canvas></div>
+<h2>Monthly exports and imports (GWh)</h2>
+<div class="chart"><canvas id="mvol"></canvas></div>
+<h2>Last 60 days: daily net flow (GWh) and prices (C$/MWh)</h2>
+<div class="chart"><canvas id="daily"></canvas></div>
+
+<h2>How this is calculated</h2>
+<ul class="notes" id="notes"></ul>
+</main>
 <script>
-fetch('data.json').then(r=>r.json()).then(d=>{
- const b=d.bc_us,m=d.midc;
- document.getElementById('sum').innerHTML=`<p>Latest hour (${new Date(b.latest_hour_utc).toLocaleString('en-CA',{timeZone:'America/Vancouver'})} Pacific): BC net export <b>${b.latest_export_mw.toFixed(0)} MW</b>.<br>
- Last ${b.hours} h: net export ${Math.round(b.net_export_mwh).toLocaleString()} MWh, estimated value <b>C$${b.est_value_cad.toLocaleString()}</b> at ${m.hub} C$${m.cad_mwh}/MWh.</p>`;
- new Chart(document.getElementById('c'),{type:'bar',data:{labels:d.series.map(s=>new Date(s.t).toLocaleString('en-CA',{timeZone:'America/Vancouver',month:'short',day:'numeric',hour:'2-digit'})),
-  datasets:[{label:'BC net export to US (MW, + = export)',data:d.series.map(s=>s.mw)}]}});
- const a=d.aeso; if(a){const t=a.interchange_mw_into_ab;
- document.getElementById('ab').innerHTML=`<p>As of ${a.as_of_mpt} Alberta time: BC net export to Alberta <b>${a.bc_export_to_ab_mw} MW</b> (Montana ${t.Montana??'n/a'} MW, Saskatchewan ${t.Saskatchewan??'n/a'} MW into AB).<br>
- Pool price C$${a.latest_pool_price_cad}/MWh (hour ${a.latest_price_hour_mpt}) → estimated value <b>C$${a.bc_ab_est_value_cad_per_hour.toLocaleString()}/h</b> to BC (estimate). ${a.prices.length}-h avg pool price C$${a.avg_pool_price_cad}/MWh.</p><p><small>${a.source}</small></p>`;
- new Chart(document.getElementById('p'),{type:'line',data:{labels:a.prices.map(p=>p.mpt),datasets:[{label:'AESO pool price (C$/MWh)',data:a.prices.map(p=>p.cad_mwh)}]}});}
- document.getElementById('src').textContent=`${d.note} Flows: ${b.source}. Price: ${m.source}, delivery ${m.delivery}. FX: ${d.fx.source}, ${d.fx.usdcad} on ${d.fx.date}. Generated ${d.generated_utc}.`;
-});
+const C=n=>n==null?'n/a':(Math.abs(n)>=1e6?(n<0?'−':'')+'C$'+(Math.abs(n)/1e6).toFixed(1)+'M':(n<0?'−':'')+'C$'+Math.round(Math.abs(n)/1e3).toLocaleString()+'k');
+const G=n=>(n/1000).toLocaleString(undefined,{maximumFractionDigits:n&&Math.abs(n)<1e5?1:0})+' GWh';
+const P=n=>n==null?'n/a':'C$'+n.toFixed(2);
+const T=s=>s?new Date(s).toLocaleString('en-CA',{timeZone:'America/Vancouver',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'n/a';
+const D=s=>s?new Date(s).toLocaleDateString('en-CA',{timeZone:'America/Vancouver',month:'short',day:'numeric',year:'numeric'}):'n/a';
+let data,view='total',charts={};
+fetch('dashboard.json?'+Date.now()).then(r=>r.json()).then(d=>{data=d;render();});
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{view=b.dataset.v;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));render();});
+
+function render(){
+ const d=data,L=d.live||{};
+ document.getElementById('upd').textContent=`Updated ${T(d.generated)} Pacific.`;
+ const lv=[];
+ if(L.bch){lv.push(`Now (${T(L.bch.t_utc)}): BC → US <b>${L.bch.us_mw} MW</b>`);lv.push(`BC → Alberta <b>${L.bch.ab_mw} MW</b>`);}
+ if(L.pool_price)lv.push(`Alberta pool price <b>${P(L.pool_price.cad_mwh)}</b>/MWh`);
+ const lastDay=d.daily.filter(x=>x.midc_cad).slice(-1)[0];
+ lv.push(`Latest Mid-C peak (delivery ${d.midc_last_delivery}) <b>${lastDay?P(lastDay.midc_cad):'n/a'}</b>/MWh`);
+ document.getElementById('live').innerHTML=lv.map(x=>`<div class="pill">${x}</div>`).join('')+'<div class="pill k">Negative MW = BC importing</div>';
+ const pk=['mtd','prev_month','ytd','prev_year'],names={mtd:'Month to date',prev_month:'Previous month',ytd:'Year to date',prev_year:'Previous year'};
+ document.getElementById('cards').innerHTML=pk.map(k=>{
+  const p=d.periods[k],s=p[view],us=p.us,ab=p.ab;
+  const est=view==='total'?us.est_hours+ab.est_hours:s.est_hours, prov=view==='total'?us.prov_hours+ab.prov_hours:s.prov_hours;
+  const thr=view==='total'?[us.through,ab.through].filter(Boolean).sort()[0]:s.through;
+  const badge=est?`<span class="badge" title="${est} hours use estimated flows or a carried-forward price">partly estimated</span>`:(prov?`<span class="badge p" title="${prov} hours from BC Hydro real-time data, before official hourly figures">provisional</span>`:'');
+  let cmp='';
+  if(k==='ytd'&&view==='total'&&p.same_period_last_year){const l=p.same_period_last_year;cmp=`<div class="cmp">Same period 2025: ${C(l.net_cad)}, ${G(l.net_mwh)} net</div>`;}
+  const showThr=k==='mtd'||k==='ytd'||est||prov;
+  return `<div class="card"><h3>${names[k]} <span class="k">${p.label}</span></h3>
+  <div style="margin-top:4px">${badge}</div>
+  <div class="big ${s.net_cad>=0?'pos':'neg'}">${C(s.net_cad)}</div>
+  <div class="k">${s.net_mwh>=0?'Net export':'Net import'} ${G(Math.abs(s.net_mwh))}</div>
+  <table><tr><td>Exports</td><td>${G(s.exp_mwh)} · ${C(s.exp_cad)}</td></tr>
+  <tr><td>Imports</td><td>${G(s.imp_mwh)} · ${C(s.imp_cad)}</td></tr>
+  <tr><td>Avg export price</td><td>${P(s.avg_exp_price)}/MWh</td></tr>
+  <tr><td>Avg import price</td><td>${P(s.avg_imp_price)}/MWh</td></tr>
+  ${view==='total'?`<tr><td>US / Alberta net</td><td>${C(us.net_cad)} / ${C(ab.net_cad)}</td></tr>`:''}</table>
+  ${cmp}${showThr?`<div class="cmp">Data through ${T(thr)}</div>`:''}</div>`;}).join('');
+ charts.mval&&charts.mval.destroy();charts.mvol&&charts.mvol.destroy();charts.daily&&charts.daily.destroy();
+ const M=d.monthly,lab=M.map(m=>new Date(m.month+'-15').toLocaleDateString('en-CA',{month:'short',year:'2-digit'})+(m.est?'*':''));
+ const ds=[];if(view!=='ab')ds.push({label:'BC–US',data:M.map(m=>m.us_net_cad),backgroundColor:'#2563eb'});
+ if(view!=='us')ds.push({label:'BC–Alberta',data:M.map(m=>m.ab_net_cad),backgroundColor:'#d97706'});
+ const money={ticks:{callback:v=>C(v)}};
+ charts.mval=new Chart(mval,{type:'bar',data:{labels:lab,datasets:ds},options:{maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true,...money}},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+C(c.raw)}}}}});
+ const ex=[],im=[];
+ M.forEach(m=>{});
+ // monthly volume by view: exports/imports only available as totals; per-tie view uses net
+ let vds;
+ if(view==='total')vds=[{label:'Exports',data:M.map(m=>m.exp_mwh/1000),backgroundColor:'#0f8a5f'},{label:'Imports',data:M.map(m=>-m.imp_mwh/1000),backgroundColor:'#c2410c'}];
+ else vds=[{label:(view==='us'?'BC–US':'BC–Alberta')+' net (GWh, + = export)',data:M.map(m=>(view==='us'?m.us_net_mwh:m.ab_net_mwh)/1000),backgroundColor:M.map(m=>((view==='us'?m.us_net_mwh:m.ab_net_mwh)>=0?'#0f8a5f':'#c2410c'))}];
+ charts.mvol=new Chart(mvol,{type:'bar',data:{labels:lab,datasets:vds},options:{maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true,title:{display:true,text:'GWh'}}}}});
+ const Dd=d.daily,dl=Dd.map(x=>x.date.slice(5));
+ const dds=[];
+ if(view!=='ab')dds.push({type:'bar',label:'BC–US net GWh',data:Dd.map(x=>x.us_net_mwh/1000),backgroundColor:'#93c5fd',yAxisID:'y',stack:'s'});
+ if(view!=='us')dds.push({type:'bar',label:'BC–Alberta net GWh',data:Dd.map(x=>x.ab_net_mwh/1000),backgroundColor:'#fcd34d',yAxisID:'y',stack:'s'});
+ if(view!=='ab')dds.push({type:'line',label:'Mid-C peak C$/MWh',data:Dd.map(x=>x.midc_cad),borderColor:'#1d4ed8',pointRadius:0,yAxisID:'y1'});
+ if(view!=='us')dds.push({type:'line',label:'AESO pool avg C$/MWh',data:Dd.map(x=>x.pool_cad),borderColor:'#b45309',pointRadius:0,yAxisID:'y1'});
+ charts.daily=new Chart(daily,{data:{labels:dl,datasets:dds},options:{maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true,title:{display:true,text:'GWh/day (+ = export)'}},y1:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'C$/MWh'}}}}});
+ const S=d.sources,r=x=>S[x]?`${D(S[x].from)} – ${D(S[x].to)}`:'none';
+ document.getElementById('notes').innerHTML=[
+ `<b>Value = hourly flow (MWh) × hub price.</b> Exports earn, imports cost. These are <b>estimates at public market prices</b>, not BC Hydro/Powerex contract settlements, which aren't public.`,
+ `<b>BC–US price:</b> Mid-Columbia (Mid-C) day-ahead <i>peak</i> price from ICE via the EIA, applied to <i>every</i> hour of the delivery day (no free off-peak series), so night-time hours are probably overvalued. Sundays and holidays use the previous trading day's price. Converted to C$ with the Bank of Canada daily USD/CAD rate. Mid-C runs a few days behind; latest delivery day ${d.midc_last_delivery}. Days after that use the latest price and are flagged <span class="badge">partly estimated</span>.`,
+ `<b>BC–Alberta price:</b> AESO hourly pool price (C$), exact.`,
+ `<b>Flows:</b> BC Hydro official hourly tie-line data (${r('us_bch')}). After that, BC–US comes from the EIA grid monitor (BPA–BC Hydro tie, identical to BC Hydro's figures, ~1–1.5 days behind: ${r('us_eia')}). The most recent hours come from BC Hydro's 5-minute real-time page <span class="badge p">provisional</span>. Its US figure reads about ${d.us5_bias!=null?Math.round(d.us5_bias):'200'} MW lower than the official series, so it's calibrated by that offset and counted as estimated (${r('us_bch5')}).`,
+ `<b>Alberta gap:</b> there's no public hourly BC–AB actual flow for ${r('ab_aeso')}. Those hours use AESO's settled import/export volumes on the BC path (schedules) as a stand-in, flagged <span class="badge">partly estimated</span>. In checks against September they caught the direction and the dollar value roughly but understated BC's imports from Alberta. They'll be replaced automatically when BC Hydro posts October's official data. BC–AB real-time hours: ${r('ab_bch5')}.`,
+ `Months marked * contain estimated hours. Positive = BC exporting. Times are Pacific (BC is now on permanent UTC−7).`,
+ `Download the hourly data: <a href="hourly.csv">hourly.csv</a> · <a href="daily_prices.csv">daily_prices.csv</a> · <a href="dashboard.json">dashboard.json</a>. Code: <a href="https://github.com/warrenboyle/bc-powerflow">GitHub</a>. Updated hourly.`
+ ].map(x=>`<li>${x}</li>`).join('');
+}
 </script></body></html>
