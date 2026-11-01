@@ -26,6 +26,14 @@ table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:8px}td{pad
 .chart{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;height:340px}
 .notes{font-size:.85rem;color:#374151;line-height:1.5}.notes li{margin-bottom:4px}
 a{color:var(--us)}
+.est{font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:99px;background:#fde2e2;color:#991b1b;letter-spacing:.03em}
+.lbl{font-size:.82rem;color:var(--mute);margin:-4px 0 10px}
+.ctx{width:100%;border-collapse:collapse;font-size:.85rem;background:var(--card)}
+.ctx th,.ctx td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:right}.ctx th:first-child,.ctx td:first-child{text-align:left}
+.ctx th{font-weight:600;background:#f3f4f6}
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 16px;margin-top:12px}
+summary{cursor:pointer;font-weight:600}
 </style></head>
 <body><main>
 <h1>BC electricity trade: rolling totals</h1>
@@ -33,7 +41,14 @@ a{color:var(--us)}
 <div class="live" id="live"></div>
 
 <div class="tabs" id="tabs"><button data-v="total" class="on">All interties</button><button data-v="us">BC ⇄ US</button><button data-v="ab">BC ⇄ Alberta</button></div>
+<div class="lbl">Dollar figures are <b>tie-line flows valued at hub prices</b> (Mid-C day-ahead peak + AESO pool), not BC Hydro's import bill nor Powerex's trading margin. See <a href="#reported">Reported context</a>.</div>
 <div class="grid" id="cards"></div>
+
+<h2>Estimated arbitrage value <span class="est">ESTIMATE</span></h2>
+<div class="lbl">A separate heuristic proxy for how much value comes from <i>when</i> BC trades (buying low, selling high), computed from the same hourly flows and hub prices. Not Powerex's actual arbitrage profit, which is only published as multi-year ranges. All interties; see <a href="#method">Method &amp; caveats</a>.</div>
+<div class="grid" id="arb"></div>
+<h2>Monthly estimated arbitrage value (C$) <span class="est">ESTIMATE</span></h2>
+<div class="chart"><canvas id="marb"></canvas></div>
 
 <h2>Monthly net value (C$, + = BC earned on net exports)</h2>
 <div class="chart"><canvas id="mval"></canvas></div>
@@ -41,6 +56,12 @@ a{color:var(--us)}
 <div class="chart"><canvas id="mvol"></canvas></div>
 <h2>Last 60 days: daily net flow (GWh) and prices (C$/MWh)</h2>
 <div class="chart"><canvas id="daily"></canvas></div>
+
+<h2 id="reported">Reported context: BC Hydro's published figures</h2>
+<div class="lbl">BC Hydro reports by fiscal year (Apr–Mar). Its import/export dollars are BC Hydro's own system trade, including Powerex transfer pricing, transmission and shaping. Powerex's trading profit is booked separately as trade income.</div>
+<div class="wrap"><table class="ctx" id="ctx"></table></div>
+<div class="grid" id="ctx2" style="margin-top:12px"></div>
+<details id="method"><summary>Method &amp; caveats for the estimates</summary><ul class="notes" id="mnotes"></ul></details>
 
 <h2>How this is calculated</h2>
 <ul class="notes" id="notes"></ul>
@@ -83,7 +104,7 @@ function render(){
   <tr><td>Avg import price</td><td>${P(s.avg_imp_price)}/MWh</td></tr>
   ${view==='total'?`<tr><td>US / Alberta net</td><td>${C(us.net_cad)} / ${C(ab.net_cad)}</td></tr>`:''}</table>
   ${cmp}${showThr?`<div class="cmp">Data through ${T(thr)}</div>`:''}</div>`;}).join('');
- charts.mval&&charts.mval.destroy();charts.mvol&&charts.mvol.destroy();charts.daily&&charts.daily.destroy();
+ charts.mval&&charts.mval.destroy();charts.marb&&charts.marb.destroy();charts.mvol&&charts.mvol.destroy();charts.daily&&charts.daily.destroy();
  const M=d.monthly,lab=M.map(m=>new Date(m.month+'-15').toLocaleDateString('en-CA',{month:'short',year:'2-digit'})+(m.est?'*':''));
  const ds=[];if(view!=='ab')ds.push({label:'BC–US',data:M.map(m=>m.us_net_cad),backgroundColor:'#2563eb'});
  if(view!=='us')ds.push({label:'BC–Alberta',data:M.map(m=>m.ab_net_cad),backgroundColor:'#d97706'});
@@ -103,6 +124,7 @@ function render(){
  if(view!=='ab')dds.push({type:'line',label:'Mid-C peak C$/MWh',data:Dd.map(x=>x.midc_cad),borderColor:'#1d4ed8',pointRadius:0,yAxisID:'y1'});
  if(view!=='us')dds.push({type:'line',label:'AESO pool avg C$/MWh',data:Dd.map(x=>x.pool_cad),borderColor:'#b45309',pointRadius:0,yAxisID:'y1'});
  charts.daily=new Chart(daily,{data:{labels:dl,datasets:dds},options:{maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true,title:{display:true,text:'GWh/day (+ = export)'}},y1:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'C$/MWh'}}}}});
+ renderArb(d,M,lab);renderCtx(d);
  const S=d.sources,r=x=>S[x]?`${D(S[x].from)} – ${D(S[x].to)}`:'none';
  document.getElementById('notes').innerHTML=[
  `<b>Value = hourly flow (MWh) × hub price.</b> Exports earn, imports cost. These are <b>estimates at public market prices</b>, not BC Hydro/Powerex contract settlements, which aren't public.`,
@@ -112,6 +134,69 @@ function render(){
  `<b>Alberta gap:</b> there's no public hourly BC–AB actual flow for ${r('ab_aeso')}. Those hours use AESO's settled import/export volumes on the BC path (schedules) as a stand-in, flagged <span class="badge">partly estimated</span>. In checks against September they caught the direction and the dollar value roughly but understated BC's imports from Alberta. They'll be replaced automatically when BC Hydro posts October's official data. BC–AB real-time hours: ${r('ab_bch5')}.`,
  `Months marked * contain estimated hours. Positive = BC exporting. Times are Pacific (BC is now on permanent UTC−7).`,
  `Download the hourly data: <a href="hourly.csv">hourly.csv</a> · <a href="daily_prices.csv">daily_prices.csv</a> · <a href="dashboard.json">dashboard.json</a>. Code: <a href="https://github.com/warrenboyle/bc-powerflow">GitHub</a>. Updated hourly.`
+ ].map(x=>`<li>${x}</li>`).join('');
+}
+
+const M$=n=>n==null?'n/a':(n<0?'−':'')+'C$'+Math.abs(n).toLocaleString()+'M';
+const pct=n=>n==null?'n/a':n.toFixed(2)+'×';
+function renderArb(d,M,lab){
+ const A=d.arbitrage_estimate;if(!A)return;
+ const f=A.assumptions.offpeak_factor,pk=['mtd','prev_month','ytd','prev_year'],names={mtd:'Month to date',prev_month:'Previous month',ytd:'Year to date',prev_year:'Previous year'};
+ document.getElementById('arb').innerHTML=pk.map(k=>{const p=A.periods[k],b=p.base,o=p.offpeak_sens;
+  return `<div class="card"><h3>${names[k]} <span class="k">${p.label}</span></h3>
+  <div style="margin-top:4px"><span class="est">ESTIMATE</span></div>
+  <div class="big ${b.timing_cad>=0?'pos':'neg'}">${C(b.timing_cad)}</div>
+  <div class="k">Timing value (flow × price vs monthly average)</div>
+  <table><tr><td>US / Alberta timing</td><td>${C(b.timing_us_cad)} / ${C(b.timing_ab_cad)}</td></tr>
+  <tr><td>Round-trip spread value</td><td>${C(b.spread_cad)}</td></tr>
+  <tr><td>Matched buy/sell volume</td><td>${G(b.matched_mwh)}</td></tr>
+  <tr><td colspan="2" class="k" style="text-align:left;padding-top:6px">Sensitivity: Mid-C off-peak at ${f}× peak</td></tr>
+  <tr><td>Timing / spread</td><td>${C(o.timing_cad)} / ${C(o.spread_cad)}</td></tr>
+  <tr><td>Hub-valued net</td><td>${C(b.net_cad)} → ${C(o.net_cad)}</td></tr></table></div>`;}).join('');
+ const AM=Object.fromEntries(A.monthly.map(m=>[m.month,m]));
+ charts.marb=new Chart(marb,{data:{labels:lab,datasets:[
+  {type:'bar',label:'Timing value',data:M.map(m=>AM[m.month]?.timing_cad),backgroundColor:'#7c3aed'},
+  {type:'bar',label:'Round-trip spread value',data:M.map(m=>AM[m.month]?.spread_cad),backgroundColor:'#a7f3d0'},
+  {type:'line',label:`Timing, off-peak ${f}× (sensitivity)`,data:M.map(m=>AM[m.month]?.timing_cad_offpeak),borderColor:'#4c1d95',borderDash:[5,4],pointRadius:2},
+  {type:'line',label:`Spread, off-peak ${f}× (sensitivity)`,data:M.map(m=>AM[m.month]?.spread_cad_offpeak),borderColor:'#047857',borderDash:[5,4],pointRadius:2}]},
+  options:{maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>C(v)}}},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+C(c.raw)}}}}});
+}
+function renderCtx(d){
+ const R=d.reported_context;if(!R)return;
+ const a=R.fy2026,b=R.fy2025,h=R.dashboard_fy2026,c=R.calibration_fy2026,g=x=>Math.round(x/1000).toLocaleString();
+ const row=(l,x,y,z)=>`<tr><td>${l}</td><td>${x}</td><td>${y}</td><td>${z}</td></tr>`;
+ document.getElementById('ctx').innerHTML=`<tr><th></th><th>BC Hydro reported<br>FY2026 (Apr 2025–Mar 2026)</th><th>This dashboard, same FY<br>hub-valued <span class="est">ESTIMATE</span></th><th>BC Hydro reported<br>FY2025 (Apr 2024–Mar 2025)</th></tr>`+
+ row('Imports',`${a.imp_gwh.toLocaleString()} GWh · ${M$(a.imp_cad_m)}`,`${g(h.imp_mwh)} GWh · ${C(h.imp_cad)}`,`${b.imp_gwh.toLocaleString()} GWh · ${M$(b.imp_cad_m)}`)+
+ row('Avg import price',`~C$${a.imp_price}/MWh`,`${P(h.avg_imp_price)}/MWh`,`~C$${b.imp_price}/MWh`)+
+ row('Exports',`${a.exp_gwh.toLocaleString()} GWh · ${M$(a.exp_cad_m)}`,`${g(h.exp_mwh)} GWh · ${C(h.exp_cad)}`,`${b.exp_gwh.toLocaleString()} GWh · ${M$(b.exp_cad_m)}`)+
+ row('Avg export price',`~C$${a.exp_price}/MWh`,`${P(h.avg_exp_price)}/MWh`,`~C$${b.exp_price}/MWh`)+
+ row('Net imports',`${a.net_import_gwh.toLocaleString()} GWh`,`${g(h.imp_mwh-h.exp_mwh)} GWh`,`${b.net_import_gwh.toLocaleString()} GWh`)+
+ row('<b>Net trade value</b> (+ = BC earned)',`<b class="neg">${M$(-a.net_cost_cad_m)}</b>`,`<b class="${h.net_cad>=0?'pos':'neg'}">${C(h.net_cad)}</b> <span class="k">(off-peak ${d.arbitrage_estimate.assumptions.offpeak_factor}×: ${C(h.offpeak_net_cad)})</span>`,`<b class="neg">${M$(-b.net_cost_cad_m)}</b>`)+
+ row('Consolidated trade revenue (mostly Powerex, gross sales)',M$(a.trade_revenue_cad_m),'—',M$(b.trade_revenue_cad_m));
+ const tr=R.trade_income_ranges.map(x=>`${x.span}: ${M$(x.low_cad_m)}–${M$(x.high_cad_m)}`).join('<br>');
+ document.getElementById('ctx2').innerHTML=`
+ <div class="card"><h3>Calibration (FY2026)</h3><table>
+  <tr><td>Reported ÷ hub import price</td><td><b>${pct(c.imp_price_ratio)}</b></td></tr>
+  <tr><td>Reported ÷ hub export price</td><td><b>${pct(c.exp_price_ratio)}</b></td></tr>
+  <tr><td>Import cost gap (reported − hub)</td><td>${C(c.imp_gap_cad)}</td></tr>
+  <tr><td>… with off-peak sensitivity</td><td>${C(c.imp_gap_cad_offpeak)}</td></tr></table>
+  <div class="cmp">BC Hydro paid ~C$${a.imp_price}/MWh for imports vs ~${P(h.avg_imp_price)} at hub prices. The gap is an indicator of shaping, wheeling and Powerex transfer-pricing costs, not a measured quantity.</div></div>
+ <div class="card"><h3>Powerex trade income (profit)</h3><table><tr><td colspan="2" style="text-align:left">${tr}</td></tr>
+  <tr><td>FY2026 (inferred, likely the range low)</td><td>~${M$(R.fy2026_trade_income_inferred_cad_m)}</td></tr>
+  <tr><td>Added to Trade Income Deferral Account, FY2026</td><td>${M$(R.fy2026_tida_addition_cad_m)}</td></tr></table>
+  <div class="cmp">Not published separately by year; reports give multi-year ranges only. FY2026 trade income came in below plan.</div></div>
+ <div class="card"><h3>Trade revenue, calendar 2025</h3><div class="big">~${M$(R.trade_revenue_cy2025_cad_m)}</div>
+  <div class="k">Derived: Apr–Dec 2025 + (FY2025 − Apr–Dec 2024). Gross sales, not profit, so it can't be netted against import cost.</div></div>
+ <div class="card"><h3>Sources</h3><ul class="notes" style="padding-left:18px;margin:6px 0 0">${R.sources.map(x=>`<li><a href="${x.url}">${x.label}</a></li>`).join('')}</ul></div>`;
+ const f=d.arbitrage_estimate.assumptions;
+ document.getElementById('mnotes').innerHTML=[
+ `<b>Everything in the arbitrage section is an ESTIMATE</b>: a heuristic proxy from public tie-line flows and hub prices. It is <b>not</b> Powerex's actual arbitrage profit, which BC Hydro publishes only as multi-year trade-income ranges, and it ignores transmission, losses, wheeling, contracts and third-party trades.`,
+ `<b>Timing value</b> = Σ hourly flow × (hourly price − that tie's simple average price for the calendar month), summed over both ties. Positive means BC tended to export in higher-priced hours and import in lower-priced hours <i>within the month</i>, versus moving the same net energy flat. Rolling totals are the sum of their months, so seasonal (month-to-month) shifting is excluded.`,
+ `<b>Round-trip spread value</b> = (flow-weighted avg export price − flow-weighted avg import price) × min(export MWh, import MWh), per month, both ties pooled. A simple "bought this much, sold this much, at this spread" figure.`,
+ `<b>Price-shape limitation:</b> the BC–US price is the Mid-C day-ahead <i>peak</i> index applied to every hour, so on the US tie the base timing value only captures day-to-day swings. Alberta pool prices are truly hourly.`,
+ `<b>Off-peak sensitivity:</b> Mid-C off-peak hours (${f.offpeak_hours}) are priced at <b>${f.offpeak_factor}×</b> the peak price. This is a documented assumption (env <code>OFFPEAK_FACTOR</code> in fetch.py), not data. Dashed lines and the "Sensitivity" rows use it.`,
+ `<b>Hub-to-reported calibration gap</b> = BC Hydro's reported FY import cost minus this dashboard's hub-valued import cost for the same months. It hints at shaping, wheeling and transfer-pricing costs, but it also absorbs volume differences (the dashboard's tie-line volumes differ from BC Hydro's reported trade volumes).`,
+ `BC Hydro figures are static values from its annual service plan reports and financial statements (links above). FY2025 isn't compared against the dashboard because the hourly data starts January 2025.`
  ].map(x=>`<li>${x}</li>`).join('');
 }
 </script></body></html>

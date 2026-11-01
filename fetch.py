@@ -25,6 +25,9 @@ HOURLY, PRICES, META = f"{D}/hourly.csv", f"{D}/daily_prices.csv", f"{D}/meta.js
 BCH = "https://www.bchydro.com"
 META_BIAS = {}
 RANK = {"bch": 3, "eia": 2, "bch5": 1, "aeso": 0}
+# Sensitivity assumption: Mid-C off-peak hours (NERC: HE23-HE6 Mon-Sat, all day Sunday, Pacific time) are
+# priced at this multiple of the Mid-C day-ahead PEAK price. Main figures use 1.0 (peak price in every hour).
+OFFPEAK_FACTOR = float(os.environ.get("OFFPEAK_FACTOR", "0.8"))
 
 
 def check_tz():
@@ -236,6 +239,9 @@ def compute(h, prices):
     df["usdcad"] = df["date"].map(p["usdcad"])
     df["us_price"] = df["midc_usd"] * df["usdcad"]
     df["us_price_est"] = df["date"] > last_midc
+    hb = df["local"].dt.hour  # hour beginning, Pacific
+    df["offpeak"] = (hb >= 22) | (hb < 6) | (df["local"].dt.dayofweek == 6)
+    df["us_price_op"] = df["us_price"] * df["offpeak"].map({True: OFFPEAK_FACTOR, False: 1.0})
     # pool price: carry forward at most 3 hours for the not-yet-settled current hour
     df["ab_price_est"] = df["pool_cad"].isna()
     df["ab_price"] = df["pool_cad"].ffill(limit=3)
@@ -250,6 +256,7 @@ def compute(h, prices):
         est_src = ["aeso", "bch5"] if k == "us" else ["aeso"]
         df[f"{k}_est"] = ok & (df[f"{k}_price_est"] | df[f"{k}_src"].isin(est_src))
         df[f"{k}_prov"] = ok & (df[f"{k}_src"] == "bch5")
+    df["ab_price_op"] = df["ab_price"]
     return df, last_midc
 
 
@@ -274,6 +281,87 @@ def summarize(sub):
     return out
 
 
+def _arb_month(sub, sfx):
+    timing, e_mwh, i_mwh, e_cad, i_cad, per = 0.0, 0.0, 0.0, 0.0, 0.0, {"us": 0.0, "ab": 0.0}
+    for k in ("us", "ab"):
+        ok = sub[sub[f"{k}_ok"]]
+        if ok.empty:
+            continue
+        mw, p = ok[f"{k}_mw"].astype(float), ok[f"{k}_price{sfx}"]
+        per[k] = float((mw * (p - p.mean())).sum())
+        e, i = mw.clip(lower=0), (-mw).clip(lower=0)
+        e_mwh += e.sum(); i_mwh += i.sum(); e_cad += (e * p).sum(); i_cad += (i * p).sum()
+    spread = (e_cad / e_mwh - i_cad / i_mwh) * min(e_mwh, i_mwh) if e_mwh and i_mwh else 0.0
+    return per, spread, min(e_mwh, i_mwh), e_mwh, i_mwh, e_cad, i_cad
+
+
+def arb_metrics(sub, sfx=""):
+    """Heuristic arbitrage proxies (ESTIMATES), computed per calendar month and summed, so rolling totals
+    equal the sum of their months. Price columns: <tie>_price<sfx>.
+    timing_cad: sum of flow x (hourly price - that tie's simple average price for the month), i.e. value from
+                WHEN within the month BC exported/imported, versus moving the same net energy flat.
+    spread_cad: (flow-weighted avg export price - flow-weighted avg import price) x min(export, import MWh)
+                for the month (both ties pooled), i.e. a round-trip 'buy low / sell high' value."""
+    tot = {"us": 0.0, "ab": 0.0}
+    spread = matched = e_mwh = i_mwh = e_cad = i_cad = 0.0
+    if len(sub):
+        for _, g in sub.groupby(sub["local"].dt.strftime("%Y-%m")):
+            per, sp, mt, em, im, ec, ic = _arb_month(g, sfx)
+            tot["us"] += per["us"]; tot["ab"] += per["ab"]
+            spread += sp; matched += mt; e_mwh += em; i_mwh += im; e_cad += ec; i_cad += ic
+    return {"timing_cad": round(tot["us"] + tot["ab"]), "timing_us_cad": round(tot["us"]), "timing_ab_cad": round(tot["ab"]),
+            "spread_cad": round(spread), "matched_mwh": round(matched),
+            "avg_exp_price": round(e_cad / e_mwh, 2) if e_mwh else None,
+            "avg_imp_price": round(i_cad / i_mwh, 2) if i_mwh else None,
+            "net_cad": round(e_cad - i_cad), "imp_cad": round(i_cad), "exp_cad": round(e_cad)}
+
+
+def arb_block(sub):
+    return {"base": arb_metrics(sub), "offpeak_sens": arb_metrics(sub, "_op")}
+
+
+# BC Hydro published figures (static; fiscal years end Mar 31). Sources in REPORTED["sources"].
+REPORTED = {
+    "fy2026": {"label": "FY2026 (Apr 2025 - Mar 2026)", "net_import_gwh": 4344, "imp_gwh": 5957, "imp_cad_m": 305,
+               "imp_price": 51, "exp_gwh": 1613, "exp_cad_m": 60, "exp_price": 37, "net_cost_cad_m": 245,
+               "trade_revenue_cad_m": 1244},
+    "fy2025": {"label": "FY2025 (Apr 2024 - Mar 2025)", "net_import_gwh": 8356, "imp_gwh": 9082, "imp_cad_m": 528,
+               "imp_price": 58, "exp_gwh": 726, "exp_cad_m": 32, "exp_price": 44, "net_cost_cad_m": 496,
+               "trade_revenue_cad_m": 1429},
+    "trade_revenue_cy2025_cad_m": 1430,
+    "trade_income_ranges": [{"span": "FY2021-FY2025", "low_cad_m": 386, "high_cad_m": 1051},
+                            {"span": "FY2022-FY2026", "low_cad_m": 379, "high_cad_m": 1052}],
+    "fy2026_trade_income_inferred_cad_m": 379,
+    "fy2026_tida_addition_cad_m": 167,
+    "sources": [
+        {"label": "BC Hydro 2025/26 Annual Service Plan Report (net trade table p.136, Appendix B p.64, MD&A p.25-26)",
+         "url": "https://bcbudget.gov.bc.ca/Annual_Reports/2025_2026/pdf/agency/bchydro.pdf"},
+        {"label": "BC Hydro 2024/25 Annual Service Plan Report (Appendix B p.68)",
+         "url": "https://bcbudget.gov.bc.ca/Annual_Reports/2024_2025/pdf/agency/bchydro.pdf"},
+        {"label": "BC Hydro 2025/26 audited financial statements",
+         "url": "https://www2.gov.bc.ca/assets/gov/british-columbians-our-governments/government-finances/public-accounts/2025-26/sup-e/bc-hydro-fs-2025-26.pdf"}],
+}
+
+
+def reported_context(df):
+    loc = df["local"]
+    a, b = pd.Timestamp("2025-04-01", tz=TZ), pd.Timestamp("2026-04-01", tz=TZ)
+    sub = df[(loc >= a) & (loc < b)]
+    t = summarize(sub)["total"]
+    sens = arb_metrics(sub, "_op")
+    r = REPORTED["fy2026"]
+    hub = {"imp_mwh": t["imp_mwh"], "imp_cad": t["imp_cad"], "exp_mwh": t["exp_mwh"], "exp_cad": t["exp_cad"],
+           "net_cad": t["net_cad"], "avg_imp_price": t["avg_imp_price"], "avg_exp_price": t["avg_exp_price"],
+           "offpeak_imp_cad": sens["imp_cad"], "offpeak_exp_cad": sens["exp_cad"], "offpeak_net_cad": sens["net_cad"]}
+    cal = {"imp_price_ratio": float(round(r["imp_cad_m"] * 1e6 / r["imp_gwh"] / 1e3 / t["avg_imp_price"], 2)) if t["avg_imp_price"] else None,
+           "exp_price_ratio": float(round(r["exp_cad_m"] * 1e6 / r["exp_gwh"] / 1e3 / t["avg_exp_price"], 2)) if t["avg_exp_price"] else None,
+           # reported import cost minus hub-valued import cost: indicator of shaping/wheeling/transfer-pricing costs
+           "imp_gap_cad": round(r["imp_cad_m"] * 1e6 - t["imp_cad"]),
+           "imp_gap_cad_offpeak": round(r["imp_cad_m"] * 1e6 - sens["imp_cad"]),
+           "net_gap_cad": round(-r["net_cost_cad_m"] * 1e6 - t["net_cad"])}
+    return {**REPORTED, "dashboard_fy2026": hub, "calibration_fy2026": cal}
+
+
 def build_dashboard(df, last_midc, live):
     now = pd.Timestamp.now(tz=TZ)
     ms = now.normalize().replace(day=1)
@@ -283,7 +371,7 @@ def build_dashboard(df, last_midc, live):
     loc = df["local"]
     # last hour that has data for both ties (common "data through")
     has = df[df["us_ok"] | df["ab_ok"]]
-    periods = {}
+    periods, arb_periods = {}, {}
     defs = [("mtd", f"{now:%B %Y} to date", ms, now), ("prev_month", f"{pms:%B %Y}", pms, ms),
             ("ytd", f"{now.year} to date", ys, now), ("prev_year", f"{pys.year}", pys, ys)]
     for key, label, a, b in defs:
@@ -296,19 +384,25 @@ def build_dashboard(df, last_midc, live):
             ok = sub[sub[f"{k}_ok"]]
             s[k]["through"] = ok["local"].max().isoformat() if len(ok) else None
         periods[key] = s
+        arb_periods[key] = {"label": label, **arb_block(sub)}
     # YTD comparison: same span last year
     last = has["local"].max()
     ly = df[(loc >= pys) & (loc <= last - pd.DateOffset(years=1))]
     periods["ytd"]["same_period_last_year"] = summarize(ly)["total"]
     # monthly
     df["month"] = loc.dt.strftime("%Y-%m")
-    monthly = []
+    monthly, arb_monthly = [], []
     for m, g in df.groupby("month"):
         s = summarize(g)
         monthly.append({"month": m, "us_net_cad": s["us"]["net_cad"], "ab_net_cad": s["ab"]["net_cad"],
                         "us_net_mwh": s["us"]["net_mwh"], "ab_net_mwh": s["ab"]["net_mwh"],
                         "exp_mwh": s["total"]["exp_mwh"], "imp_mwh": s["total"]["imp_mwh"],
                         "est": bool(s["us"]["est_hours"] or s["ab"]["est_hours"])})
+        ab_ = arb_block(g)
+        arb_monthly.append({"month": m, "timing_cad": ab_["base"]["timing_cad"], "spread_cad": ab_["base"]["spread_cad"],
+                            "timing_cad_offpeak": ab_["offpeak_sens"]["timing_cad"],
+                            "spread_cad_offpeak": ab_["offpeak_sens"]["spread_cad"],
+                            "net_cad_offpeak": ab_["offpeak_sens"]["net_cad"]})
     # daily, last 60 days
     d60 = df[loc >= now.normalize() - pd.Timedelta(days=60)]
     daily = []
@@ -324,7 +418,15 @@ def build_dashboard(df, last_midc, live):
             srcs[f"{k}_{src}"] = {"from": g["local"].min().isoformat(), "to": g["local"].max().isoformat(), "hours": len(g)}
     return {"generated": now.isoformat(timespec="minutes"), "midc_last_delivery": str(pd.Timestamp(last_midc).date()),
             "us5_bias": META_BIAS.get("v"),
-            "periods": periods, "monthly": monthly, "daily": daily, "sources": srcs, "live": live}
+            "periods": periods, "monthly": monthly, "daily": daily, "sources": srcs, "live": live,
+            "arbitrage_estimate": {
+                "note": "ESTIMATE / heuristic proxy from public flows and hub prices; NOT Powerex's actual trading profit "
+                        "(published only as multi-year ranges).",
+                "assumptions": {"offpeak_factor": OFFPEAK_FACTOR,
+                                "offpeak_hours": "Pacific hour-ending 23-6 Mon-Sat and all Sunday (holidays not included)",
+                                "applies_to": "Mid-C (BC-US) price only; AESO pool price is already hourly"},
+                "periods": arb_periods, "monthly": arb_monthly},
+            "reported_context": reported_context(df)}
 
 
 # ---------------------------------------------------------------- main
@@ -426,6 +528,9 @@ def main():
     for k, p in dash["periods"].items():
         t = p["total"]
         log(f"{p['label']:>18}: net {t['net_mwh']:>12,} MWh  net C${t['net_cad']:>14,}  (US {p['us']['net_cad']:,} / AB {p['ab']['net_cad']:,})")
+        a = dash["arbitrage_estimate"]["periods"][k]
+        log(f"{'':>18}  arbitrage est: timing C${a['base']['timing_cad']:,} spread C${a['base']['spread_cad']:,} | off-peak x{OFFPEAK_FACTOR}: timing C${a['offpeak_sens']['timing_cad']:,} spread C${a['offpeak_sens']['spread_cad']:,}")
+    log("FY2026 calibration:", dash["reported_context"]["calibration_fy2026"])
 
 
 if __name__ == "__main__":
