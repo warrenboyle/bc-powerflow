@@ -111,7 +111,7 @@ function cards(d){
 }
 
 function mainChart(d){
- chart&&chart.destroy();
+ (Chart.getChart('main')||chart)?.destroy();chart=null;
  const M=d.monthly,AM=Object.fromEntries((d.arbitrage_estimate?.monthly||[]).map(m=>[m.month,m]));
  const lab=M.map(m=>new Date(m.month+'-15').toLocaleDateString('en-CA',{month:'short',year:'2-digit'})+(m.est?'*':''));
  let ds,y;
@@ -123,12 +123,12 @@ function mainChart(d){
    ds.push({type:'line',label:'Possible extra from price gap (estimate, not in bars)',data:M.map(m=>AM[m.month]?AM[m.month].spread_cad:null),borderColor:'#a78bfa',backgroundColor:'#a78bfa',borderDash:[2,3],pointRadius:2,tension:.25,stack:'s',hidden:true});}
   y={stacked:true,ticks:{callback:v=>C(v)}};
  }else{
-  if(view==='total')ds=[{label:'Exports',data:M.map(m=>m.exp_mwh/1000),backgroundColor:'#0f8a5f'},{label:'Imports',data:M.map(m=>-m.imp_mwh/1000),backgroundColor:'#c2410c'}];
-  else{const key=view==='us'?'us_net_mwh':'ab_net_mwh';ds=[{label:'Net GWh (+ = export)',data:M.map(m=>m[key]/1000),backgroundColor:M.map(m=>m[key]>=0?'#0f8a5f':'#c2410c')}];}
+  if(view==='total')ds=[{type:'bar',label:'Exports',data:M.map(m=>m.exp_mwh/1000),backgroundColor:'#0f8a5f'},{type:'bar',label:'Imports (shown negative)',data:M.map(m=>-m.imp_mwh/1000),backgroundColor:'#c2410c'}];
+  else{const key=view==='us'?'us_net_mwh':'ab_net_mwh';ds=[{type:'bar',label:'Net GWh (+ = export)',data:M.map(m=>m[key]/1000),backgroundColor:M.map(m=>m[key]>=0?'#0f8a5f':'#c2410c')}];}
   y={stacked:true,title:{display:true,text:'GWh'}};
  }
- const fmt=mode==='cad'?C:v=>v.toFixed(0)+' GWh';
- chart=new Chart(document.getElementById('main'),{data:{labels:lab,datasets:ds},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+ const fmt=mode==='cad'?C:v=>(v==null||isNaN(v))?'–':v.toFixed(0)+' GWh';
+ chart=new Chart(document.getElementById('main'),{type:'bar',data:{labels:lab,datasets:ds},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
   scales:{x:{stacked:true},y},plugins:{legend:{labels:{boxWidth:12}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}}}});
 }
 
