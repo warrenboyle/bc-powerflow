@@ -25,7 +25,8 @@ h2{font-size:1rem;margin:22px 0 8px}
 .fl{display:grid;grid-template-columns:auto 1fr 1fr auto;gap:2px 6px;font-size:.82rem;text-align:right;white-space:nowrap}.fl>:nth-child(4n+1){text-align:left}
 .row{display:flex;justify-content:space-between;font-size:.85rem;padding:2px 0}
 .arb{margin-top:auto;padding-top:10px;border-top:1px dashed var(--line)}
-.arb .row b{color:var(--arb)}
+.arb .row b{color:var(--arb);white-space:nowrap;padding-left:8px}
+.arb .note{font-size:.72rem;margin:1px 0 3px}
 .badge{font-size:.68rem;font-weight:600;padding:1px 7px;border-radius:99px;background:#fef3c7;color:#92400e;white-space:nowrap;cursor:help}
 .badge.p{background:#e0e7ff;color:#3730a3}
 .est{font-size:.66rem;font-weight:700;padding:1px 6px;border-radius:99px;background:#fde2e2;color:#991b1b;letter-spacing:.03em}
@@ -94,9 +95,10 @@ function cards(d){
   const a=A.periods[k];let arb='';
   if(a){const b=a.base,o=a.offpeak_sens;
    const tm=view==='us'?b.timing_us_cad:view==='ab'?b.timing_ab_cad:b.timing_cad, tmo=view==='us'?o.timing_us_cad:view==='ab'?o.timing_ab_cad:o.timing_cad;
-   arb=`<div class="arb"><div class="row"><span class="k">Est. arbitrage value <span class="est">ESTIMATE</span></span></div>
-   <div class="row" title="Off-peak sensitivity (Mid-C off-peak at ${f}× peak): ${C(tmo)}"><span>Timing</span><b>${C(tm)}</b></div>
-   ${view==='total'?`<div class="row" title="Off-peak sensitivity: ${C(o.spread_cad)}"><span>Round-trip spread</span><b>${C(b.spread_cad)}</b></div>`:''}
+   arb=`<div class="arb"><div class="row"><span class="k">Arbitrage estimates <span class="est">ESTIMATE</span></span></div>
+   <div class="k note">Not extra to the total; don't add together.</div>
+   <div class="row" title="Part of the headline total, not added to it: the gain from trading in better-priced hours than the month's average. Sum of hourly flow × (hour price − that tie's monthly average price). With Mid-C off-peak at ${f}× peak: ${C(tmo)}"><span>Of which: timing gain <span class="k">(included above)</span></span><b>${C(tm)}</b></div>
+   ${view==='total'?`<div class="row" title="Hypothetical, separate from the headline and overlapping with timing: (avg export price − avg import price) × min(export, import MWh), per month. With Mid-C off-peak at ${f}× peak: ${C(o.spread_cad)}"><span>Hypothetical round-trip spread <span class="k">(not additional)</span></span><b>${C(b.spread_cad)}</b></div>`:''}
    <div class="k" style="margin-top:2px">At ${f}× off-peak: ${C(tmo)}${view==='total'?' / '+C(o.spread_cad):''}</div></div>`;}
   return `<div class="card"><h3>${names[k]} <span class="k">${p.label.replace(' to date','')}</span></h3>
   <div class="big ${s.net_cad>=0?'pos':'neg'}">${C(s.net_cad)} ${badge}</div>
@@ -115,7 +117,8 @@ function mainChart(d){
   ds=[];
   if(view!=='ab')ds.push({type:'bar',label:'BC–US net',data:M.map(m=>m.us_net_cad),backgroundColor:'#2563eb',stack:'n'});
   if(view!=='us')ds.push({type:'bar',label:'BC–Alberta net',data:M.map(m=>m.ab_net_cad),backgroundColor:'#d97706',stack:'n'});
-  if(view==='total')ds.push({type:'line',label:'Est. arbitrage (timing + spread)',data:M.map(m=>AM[m.month]?AM[m.month].timing_cad+AM[m.month].spread_cad:null),borderColor:'#7c3aed',backgroundColor:'#7c3aed',borderDash:[5,4],pointRadius:2,tension:.25});
+  if(view==='total'){ds.push({type:'line',label:'Of which: timing gain (in bars)',data:M.map(m=>AM[m.month]?AM[m.month].timing_cad:null),borderColor:'#7c3aed',backgroundColor:'#7c3aed',borderDash:[5,4],pointRadius:2,tension:.25,stack:'t'});
+   ds.push({type:'line',label:'Hypothetical spread (not additional)',data:M.map(m=>AM[m.month]?AM[m.month].spread_cad:null),borderColor:'#a78bfa',backgroundColor:'#a78bfa',borderDash:[2,3],pointRadius:2,tension:.25,stack:'s',hidden:true});}
   y={stacked:true,ticks:{callback:v=>C(v)}};
  }else{
   if(view==='total')ds=[{label:'Exports',data:M.map(m=>m.exp_mwh/1000),backgroundColor:'#0f8a5f'},{label:'Imports',data:M.map(m=>-m.imp_mwh/1000),backgroundColor:'#c2410c'}];
@@ -152,7 +155,8 @@ function notes(d){
  `<b>Value</b> = hourly flow × hub price, in C$ (Bank of Canada USD/CAD). Exports earn, imports cost. Not BC Hydro/Powerex settlements.`,
  `<b>Prices:</b> BC–US uses the Mid-C day-ahead <i>peak</i> price for every hour (no free off-peak series), so night hours are likely overvalued; latest delivery day ${d.midc_last_delivery}, later days carry it forward (partly est.). BC–Alberta uses the hourly AESO pool price.`,
  `<b>Flows:</b> BC Hydro official hourly data (${r('us_bch')}), then EIA BPA–BC Hydro tie (${r('us_eia')}), then BC Hydro's 5-min real-time page, offset-corrected by ~${Math.round(d.us5_bias||200)} MW (provisional). BC–AB ${r('ab_aeso')} uses AESO settled schedules as a stand-in until BC Hydro posts actuals.`,
- `<b>Est. arbitrage value</b> (ESTIMATE, not Powerex's profit): <i>Timing</i> = Σ flow × (hourly price − that month's average price), i.e. value from trading in better hours within a month. <i>Round-trip spread</i> = (avg export price − avg import price) × min(export, import MWh), per month. Sensitivity prices Mid-C off-peak hours (${f.offpeak_hours||'nights/Sundays'}) at ${f.offpeak_factor}× peak, an assumption.`,
+ `<b>Headline</b> on each card = full hub-priced value of net flows (exports − imports). The arbitrage lines are estimates <i>inside or beside</i> it, never extra to it, and not Powerex's profit.`,
+ `<b>Timing gain</b> (included in the headline) = Σ hourly flow × (hour price − that tie's monthly average price): how much the headline beats valuing every hour at the month's average. <b>Hypothetical round-trip spread</b> (not included, not additional, overlaps timing) = (avg export price − avg import price) × min(export, import MWh), per month: what buying and re-selling the matched volume would be worth. Don't add the two. Sensitivity prices Mid-C off-peak hours (${f.offpeak_hours||'nights/Sundays'}) at ${f.offpeak_factor}× peak, an assumption.`,
  `* = month contains estimated hours. Positive = BC exporting/earning. Times are Pacific (BC is on permanent UTC−7).`
  ].map(x=>`<li>${x}</li>`).join('');
 }
