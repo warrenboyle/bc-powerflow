@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-01T15:33-07:00",
+ "generated": "2026-11-01T15:35-07:00",
  "midc_last_delivery": "2026-10-28",
  "us5_bias": 205.7,
  "periods": {
@@ -45,7 +45,7 @@
    "expected_hours": 15,
    "label": "November 2026 to date",
    "start": "2026-11-01T00:00:00-07:00",
-   "end": "2026-11-01T15:33:55.345693-07:00"
+   "end": "2026-11-01T15:35:27.908280-07:00"
   },
   "prev_month": {
    "us": {
@@ -66,13 +66,13 @@
     "exp_mwh": 24272,
     "imp_mwh": 80878,
     "net_mwh": -56607,
-    "exp_cad": 5447444,
-    "imp_cad": 1980066,
-    "net_cad": 3467378,
+    "exp_cad": 5447404,
+    "imp_cad": 1980183,
+    "net_cad": 3467220,
     "hours": 744,
     "est_hours": 592,
     "prov_hours": 152,
-    "avg_exp_price": 224.44,
+    "avg_exp_price": 224.43,
     "avg_imp_price": 24.48,
     "through": "2026-10-31T23:00:00-07:00"
    },
@@ -80,9 +80,9 @@
     "exp_mwh": 922108,
     "imp_mwh": 84720,
     "net_mwh": 837388,
-    "exp_cad": 83138637,
-    "imp_cad": 2197535,
-    "net_cad": 80941102,
+    "exp_cad": 83138597,
+    "imp_cad": 2197652,
+    "net_cad": 80940945,
     "avg_exp_price": 90.16,
     "avg_imp_price": 25.94
    },
@@ -110,13 +110,13 @@
     "exp_mwh": 651729,
     "imp_mwh": 913177,
     "net_mwh": -261449,
-    "exp_cad": 38741852,
-    "imp_cad": 13577689,
-    "net_cad": 25164163,
+    "exp_cad": 38742369,
+    "imp_cad": 13578844,
+    "net_cad": 25163524,
     "hours": 7310,
     "est_hours": 592,
     "prov_hours": 167,
-    "avg_exp_price": 59.44,
+    "avg_exp_price": 59.45,
     "avg_imp_price": 14.87,
     "through": "2026-11-01T14:00:00-07:00"
    },
@@ -124,23 +124,23 @@
     "exp_mwh": 8926147,
     "imp_mwh": 1856749,
     "net_mwh": 7069398,
-    "exp_cad": 485040902,
-    "imp_cad": 30912979,
-    "net_cad": 454127923,
+    "exp_cad": 485041419,
+    "imp_cad": 30914134,
+    "net_cad": 454127285,
     "avg_exp_price": 54.34,
     "avg_imp_price": 16.65
    },
    "expected_hours": 7310,
    "label": "2026 to date",
    "start": "2026-01-01T00:00:00-08:00",
-   "end": "2026-11-01T15:33:55.345693-07:00",
+   "end": "2026-11-01T15:35:27.908280-07:00",
    "same_period_last_year": {
     "exp_mwh": 2000397,
     "imp_mwh": 6437842,
     "net_mwh": -4437445,
-    "exp_cad": 175881399,
-    "imp_cad": 237451188,
-    "net_cad": -61569789,
+    "exp_cad": 175881267,
+    "imp_cad": 237452269,
+    "net_cad": -61571002,
     "avg_exp_price": 87.92,
     "avg_imp_price": 36.88
    }
@@ -164,9 +164,9 @@
     "exp_mwh": 234750,
     "imp_mwh": 3055148,
     "net_mwh": -2820398,
-    "exp_cad": 36169095,
-    "imp_cad": 56024061,
-    "net_cad": -19854966,
+    "exp_cad": 36168947,
+    "imp_cad": 56025246,
+    "net_cad": -19856299,
     "hours": 8760,
     "est_hours": 0,
     "prov_hours": 0,
@@ -178,9 +178,9 @@
     "exp_mwh": 2183311,
     "imp_mwh": 7774876,
     "net_mwh": -5591565,
-    "exp_cad": 192137122,
-    "imp_cad": 287934616,
-    "net_cad": -95797495,
+    "exp_cad": 192136974,
+    "imp_cad": 287935801,
+    "net_cad": -95798828,
     "avg_exp_price": 88.0,
     "avg_imp_price": 37.03
    },
@@ -194,7 +194,7 @@
   {
    "month": "2025-01",
    "us_net_cad": -2023119,
-   "ab_net_cad": -6798956,
+   "ab_net_cad": -6799917,
    "us_net_mwh": -45894,
    "ab_net_mwh": -414534,
    "exp_mwh": 197151,
@@ -204,7 +204,7 @@
   {
    "month": "2025-02",
    "us_net_cad": -15109898,
-   "ab_net_cad": -3285680,
+   "ab_net_cad": -3285947,
    "us_net_mwh": -231912,
    "ab_net_mwh": -301300,
    "exp_mwh": 95475,
@@ -214,7 +214,7 @@
   {
    "month": "2025-03",
    "us_net_cad": -39257838,
-   "ab_net_cad": -4896562,
+   "ab_net_cad": -4896547,
    "us_net_mwh": -925501,
    "ab_net_mwh": -258156,
    "exp_mwh": 40413,
@@ -224,7 +224,7 @@
   {
    "month": "2025-04",
    "us_net_cad": -24217132,
-   "ab_net_cad": -140498,
+   "ab_net_cad": -140715,
    "us_net_mwh": -713372,
    "ab_net_mwh": -161291,
    "exp_mwh": 50113,
@@ -234,7 +234,7 @@
   {
    "month": "2025-05",
    "us_net_cad": -18757417,
-   "ab_net_cad": 2020904,
+   "ab_net_cad": 2020769,
    "us_net_mwh": -387162,
    "ab_net_mwh": -159933,
    "exp_mwh": 109499,
@@ -244,7 +244,7 @@
   {
    "month": "2025-06",
    "us_net_cad": -8944766,
-   "ab_net_cad": 861279,
+   "ab_net_cad": 860514,
    "us_net_mwh": -217976,
    "ab_net_mwh": -231937,
    "exp_mwh": 118781,
@@ -254,7 +254,7 @@
   {
    "month": "2025-07",
    "us_net_cad": 5476514,
-   "ab_net_cad": -5270271,
+   "ab_net_cad": -5269685,
    "us_net_mwh": -43708,
    "ab_net_mwh": -300901,
    "exp_mwh": 235736,
@@ -264,7 +264,7 @@
   {
    "month": "2025-08",
    "us_net_cad": 29020780,
-   "ab_net_cad": 2543251,
+   "ab_net_cad": 2543386,
    "us_net_mwh": 308851,
    "ab_net_mwh": -201086,
    "exp_mwh": 448668,
@@ -274,7 +274,7 @@
   {
    "month": "2025-09",
    "us_net_cad": 40070929,
-   "ab_net_cad": -1544656,
+   "ab_net_cad": -1544464,
    "us_net_mwh": 478094,
    "ab_net_mwh": -109327,
    "exp_mwh": 548172,
@@ -284,7 +284,7 @@
   {
    "month": "2025-10",
    "us_net_cad": -9036390,
-   "ab_net_cad": -1526900,
+   "ab_net_cad": -1526660,
    "us_net_mwh": -190213,
    "ab_net_mwh": -305246,
    "exp_mwh": 156389,
@@ -294,7 +294,7 @@
   {
    "month": "2025-11",
    "us_net_cad": -24098680,
-   "ab_net_cad": -168820,
+   "ab_net_cad": -168704,
    "us_net_mwh": -453055,
    "ab_net_mwh": -184396,
    "exp_mwh": 77292,
@@ -304,7 +304,7 @@
   {
    "month": "2025-12",
    "us_net_cad": -9065513,
-   "ab_net_cad": -1648057,
+   "ab_net_cad": -1648329,
    "us_net_mwh": -349319,
    "ab_net_mwh": -192291,
    "exp_mwh": 105622,
@@ -314,7 +314,7 @@
   {
    "month": "2026-01",
    "us_net_cad": 17822386,
-   "ab_net_cad": 2260552,
+   "ab_net_cad": 2260456,
    "us_net_mwh": 264313,
    "ab_net_mwh": -181409,
    "exp_mwh": 466291,
@@ -324,7 +324,7 @@
   {
    "month": "2026-02",
    "us_net_cad": 8001382,
-   "ab_net_cad": -1031930,
+   "ab_net_cad": -1032061,
    "us_net_mwh": 192883,
    "ab_net_mwh": -177728,
    "exp_mwh": 336331,
@@ -334,7 +334,7 @@
   {
    "month": "2026-03",
    "us_net_cad": -5122594,
-   "ab_net_cad": 3745635,
+   "ab_net_cad": 3745648,
    "us_net_mwh": -443968,
    "ab_net_mwh": -14607,
    "exp_mwh": 153696,
@@ -344,7 +344,7 @@
   {
    "month": "2026-04",
    "us_net_cad": 6851051,
-   "ab_net_cad": 3785058,
+   "ab_net_cad": 3785290,
    "us_net_mwh": 471605,
    "ab_net_mwh": 109974,
    "exp_mwh": 680335,
@@ -354,7 +354,7 @@
   {
    "month": "2026-05",
    "us_net_cad": 24294323,
-   "ab_net_cad": 9633004,
+   "ab_net_cad": 9633086,
    "us_net_mwh": 1129654,
    "ab_net_mwh": 145644,
    "exp_mwh": 1285880,
@@ -364,7 +364,7 @@
   {
    "month": "2026-06",
    "us_net_cad": 19304150,
-   "ab_net_cad": 2572277,
+   "ab_net_cad": 2572075,
    "us_net_mwh": 979717,
    "ab_net_mwh": 102212,
    "exp_mwh": 1102391,
@@ -374,7 +374,7 @@
   {
    "month": "2026-07",
    "us_net_cad": 88490013,
-   "ab_net_cad": 5001812,
+   "ab_net_cad": 5001696,
    "us_net_mwh": 1346200,
    "ab_net_mwh": 72022,
    "exp_mwh": 1449781,
@@ -384,7 +384,7 @@
   {
    "month": "2026-08",
    "us_net_cad": 100365567,
-   "ab_net_cad": -2877755,
+   "ab_net_cad": -2878006,
    "us_net_mwh": 1131846,
    "ab_net_mwh": -114072,
    "exp_mwh": 1149660,
@@ -394,7 +394,7 @@
   {
    "month": "2026-09",
    "us_net_cad": 90572114,
-   "ab_net_cad": -1451576,
+   "ab_net_cad": -1451589,
    "us_net_mwh": 1352771,
    "ab_net_mwh": -148068,
    "exp_mwh": 1366441,
@@ -404,7 +404,7 @@
   {
    "month": "2026-10",
    "us_net_cad": 77473724,
-   "ab_net_cad": 3467378,
+   "ab_net_cad": 3467220,
    "us_net_mwh": 893995,
    "ab_net_mwh": -56607,
    "exp_mwh": 922108,
@@ -428,7 +428,7 @@
    "us_net_mwh": 44723,
    "ab_net_mwh": 729,
    "us_net_cad": 2031723,
-   "ab_net_cad": 94131,
+   "ab_net_cad": 94152,
    "midc_cad": 45.43,
    "pool_cad": 26.17
   },
@@ -437,7 +437,7 @@
    "us_net_mwh": 51905,
    "ab_net_mwh": -6729,
    "us_net_cad": 2345408,
-   "ab_net_cad": -81387,
+   "ab_net_cad": -81410,
    "midc_cad": 45.19,
    "pool_cad": 17.52
   },
@@ -446,7 +446,7 @@
    "us_net_mwh": 50727,
    "ab_net_mwh": 864,
    "us_net_cad": 2300656,
-   "ab_net_cad": 28804,
+   "ab_net_cad": 28853,
    "midc_cad": 45.35,
    "pool_cad": 25.12
   },
@@ -455,16 +455,16 @@
    "us_net_mwh": 52725,
    "ab_net_mwh": -1731,
    "us_net_cad": 3044367,
-   "ab_net_cad": -38736,
+   "ab_net_cad": -38735,
    "midc_cad": 57.74,
-   "pool_cad": 26.19
+   "pool_cad": 26.18
   },
   {
    "date": "2026-09-06",
    "us_net_mwh": 48858,
    "ab_net_mwh": -1713,
    "us_net_cad": 2821084,
-   "ab_net_cad": -48198,
+   "ab_net_cad": -48190,
    "midc_cad": 57.74,
    "pool_cad": 31.16
   },
@@ -473,7 +473,7 @@
    "us_net_mwh": 39284,
    "ab_net_mwh": -5295,
    "us_net_cad": 2268277,
-   "ab_net_cad": -59524,
+   "ab_net_cad": -59545,
    "midc_cad": 57.74,
    "pool_cad": 14.87
   },
@@ -482,16 +482,16 @@
    "us_net_mwh": 46758,
    "ab_net_mwh": -7618,
    "us_net_cad": 3908322,
-   "ab_net_cad": -88284,
+   "ab_net_cad": -88258,
    "midc_cad": 83.59,
-   "pool_cad": 11.61
+   "pool_cad": 11.6
   },
   {
    "date": "2026-09-09",
    "us_net_mwh": 43756,
    "ab_net_mwh": -8513,
    "us_net_cad": 6057980,
-   "ab_net_cad": -110333,
+   "ab_net_cad": -110266,
    "midc_cad": 138.45,
    "pool_cad": 12.85
   },
@@ -500,7 +500,7 @@
    "us_net_mwh": 43618,
    "ab_net_mwh": -5457,
    "us_net_cad": 3800606,
-   "ab_net_cad": -52440,
+   "ab_net_cad": -52443,
    "midc_cad": 87.13,
    "pool_cad": 14.1
   },
@@ -509,7 +509,7 @@
    "us_net_mwh": 45639,
    "ab_net_mwh": -4526,
    "us_net_cad": 3517904,
-   "ab_net_cad": -83571,
+   "ab_net_cad": -83547,
    "midc_cad": 77.08,
    "pool_cad": 18.97
   },
@@ -518,7 +518,7 @@
    "us_net_mwh": 50522,
    "ab_net_mwh": -2208,
    "us_net_cad": 3894291,
-   "ab_net_cad": -56499,
+   "ab_net_cad": -56498,
    "midc_cad": 77.08,
    "pool_cad": 27.73
   },
@@ -527,16 +527,16 @@
    "us_net_mwh": 28473,
    "ab_net_mwh": -3613,
    "us_net_cad": 2194730,
-   "ab_net_cad": -57620,
+   "ab_net_cad": -57670,
    "midc_cad": 77.08,
-   "pool_cad": 19.18
+   "pool_cad": 19.19
   },
   {
    "date": "2026-09-14",
    "us_net_mwh": 50614,
    "ab_net_mwh": -6308,
    "us_net_cad": 3938825,
-   "ab_net_cad": -64089,
+   "ab_net_cad": -64058,
    "midc_cad": 77.82,
    "pool_cad": 15.65
   },
@@ -545,7 +545,7 @@
    "us_net_mwh": 48337,
    "ab_net_mwh": 4281,
    "us_net_cad": 4268320,
-   "ab_net_cad": 261004,
+   "ab_net_cad": 261062,
    "midc_cad": 88.3,
    "pool_cad": 55.12
   },
@@ -554,16 +554,16 @@
    "us_net_mwh": 48993,
    "ab_net_mwh": -3255,
    "us_net_cad": 3869558,
-   "ab_net_cad": -70556,
+   "ab_net_cad": -70592,
    "midc_cad": 78.98,
-   "pool_cad": 27.21
+   "pool_cad": 27.22
   },
   {
    "date": "2026-09-17",
    "us_net_mwh": 46198,
    "ab_net_mwh": -2169,
    "us_net_cad": 3659530,
-   "ab_net_cad": 462862,
+   "ab_net_cad": 462835,
    "midc_cad": 79.21,
    "pool_cad": 99.26
   },
@@ -572,61 +572,61 @@
    "us_net_mwh": 45713,
    "ab_net_mwh": 1163,
    "us_net_cad": 2783039,
-   "ab_net_cad": 78513,
+   "ab_net_cad": 78533,
    "midc_cad": 60.88,
-   "pool_cad": 43.35
+   "pool_cad": 43.34
   },
   {
    "date": "2026-09-19",
    "us_net_mwh": 48898,
    "ab_net_mwh": -5576,
    "us_net_cad": 2976944,
-   "ab_net_cad": -71147,
+   "ab_net_cad": -71118,
    "midc_cad": 60.88,
-   "pool_cad": 15.56
+   "pool_cad": 15.55
   },
   {
    "date": "2026-09-20",
    "us_net_mwh": 49505,
    "ab_net_mwh": -6707,
    "us_net_cad": 3013899,
-   "ab_net_cad": -57974,
+   "ab_net_cad": -58000,
    "midc_cad": 60.88,
-   "pool_cad": 13.67
+   "pool_cad": 13.68
   },
   {
    "date": "2026-09-21",
    "us_net_mwh": 48871,
    "ab_net_mwh": -8684,
    "us_net_cad": 3707727,
-   "ab_net_cad": -67974,
+   "ab_net_cad": -67993,
    "midc_cad": 75.87,
-   "pool_cad": 9.08
+   "pool_cad": 9.07
   },
   {
    "date": "2026-09-22",
    "us_net_mwh": 35529,
    "ab_net_mwh": -4242,
    "us_net_cad": 1868303,
-   "ab_net_cad": -5676,
+   "ab_net_cad": -5653,
    "midc_cad": 52.59,
-   "pool_cad": 22.14
+   "pool_cad": 22.15
   },
   {
    "date": "2026-09-23",
    "us_net_mwh": 51191,
    "ab_net_mwh": -4660,
    "us_net_cad": 3807100,
-   "ab_net_cad": -140980,
+   "ab_net_cad": -141042,
    "midc_cad": 74.37,
-   "pool_cad": 39.73
+   "pool_cad": 39.74
   },
   {
    "date": "2026-09-24",
    "us_net_mwh": 50998,
    "ab_net_mwh": -2126,
    "us_net_cad": 3901553,
-   "ab_net_cad": -62616,
+   "ab_net_cad": -62646,
    "midc_cad": 76.5,
    "pool_cad": 47.61
   },
@@ -635,7 +635,7 @@
    "us_net_mwh": 39843,
    "ab_net_mwh": -15106,
    "us_net_cad": 1841213,
-   "ab_net_cad": -270286,
+   "ab_net_cad": -270396,
    "midc_cad": 46.21,
    "pool_cad": 18.59
   },
@@ -644,7 +644,7 @@
    "us_net_mwh": 44322,
    "ab_net_mwh": -15387,
    "us_net_cad": 2048196,
-   "ab_net_cad": -175737,
+   "ab_net_cad": -175755,
    "midc_cad": 46.21,
    "pool_cad": 14.59
   },
@@ -653,7 +653,7 @@
    "us_net_mwh": 47984,
    "ab_net_mwh": -1789,
    "us_net_cad": 2217423,
-   "ab_net_cad": -40584,
+   "ab_net_cad": -40585,
    "midc_cad": 46.21,
    "pool_cad": 28.12
   },
@@ -662,7 +662,7 @@
    "us_net_mwh": 40176,
    "ab_net_mwh": -8539,
    "us_net_cad": 2607567,
-   "ab_net_cad": -187096,
+   "ab_net_cad": -187053,
    "midc_cad": 64.9,
    "pool_cad": 30.96
   },
@@ -671,16 +671,16 @@
    "us_net_mwh": 39279,
    "ab_net_mwh": -16545,
    "us_net_cad": 1758809,
-   "ab_net_cad": -221502,
+   "ab_net_cad": -221564,
    "midc_cad": 44.78,
-   "pool_cad": 15.83
+   "pool_cad": 15.84
   },
   {
    "date": "2026-09-30",
    "us_net_mwh": 29528,
    "ab_net_mwh": -5434,
    "us_net_cad": 2156301,
-   "ab_net_cad": -142941,
+   "ab_net_cad": -142877,
    "midc_cad": 73.03,
    "pool_cad": 44.63
   },
@@ -689,16 +689,16 @@
    "us_net_mwh": 36399,
    "ab_net_mwh": 1310,
    "us_net_cad": 2668364,
-   "ab_net_cad": 253120,
+   "ab_net_cad": 253121,
    "midc_cad": 73.31,
-   "pool_cad": 90.36
+   "pool_cad": 90.38
   },
   {
    "date": "2026-10-02",
    "us_net_mwh": 47097,
    "ab_net_mwh": -4204,
    "us_net_cad": 4415482,
-   "ab_net_cad": -127111,
+   "ab_net_cad": -127088,
    "midc_cad": 93.75,
    "pool_cad": 30.46
   },
@@ -707,25 +707,25 @@
    "us_net_mwh": 40570,
    "ab_net_mwh": -1940,
    "us_net_cad": 3803556,
-   "ab_net_cad": -63992,
+   "ab_net_cad": -64013,
    "midc_cad": 93.75,
-   "pool_cad": 41.64
+   "pool_cad": 41.65
   },
   {
    "date": "2026-10-04",
    "us_net_mwh": 44487,
    "ab_net_mwh": -4490,
    "us_net_cad": 4170786,
-   "ab_net_cad": -107566,
+   "ab_net_cad": -107579,
    "midc_cad": 93.75,
-   "pool_cad": 24.62
+   "pool_cad": 24.63
   },
   {
    "date": "2026-10-05",
    "us_net_mwh": 42811,
    "ab_net_mwh": -3731,
    "us_net_cad": 3655876,
-   "ab_net_cad": -67154,
+   "ab_net_cad": -67137,
    "midc_cad": 85.4,
    "pool_cad": 17.92
   },
@@ -734,7 +734,7 @@
    "us_net_mwh": 36452,
    "ab_net_mwh": -1133,
    "us_net_cad": 3409054,
-   "ab_net_cad": -45509,
+   "ab_net_cad": -45544,
    "midc_cad": 93.52,
    "pool_cad": 66.34
   },
@@ -743,25 +743,25 @@
    "us_net_mwh": 34806,
    "ab_net_mwh": 5333,
    "us_net_cad": 3061238,
-   "ab_net_cad": 1605257,
+   "ab_net_cad": 1605228,
    "midc_cad": 87.95,
-   "pool_cad": 194.76
+   "pool_cad": 194.75
   },
   {
    "date": "2026-10-08",
    "us_net_mwh": 32706,
    "ab_net_mwh": 384,
    "us_net_cad": 2359871,
-   "ab_net_cad": 97499,
+   "ab_net_cad": 97506,
    "midc_cad": 72.15,
-   "pool_cad": 72.32
+   "pool_cad": 72.31
   },
   {
    "date": "2026-10-09",
    "us_net_mwh": 1623,
    "ab_net_mwh": -3678,
    "us_net_cad": 79329,
-   "ab_net_cad": -45642,
+   "ab_net_cad": -45655,
    "midc_cad": 48.88,
    "pool_cad": 12.48
   },
@@ -770,25 +770,25 @@
    "us_net_mwh": 490,
    "ab_net_mwh": -3290,
    "us_net_cad": 23950,
-   "ab_net_cad": -50406,
+   "ab_net_cad": -50424,
    "midc_cad": 48.88,
-   "pool_cad": 15.12
+   "pool_cad": 15.13
   },
   {
    "date": "2026-10-11",
    "us_net_mwh": 5044,
    "ab_net_mwh": 665,
    "us_net_cad": 246542,
-   "ab_net_cad": 33636,
+   "ab_net_cad": 33645,
    "midc_cad": 48.88,
-   "pool_cad": 44.31
+   "pool_cad": 44.32
   },
   {
    "date": "2026-10-12",
    "us_net_mwh": 22992,
    "ab_net_mwh": -1009,
    "us_net_cad": 1586783,
-   "ab_net_cad": 9015,
+   "ab_net_cad": 8994,
    "midc_cad": 69.01,
    "pool_cad": 45.38
   },
@@ -797,7 +797,7 @@
    "us_net_mwh": 31135,
    "ab_net_mwh": -605,
    "us_net_cad": 2564709,
-   "ab_net_cad": 666208,
+   "ab_net_cad": 666211,
    "midc_cad": 82.37,
    "pool_cad": 124.2
   },
@@ -806,7 +806,7 @@
    "us_net_mwh": 30274,
    "ab_net_mwh": -3876,
    "us_net_cad": 2336459,
-   "ab_net_cad": -23077,
+   "ab_net_cad": -23104,
    "midc_cad": 77.18,
    "pool_cad": 5.97
   },
@@ -815,7 +815,7 @@
    "us_net_mwh": 28816,
    "ab_net_mwh": -3333,
    "us_net_cad": 2213488,
-   "ab_net_cad": -67476,
+   "ab_net_cad": -67457,
    "midc_cad": 76.81,
    "pool_cad": 21.7
   },
@@ -824,27 +824,27 @@
    "us_net_mwh": 21330,
    "ab_net_mwh": -5117,
    "us_net_cad": 1342269,
-   "ab_net_cad": -58039,
+   "ab_net_cad": -58057,
    "midc_cad": 62.93,
-   "pool_cad": 9.45
+   "pool_cad": 9.46
   },
   {
    "date": "2026-10-17",
    "us_net_mwh": 12912,
    "ab_net_mwh": -3135,
    "us_net_cad": 812535,
-   "ab_net_cad": -24962,
+   "ab_net_cad": -24990,
    "midc_cad": 62.93,
-   "pool_cad": 9.26
+   "pool_cad": 9.27
   },
   {
    "date": "2026-10-18",
    "us_net_mwh": 39449,
    "ab_net_mwh": -2157,
    "us_net_cad": 2482474,
-   "ab_net_cad": -51285,
+   "ab_net_cad": -51289,
    "midc_cad": 62.93,
-   "pool_cad": 23.4
+   "pool_cad": 23.41
   },
   {
    "date": "2026-10-19",
@@ -860,7 +860,7 @@
    "us_net_mwh": 43363,
    "ab_net_mwh": -236,
    "us_net_cad": 3919813,
-   "ab_net_cad": 45123,
+   "ab_net_cad": 45129,
    "midc_cad": 90.4,
    "pool_cad": 39.83
   },
@@ -869,9 +869,9 @@
    "us_net_mwh": 46511,
    "ab_net_mwh": -1399,
    "us_net_cad": 4568790,
-   "ab_net_cad": -23565,
+   "ab_net_cad": -23578,
    "midc_cad": 98.23,
-   "pool_cad": 17.09
+   "pool_cad": 17.1
   },
   {
    "date": "2026-10-22",
@@ -1016,11 +1016,11 @@
    "cad_mwh": 44.92
   },
   "aeso": {
-   "as_of_mpt": "2026-11-01 16:33",
-   "bc_to_ab_mw": 449,
+   "as_of_mpt": "2026-11-01 16:34",
+   "bc_to_ab_mw": 453,
    "ties_into_ab_mw": {
-    "British Columbia": 449,
-    "Montana": 48,
+    "British Columbia": 453,
+    "Montana": 43,
     "Saskatchewan": -101
    }
   }
