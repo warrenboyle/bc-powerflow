@@ -4,7 +4,7 @@ Proof of concept: BC Hydro intertie flows (EIA BPAT-BCHA interchange) with estim
 
 Dollar figures are market-price estimates (MW x hours x hub price), not BC Hydro/Powerex settlements.
 
-Repo secrets used by the hourly workflow: `EIA_API_KEY` (optional; falls back to DEMO_KEY), `AESO_API_KEY` (enables Alberta data).
+Repo secrets used by the workflow (runs every 15 minutes; source data lags): `EIA_API_KEY` (optional; falls back to DEMO_KEY), `AESO_API_KEY` (enables Alberta data).
 
 Site: https://warrenboyle.github.io/bc-powerflow/
 

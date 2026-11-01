@@ -9,7 +9,7 @@ Prices: AESO hourly pool price (C$) for BC-AB; EIA/ICE Mid-C day-ahead PEAK pric
 applied to every hour of the delivery day, converted with Bank of Canada daily USD/CAD.
 Dollar values are market-price ESTIMATES (MWh x hub price), not BC Hydro/Powerex settlements.
 
-Usage: python fetch.py            # hourly incremental refresh (trailing ~10 days)
+Usage: python fetch.py            # incremental refresh, run every 15 min (trailing ~10 days)
        python fetch.py --backfill # one-time rebuild from 2025-01-01
 """
 import os, sys, io, re, json, datetime as dt, urllib.request, urllib.parse
@@ -40,6 +40,16 @@ def check_tz():
 def get(url, headers=None, timeout=90):
     req = urllib.request.Request(url, headers={**UA, **(headers or {})})
     return urllib.request.urlopen(req, timeout=timeout).read()
+
+
+def head_size(url):
+    """Content-Length via HEAD (cheap change check for big files); None if unavailable."""
+    try:
+        req = urllib.request.Request(url, headers=UA, method="HEAD")
+        n = urllib.request.urlopen(req, timeout=30).headers.get("Content-Length")
+        return n if n and int(n) > 0 else None
+    except Exception:
+        return None
 
 
 def log(*a):
@@ -209,6 +219,11 @@ def midc_daily(years):
 def fx_daily(start):
     o = json.loads(get(f"https://www.bankofcanada.ca/valet/observations/FXUSDCAD/json?start_date={start}"))["observations"]
     return pd.Series({pd.Timestamp(x["d"]).date(): float(x["FXUSDCAD"]["v"]) for x in o if x.get("FXUSDCAD")})
+
+
+def load_prices():
+    p = pd.read_csv(PRICES, parse_dates=["date"]).set_index("date")[["midc_usd", "usdcad"]]
+    return p.sort_index()
 
 
 def update_prices(full):
@@ -447,6 +462,9 @@ def main():
             for y in ([2025, today.year] if full else sorted({today.year, (today - dt.timedelta(days=45)).year})):
                 if y not in links:
                     continue
+                hs = None if full else head_size(links[y])
+                if hs is not None and meta.get(f"xls_{y}") == hs:
+                    continue  # unchanged per HEAD; skip the multi-MB download
                 raw = get(links[y])
                 sig = f"{len(raw)}"
                 if not full and meta.get(f"xls_{y}") == sig:
@@ -519,7 +537,16 @@ def main():
     for c in ("us_mw", "ab_mw", "pool_cad"):
         h[c] = pd.to_numeric(h[c], errors="coerce")
     h.to_csv(HOURLY, date_format="%Y-%m-%dT%H:%MZ", float_format="%.2f")
-    prices = update_prices(full or not os.path.exists(PRICES))
+    # Daily prices (Mid-C xlsx ~MBs, BoC FX) change at most daily: refresh at most hourly.
+    if full or not os.path.exists(PRICES) or meta.get("prices_checked", "") < (now_utc - pd.Timedelta(minutes=55)).isoformat():
+        try:
+            prices = update_prices(full or not os.path.exists(PRICES))
+            meta["prices_checked"] = pd.Timestamp.now(tz="UTC").isoformat()
+        except Exception as ex:
+            log("Price update failed, using cached:", ex)
+            prices = load_prices()
+    else:
+        prices = load_prices()
     META_BIAS["v"] = meta.get("us5_bias")
     df, last_midc = compute(h, prices)
     dash = build_dashboard(df, last_midc, live)

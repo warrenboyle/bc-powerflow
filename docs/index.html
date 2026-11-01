@@ -76,7 +76,7 @@ tabs('tabs','v',v=>view=v);tabs('mode','m',m=>mode=m);
 
 function render(){
  const d=data,L=d.live||{};
- document.getElementById('upd').textContent=`Updated ${T(d.generated)} Pacific · refreshes hourly`;
+ document.getElementById('upd').textContent=`Updated ${T(d.generated)} Pacific · refreshes every 15 minutes (source data lags)`;
  const lv=[];
  if(L.bch){lv.push(`Now: BC → US <b>${L.bch.us_mw} MW</b>`);lv.push(`BC → Alberta <b>${L.bch.ab_mw} MW</b>`);}
  if(L.pool_price)lv.push(`AB pool <b>${P(L.pool_price.cad_mwh)}</b>/MWh`);
