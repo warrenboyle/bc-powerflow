@@ -39,14 +39,34 @@ def midc_price():
     r = m.iloc[-1]
     return float(r["Wtd avg price $/MWh"]), str(r["Price hub"]), str(pd.Timestamp(r["Delivery start date"]).date())
 
-def aeso():
+def aeso(hours=72):
+    """AESO public API (header API-KEY). CSD v2 = current snapshot only; pool price v1.1 = hourly CAD.
+    AESO sign: negative actual_flow = flow INTO Alberta (load = net gen - net interchange), so BC export to AB = -flow."""
     if not AESO_KEY:
         return None
     h = {"API-KEY": AESO_KEY}
-    today = dt.date.today().isoformat()
-    pp = json.loads(get(f"https://apimgw.aeso.ca/public/poolprice-api/v1.1/price/poolPrice?startDate={today}", h))
-    csd = json.loads(get("https://apimgw.aeso.ca/public/currentsupplydemand-api/v1/csd/summary/current", h))
-    return {"pool_price": pp, "csd": csd}
+    base = "https://apimgw.aeso.ca/public"
+    end = dt.date.today()
+    start = end - dt.timedelta(days=hours // 24 + 1)
+    pp = json.loads(get(f"{base}/poolprice-api/v1.1/price/poolPrice?startDate={start}&endDate={end}", h))
+    rows = [r for r in pp["return"]["Pool Price Report"] if r["pool_price"]]
+    prices = [{"t": r["begin_datetime_utc"].replace(" ", "T") + ":00Z", "mpt": r["begin_datetime_mpt"],
+               "cad_mwh": float(r["pool_price"])} for r in rows][-hours:]
+    csd = json.loads(get(f"{base}/currentsupplydemand-api/v2/csd/summary/current", h))["return"]
+    ties = {i["path"]: -i["actual_flow"] for i in csd["interchange_list"]}
+    bc_export = ties.get("British Columbia", 0)
+    cur = prices[-1]["cad_mwh"] if prices else None
+    return {
+        "as_of_mpt": csd["effective_datetime_mpt"], "as_of_utc": csd["effective_datetime_utc"],
+        "interchange_mw_into_ab": ties, "net_interchange_mw_into_ab": -csd["net_actual_interchange"],
+        "bc_export_to_ab_mw": bc_export, "latest_pool_price_cad": cur,
+        "latest_price_hour_mpt": prices[-1]["mpt"] if prices else None,
+        "bc_ab_est_value_cad_per_hour": round(bc_export * cur) if cur is not None else None,
+        "avg_pool_price_cad": round(sum(p["cad_mwh"] for p in prices) / len(prices), 2) if prices else None,
+        "prices": prices,
+        "source": "AESO API: Current Supply Demand v2 (snapshot) + Pool Price v1.1 (hourly, CAD). "
+                  "Value = BC->AB MW x pool price, an estimate. Hourly intertie history not in CSD; needs accumulation.",
+    }
 
 def main():
     fx, fx_date = fx_usdcad()

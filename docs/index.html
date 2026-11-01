@@ -1,7 +1,7 @@
 <!doctype html><html><head><meta charset="utf-8"><title>BC Hydro intertie flows (proof of concept)</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>body{font-family:system-ui;max-width:900px;margin:2em auto;padding:0 1em}small{color:#666}</style></head>
-<body><h1>BC ⇄ US intertie flow and estimated value</h1><div id="sum"></div><canvas id="c"></canvas><p><small id="src"></small></p>
+<body><h1>BC ⇄ US intertie flow and estimated value</h1><div id="sum"></div><canvas id="c"></canvas><h2>BC ⇄ Alberta (AESO)</h2><div id="ab"></div><canvas id="p"></canvas><p><small id="src"></small></p>
 <script>
 fetch('data.json').then(r=>r.json()).then(d=>{
  const b=d.bc_us,m=d.midc;
@@ -9,6 +9,10 @@ fetch('data.json').then(r=>r.json()).then(d=>{
  Last ${b.hours} h: net export ${Math.round(b.net_export_mwh).toLocaleString()} MWh, estimated value <b>C$${b.est_value_cad.toLocaleString()}</b> at ${m.hub} C$${m.cad_mwh}/MWh.</p>`;
  new Chart(document.getElementById('c'),{type:'bar',data:{labels:d.series.map(s=>new Date(s.t).toLocaleString('en-CA',{timeZone:'America/Vancouver',month:'short',day:'numeric',hour:'2-digit'})),
   datasets:[{label:'BC net export to US (MW, + = export)',data:d.series.map(s=>s.mw)}]}});
+ const a=d.aeso; if(a){const t=a.interchange_mw_into_ab;
+ document.getElementById('ab').innerHTML=`<p>As of ${a.as_of_mpt} Alberta time: BC net export to Alberta <b>${a.bc_export_to_ab_mw} MW</b> (Montana ${t.Montana??'n/a'} MW, Saskatchewan ${t.Saskatchewan??'n/a'} MW into AB).<br>
+ Pool price C$${a.latest_pool_price_cad}/MWh (hour ${a.latest_price_hour_mpt}) → estimated value <b>C$${a.bc_ab_est_value_cad_per_hour.toLocaleString()}/h</b> to BC (estimate). ${a.prices.length}-h avg pool price C$${a.avg_pool_price_cad}/MWh.</p><p><small>${a.source}</small></p>`;
+ new Chart(document.getElementById('p'),{type:'line',data:{labels:a.prices.map(p=>p.mpt),datasets:[{label:'AESO pool price (C$/MWh)',data:a.prices.map(p=>p.cad_mwh)}]}});}
  document.getElementById('src').textContent=`${d.note} Flows: ${b.source}. Price: ${m.source}, delivery ${m.delivery}. FX: ${d.fx.source}, ${d.fx.usdcad} on ${d.fx.date}. Generated ${d.generated_utc}.`;
 });
 </script></body></html>
