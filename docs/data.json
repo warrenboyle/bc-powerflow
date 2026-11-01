@@ -1,5 +1,5 @@
 {
- "generated_utc": "2026-11-01T17:21Z",
+ "generated_utc": "2026-11-01T22:14Z",
  "fx": {
   "usdcad": 1.396,
   "date": "2026-10-30",
@@ -21,45 +21,20 @@
   "source": "EIA Hourly Electric Grid Monitor, BPAT-BCHA interchange"
  },
  "aeso": {
-  "as_of_mpt": "2026-11-01 11:20",
-  "as_of_utc": "2026-11-01 17:20",
+  "as_of_mpt": "2026-11-01 16:13",
+  "as_of_utc": "2026-11-01 22:13",
   "interchange_mw_into_ab": {
-   "British Columbia": 130,
-   "Montana": 107,
+   "British Columbia": 422,
+   "Montana": 44,
    "Saskatchewan": -101
   },
-  "net_interchange_mw_into_ab": 136,
-  "bc_export_to_ab_mw": 130,
-  "latest_pool_price_cad": 40.25,
-  "latest_price_hour_mpt": "2026-11-01 10:00",
-  "bc_ab_est_value_cad_per_hour": 5232,
-  "avg_pool_price_cad": 103.48,
+  "net_interchange_mw_into_ab": 365,
+  "bc_export_to_ab_mw": 422,
+  "latest_pool_price_cad": 44.92,
+  "latest_price_hour_mpt": "2026-11-01 15:00",
+  "bc_ab_est_value_cad_per_hour": 18956,
+  "avg_pool_price_cad": 97.6,
   "prices": [
-   {
-    "t": "2026-10-29T17:00:00Z",
-    "mpt": "2026-10-29 11:00",
-    "cad_mwh": 48.98
-   },
-   {
-    "t": "2026-10-29T18:00:00Z",
-    "mpt": "2026-10-29 12:00",
-    "cad_mwh": 38.28
-   },
-   {
-    "t": "2026-10-29T19:00:00Z",
-    "mpt": "2026-10-29 13:00",
-    "cad_mwh": 64.44
-   },
-   {
-    "t": "2026-10-29T20:00:00Z",
-    "mpt": "2026-10-29 14:00",
-    "cad_mwh": 42.72
-   },
-   {
-    "t": "2026-10-29T21:00:00Z",
-    "mpt": "2026-10-29 15:00",
-    "cad_mwh": 477.2
-   },
    {
     "t": "2026-10-29T22:00:00Z",
     "mpt": "2026-10-29 16:00",
@@ -394,6 +369,31 @@
     "t": "2026-11-01T16:00:00Z",
     "mpt": "2026-11-01 10:00",
     "cad_mwh": 40.25
+   },
+   {
+    "t": "2026-11-01T17:00:00Z",
+    "mpt": "2026-11-01 11:00",
+    "cad_mwh": 50.43
+   },
+   {
+    "t": "2026-11-01T18:00:00Z",
+    "mpt": "2026-11-01 12:00",
+    "cad_mwh": 79.35
+   },
+   {
+    "t": "2026-11-01T19:00:00Z",
+    "mpt": "2026-11-01 13:00",
+    "cad_mwh": 40.01
+   },
+   {
+    "t": "2026-11-01T20:00:00Z",
+    "mpt": "2026-11-01 14:00",
+    "cad_mwh": 33.67
+   },
+   {
+    "t": "2026-11-01T21:00:00Z",
+    "mpt": "2026-11-01 15:00",
+    "cad_mwh": 44.92
    }
   ],
   "source": "AESO API: Current Supply Demand v2 (snapshot) + Pool Price v1.1 (hourly, CAD). Value = BC->AB MW x pool price, an estimate. Hourly intertie history not in CSD; needs accumulation."
