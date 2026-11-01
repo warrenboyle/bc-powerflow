@@ -1,0 +1,14 @@
+<!doctype html><html><head><meta charset="utf-8"><title>BC Hydro intertie flows (proof of concept)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>body{font-family:system-ui;max-width:900px;margin:2em auto;padding:0 1em}small{color:#666}</style></head>
+<body><h1>BC ⇄ US intertie flow and estimated value</h1><div id="sum"></div><canvas id="c"></canvas><p><small id="src"></small></p>
+<script>
+fetch('data.json').then(r=>r.json()).then(d=>{
+ const b=d.bc_us,m=d.midc;
+ document.getElementById('sum').innerHTML=`<p>Latest hour (${new Date(b.latest_hour_utc).toLocaleString('en-CA',{timeZone:'America/Vancouver'})} Pacific): BC net export <b>${b.latest_export_mw.toFixed(0)} MW</b>.<br>
+ Last ${b.hours} h: net export ${Math.round(b.net_export_mwh).toLocaleString()} MWh, estimated value <b>C$${b.est_value_cad.toLocaleString()}</b> at ${m.hub} C$${m.cad_mwh}/MWh.</p>`;
+ new Chart(document.getElementById('c'),{type:'bar',data:{labels:d.series.map(s=>new Date(s.t).toLocaleString('en-CA',{timeZone:'America/Vancouver',month:'short',day:'numeric',hour:'2-digit'})),
+  datasets:[{label:'BC net export to US (MW, + = export)',data:d.series.map(s=>s.mw)}]}});
+ document.getElementById('src').textContent=`${d.note} Flows: ${b.source}. Price: ${m.source}, delivery ${m.delivery}. FX: ${d.fx.source}, ${d.fx.usdcad} on ${d.fx.date}. Generated ${d.generated_utc}.`;
+});
+</script></body></html>
