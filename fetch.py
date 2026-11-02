@@ -5,12 +5,19 @@ Flows (MW, + = BC exporting), best source wins per hour:
   2. EIA Hourly Electric Grid Monitor, BPAT->BCHA interchange (US tie only)  src "eia"
   3. BC Hydro 5-minute actual flow page (rolling 7 days), averaged hourly    src "bch5"
   4. AESO settled import/export volumes on the BC path (AB tie, gap fill)   src "aeso"  -> ESTIMATE
-Prices: AESO hourly pool price (C$) for BC-AB; EIA/ICE Mid-C day-ahead PEAK price (US$) for BC-US,
-applied to every hour of the delivery day, converted with Bank of Canada daily USD/CAD.
+Prices: AESO hourly pool price (C$) for BC-AB; EIA/ICE Mid-C day-ahead PEAK price (US$) for BC-US, with
+off-peak hours (WECC/NERC: HE23-HE6 Mon-Sat, all Sunday, NERC holidays; US Pacific prevailing time) priced at
+OFFPEAK_FACTOR x peak (default 0.8, an assumption), converted with Bank of Canada daily USD/CAD.
+
+Time zones: BC has been on permanent UTC-7 since Nov 2026 (BC Reg. 20/2026). BC-local grouping, display and the
+BC Hydro files use America/Vancouver, which requires tzdata >= 2026 (permanent UTC-7 from 2026-11-01; historical
+DST before that). The run aborts if the tz database is older (see check_tz). Mid-C delivery days and the
+peak/off-peak blocks use America/Los_Angeles (US Pacific prevailing time), which differs from BC Nov-Mar.
 Dollar values are market-price ESTIMATES (MWh x hub price), not BC Hydro/Powerex settlements.
 
-Usage: python fetch.py            # incremental refresh, run every 15 min (trailing ~10 days)
-       python fetch.py --backfill # one-time rebuild from 2025-01-01
+Usage: python fetch.py              # incremental refresh, run every 15 min (trailing ~10 days)
+       python fetch.py --backfill   # one-time rebuild from 2025-01-01
+       python fetch.py --seed-audit # one-time: fill source_compare.csv with EIA + BC Hydro XLS from 2025-01-01
 """
 import os, sys, io, re, json, datetime as dt, urllib.request, urllib.parse
 import pandas as pd
@@ -18,23 +25,88 @@ import pandas as pd
 EIA_KEY = os.environ.get("EIA_API_KEY", "DEMO_KEY")
 AESO_KEY = os.environ.get("AESO_API_KEY")
 UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36 bc-powerflow"}
-TZ = "America/Vancouver"
+TZ = "America/Vancouver"      # BC local (permanent UTC-7 from 2026-11-01 with tzdata >= 2026)
+US_TZ = "America/Los_Angeles"  # Mid-C delivery days and WECC peak/off-peak blocks (US Pacific prevailing time)
 START = pd.Timestamp("2025-01-01", tz=TZ)
 D = "docs"
 HOURLY, PRICES, META = f"{D}/hourly.csv", f"{D}/daily_prices.csv", f"{D}/meta.json"
+AUDIT = f"{D}/source_compare.csv"  # every source's MW per hour (not only the winning one), for QA
+AUDIT_COLS = ["us_bch", "us_eia", "us_bch5_raw", "ab_bch", "ab_bch5", "ab_aeso"]
 BCH = "https://www.bchydro.com"
 META_BIAS = {}
 RANK = {"bch": 3, "eia": 2, "bch5": 1, "aeso": 0}
-# Sensitivity assumption: Mid-C off-peak hours (NERC: HE23-HE6 Mon-Sat, all day Sunday, Pacific time) are
-# priced at this multiple of the Mid-C day-ahead PEAK price. Main figures use 1.0 (peak price in every hour).
+# Base-case assumption: Mid-C off-peak hours (NERC: HE23-HE6 Mon-Sat, all Sunday and NERC holidays, US Pacific
+# prevailing time) are priced at this multiple of the Mid-C day-ahead PEAK price. The "peak_only" alternative
+# prices every hour at the peak index (factor 1.0).
 OFFPEAK_FACTOR = float(os.environ.get("OFFPEAK_FACTOR", "0.8"))
 
 
 def check_tz():
-    # BC moved to permanent UTC-7 in Nov 2026; needs tzdata >= 2026 (workflow pins the tzdata package).
-    off = pd.Timestamp("2026-12-15 12:00").tz_localize(TZ).utcoffset()
-    if off != pd.Timedelta(hours=-7):
-        log(f"WARNING: tz database gives {TZ} offset {off} for Dec 2026; expected -07:00 (update tzdata)")
+    """BC moved to permanent UTC-7 in Nov 2026; needs tzdata >= 2026 (the workflow pins the tzdata package and
+    sets PYTHONTZPATH="" so the system zoneinfo is not used). Abort rather than publish hour-shifted data."""
+    o = lambda tz, t: pd.Timestamp(t).tz_localize(tz).utcoffset()
+    checks = {(TZ, "2026-12-15 12:00"): -7, (TZ, "2025-12-15 12:00"): -8, (TZ, "2025-07-01 12:00"): -7,
+              (US_TZ, "2026-12-15 12:00"): -8, (US_TZ, "2027-07-01 12:00"): -7}
+    bad = {k: str(o(*k)) for k, v in checks.items() if o(*k) != pd.Timedelta(hours=v)}
+    if bad:
+        log(f"ERROR: tz database out of date (need tzdata >= 2026 with BC permanent UTC-7): {bad}")
+        sys.exit(2)
+    log("tz check ok: America/Vancouver UTC-7 from 2026-11-01, America/Los_Angeles keeps DST")
+
+
+def nerc_holidays(years):
+    """NERC off-peak holidays. A holiday falling on Sunday is observed on Monday; Saturday holidays are not moved."""
+    out = set()
+    for y in years:
+        days = [pd.Timestamp(y, 1, 1), pd.Timestamp(y, 7, 4), pd.Timestamp(y, 12, 25),
+                pd.Timestamp(y, 5, 31) - pd.Timedelta(days=pd.Timestamp(y, 5, 31).dayofweek),  # Memorial: last Mon May
+                pd.Timestamp(y, 9, 1) + pd.Timedelta(days=(0 - pd.Timestamp(y, 9, 1).dayofweek) % 7),  # Labor: 1st Mon Sep
+                pd.Timestamp(y, 11, 1) + pd.Timedelta(days=(3 - pd.Timestamp(y, 11, 1).dayofweek) % 7 + 21)]  # 4th Thu Nov
+        for d in days:
+            out.add((d + pd.Timedelta(days=1) if d.dayofweek == 6 else d).date())
+    return out
+
+
+# ---------------------------------------------------------------- source audit
+def load_audit():
+    if os.path.exists(AUDIT):
+        a = pd.read_csv(AUDIT)
+        a.index = pd.to_datetime(a.pop("t_utc"), utc=True)
+        return a.reindex(columns=AUDIT_COLS)
+    return pd.DataFrame(columns=AUDIT_COLS, index=pd.DatetimeIndex([], tz="UTC"), dtype=float)
+
+
+def audit_put(a, s, col):
+    s = s.dropna().astype(float)
+    if s.empty:
+        return a
+    a = a.reindex(a.index.union(s.index))
+    a.loc[s.index, col] = s.values
+    return a
+
+
+def compare(a, x, y, min_n=24):
+    """Bias and error of source x vs reference y (MW) over hours where both exist."""
+    both = a[[x, y]].dropna()
+    if len(both) < min_n:
+        return {"hours": int(len(both))}
+    d = both[x] - both[y]
+    return {"hours": int(len(d)), "from": both.index.min().tz_convert(TZ).isoformat(),
+            "to": both.index.max().tz_convert(TZ).isoformat(),
+            "mean_bias_mw": round(float(d.mean()), 1), "median_bias_mw": round(float(d.median()), 1),
+            "mae_mw": round(float(d.abs().mean()), 1), "corr": round(float(both[x].corr(both[y])), 4)}
+
+
+def source_qa(a):
+    a = a.copy()
+    return {"note": f"x minus reference, MW, over overlapping hours; per-hour values for every source in {AUDIT.split('/')[-1]}. "
+                    "bch5_raw is the uncorrected real-time page value.",
+            "us_eia_vs_bch": compare(a, "us_eia", "us_bch"),
+            "us_bch5_raw_vs_bch": compare(a, "us_bch5_raw", "us_bch"),
+            "us_bch5_raw_vs_eia": compare(a, "us_bch5_raw", "us_eia"),
+            "ab_bch5_vs_bch": compare(a, "ab_bch5", "ab_bch"),
+            "ab_aeso_vs_bch": compare(a, "ab_aeso", "ab_bch"),
+            "ab_aeso_vs_bch5": compare(a, "ab_aeso", "ab_bch5")}
 
 
 def get(url, headers=None, timeout=90):
@@ -246,17 +318,20 @@ def update_prices(full):
 # ---------------------------------------------------------------- aggregation
 def compute(h, prices):
     df = h.copy()
-    df["local"] = df.index.tz_convert(TZ)
-    df["date"] = pd.to_datetime(df["local"].dt.date)
+    df["local"] = df.index.tz_convert(TZ)        # BC time: grouping and display
+    us_loc = df.index.tz_convert(US_TZ)           # US Pacific prevailing time: Mid-C delivery day, WECC blocks
+    df["date"] = pd.to_datetime(pd.Series(us_loc.date, index=df.index))
     last_midc = prices["midc_usd"].last_valid_index()
     p = prices.reindex(pd.date_range(prices.index.min(), max(prices.index.max(), df["date"].max()))).ffill()
     df["midc_usd"] = df["date"].map(p["midc_usd"])
     df["usdcad"] = df["date"].map(p["usdcad"])
-    df["us_price"] = df["midc_usd"] * df["usdcad"]
+    df["us_price_pk"] = df["midc_usd"] * df["usdcad"]  # peak index in every hour (alternative)
     df["us_price_est"] = df["date"] > last_midc
-    hb = df["local"].dt.hour  # hour beginning, Pacific
-    df["offpeak"] = (hb >= 22) | (hb < 6) | (df["local"].dt.dayofweek == 6)
-    df["us_price_op"] = df["us_price"] * df["offpeak"].map({True: OFFPEAK_FACTOR, False: 1.0})
+    hb = pd.Series(us_loc.hour, index=df.index)  # hour beginning, US Pacific prevailing; HB22..HB5 = HE23..HE6
+    hol = nerc_holidays(range(us_loc.year.min(), us_loc.year.max() + 1)) if len(df) else set()
+    df["offpeak"] = ((hb >= 22) | (hb < 6) | pd.Series(us_loc.dayofweek == 6, index=df.index)
+                     | pd.Series([d in hol for d in us_loc.date], index=df.index))
+    df["us_price"] = df["us_price_pk"] * df["offpeak"].map({True: OFFPEAK_FACTOR, False: 1.0})  # base case
     # pool price: carry forward at most 3 hours for the not-yet-settled current hour
     df["ab_price_est"] = df["pool_cad"].isna()
     df["ab_price"] = df["pool_cad"].ffill(limit=3)
@@ -271,7 +346,7 @@ def compute(h, prices):
         est_src = ["aeso", "bch5"] if k == "us" else ["aeso"]
         df[f"{k}_est"] = ok & (df[f"{k}_price_est"] | df[f"{k}_src"].isin(est_src))
         df[f"{k}_prov"] = ok & (df[f"{k}_src"] == "bch5")
-    df["ab_price_op"] = df["ab_price"]
+    df["ab_price_pk"] = df["ab_price"]  # AESO pool price is already hourly
     return df, last_midc
 
 
@@ -291,8 +366,21 @@ def summarize(sub):
         for f in list(v):
             if isinstance(v[f], float):
                 v[f] = round(v[f], 2) if "price" in f else round(v[f])
-    hrs = len(sub)
-    out["expected_hours"] = hrs
+    return out
+
+
+def completeness(sub, a, b, now):
+    """Calendar hours in [a, min(b, end of current hour)) versus hours with a valued flow, per tie. 'missing_to_through' counts
+    gaps up to the tie's latest data hour (true holes); hours after that are just source lag."""
+    end = min(b.ceil("h"), now.floor("h") + pd.Timedelta(hours=1))  # include the current (partial) hour
+    cal = max(0, int((end - a) / pd.Timedelta(hours=1)))
+    out = {"calendar_hours": cal}
+    for k in ("us", "ab"):
+        ok = sub[sub[f"{k}_ok"]]
+        thr = ok.index.max() + pd.Timedelta(hours=1) if len(ok) else a
+        to_thr = max(0, int((min(thr, end) - a) / pd.Timedelta(hours=1)))
+        out[k] = {"valued_hours": int(len(ok)), "missing_to_through": max(0, to_thr - len(ok)),
+                  "lag_hours": max(0, cal - to_thr)}
     return out
 
 
@@ -311,12 +399,14 @@ def _arb_month(sub, sfx):
 
 
 def arb_metrics(sub, sfx=""):
-    """Heuristic arbitrage proxies (ESTIMATES), computed per calendar month and summed, so rolling totals
-    equal the sum of their months. Price columns: <tie>_price<sfx>.
+    """Decomposition lines of the net value (both are components of E*Pe - I*Pi, not additions, and they overlap),
+    computed per calendar month and summed, so rolling totals equal the sum of their months. Price columns:
+    <tie>_price<sfx>.
     timing_cad: sum of flow x (hourly price - that tie's simple average price for the month), i.e. value from
                 WHEN within the month BC exported/imported, versus moving the same net energy flat.
     spread_cad: (flow-weighted avg export price - flow-weighted avg import price) x min(export, import MWh)
-                for the month (both ties pooled), i.e. a round-trip 'buy low / sell high' value."""
+                for the month (both ties pooled), i.e. the margin on matched import/export volume. Since
+                net = spread - (I - E) * Pi_avg when I > E (or + (E - I) * Pe_avg when E > I), it is part of net."""
     tot = {"us": 0.0, "ab": 0.0}
     spread = matched = e_mwh = i_mwh = e_cad = i_cad = 0.0
     if len(sub):
@@ -332,7 +422,7 @@ def arb_metrics(sub, sfx=""):
 
 
 def arb_block(sub):
-    return {"base": arb_metrics(sub), "offpeak_sens": arb_metrics(sub, "_op")}
+    return {"base": arb_metrics(sub), "peak_only": arb_metrics(sub, "_pk")}
 
 
 # BC Hydro published figures (static; fiscal years end Mar 31). Sources in REPORTED["sources"].
@@ -363,21 +453,20 @@ def reported_context(df):
     a, b = pd.Timestamp("2025-04-01", tz=TZ), pd.Timestamp("2026-04-01", tz=TZ)
     sub = df[(loc >= a) & (loc < b)]
     t = summarize(sub)["total"]
-    sens = arb_metrics(sub, "_op")
+    sens = arb_metrics(sub, "_pk")
     r = REPORTED["fy2026"]
     hub = {"imp_mwh": t["imp_mwh"], "imp_cad": t["imp_cad"], "exp_mwh": t["exp_mwh"], "exp_cad": t["exp_cad"],
            "net_cad": t["net_cad"], "avg_imp_price": t["avg_imp_price"], "avg_exp_price": t["avg_exp_price"],
-           "offpeak_imp_cad": sens["imp_cad"], "offpeak_exp_cad": sens["exp_cad"], "offpeak_net_cad": sens["net_cad"]}
+           "peak_only_imp_cad": sens["imp_cad"], "peak_only_exp_cad": sens["exp_cad"], "peak_only_net_cad": sens["net_cad"]}
     cal = {"imp_price_ratio": float(round(r["imp_cad_m"] * 1e6 / r["imp_gwh"] / 1e3 / t["avg_imp_price"], 2)) if t["avg_imp_price"] else None,
            "exp_price_ratio": float(round(r["exp_cad_m"] * 1e6 / r["exp_gwh"] / 1e3 / t["avg_exp_price"], 2)) if t["avg_exp_price"] else None,
-           # reported import cost minus hub-valued import cost: indicator of shaping/wheeling/transfer-pricing costs
-           "imp_gap_cad": round(r["imp_cad_m"] * 1e6 - t["imp_cad"]),
-           "imp_gap_cad_offpeak": round(r["imp_cad_m"] * 1e6 - sens["imp_cad"]),
-           "net_gap_cad": round(-r["net_cost_cad_m"] * 1e6 - t["net_cad"])}
-    return {**REPORTED, "dashboard_fy2026": hub, "calibration_fy2026": cal}
+           "note": "Different measures, not like-for-like: tie-line flows include Powerex trading and other "
+                   "non-purchase flows valued at hub prices; BC Hydro's reported trade is its domestic purchases and "
+                   "sales at Powerex transfer prices. Ratios are descriptive only."}
+    return {**REPORTED, "dashboard_fy2026": hub, "different_measures_fy2026": cal}
 
 
-def build_dashboard(df, last_midc, live):
+def build_dashboard(df, last_midc, live, qa=None):
     now = pd.Timestamp.now(tz=TZ)
     ms = now.normalize().replace(day=1)
     pms = (ms - pd.Timedelta(days=1)).replace(day=1)
@@ -398,6 +487,7 @@ def build_dashboard(df, last_midc, live):
         for k in ("us", "ab"):
             ok = sub[sub[f"{k}_ok"]]
             s[k]["through"] = ok["local"].max().isoformat() if len(ok) else None
+        s["completeness"] = completeness(sub, a, b, now)
         periods[key] = s
         arb_periods[key] = {"label": label, **arb_block(sub)}
     # YTD comparison: same span last year
@@ -415,9 +505,9 @@ def build_dashboard(df, last_midc, live):
                         "est": bool(s["us"]["est_hours"] or s["ab"]["est_hours"])})
         ab_ = arb_block(g)
         arb_monthly.append({"month": m, "timing_cad": ab_["base"]["timing_cad"], "spread_cad": ab_["base"]["spread_cad"],
-                            "timing_cad_offpeak": ab_["offpeak_sens"]["timing_cad"],
-                            "spread_cad_offpeak": ab_["offpeak_sens"]["spread_cad"],
-                            "net_cad_offpeak": ab_["offpeak_sens"]["net_cad"]})
+                            "timing_cad_peak_only": ab_["peak_only"]["timing_cad"],
+                            "spread_cad_peak_only": ab_["peak_only"]["spread_cad"],
+                            "net_cad_peak_only": ab_["peak_only"]["net_cad"]})
     # daily, last 60 days
     d60 = df[loc >= now.normalize() - pd.Timedelta(days=60)]
     daily = []
@@ -425,7 +515,7 @@ def build_dashboard(df, last_midc, live):
         s = summarize(g)
         daily.append({"date": d, "us_net_mwh": s["us"]["net_mwh"], "ab_net_mwh": s["ab"]["net_mwh"],
                       "us_net_cad": s["us"]["net_cad"], "ab_net_cad": s["ab"]["net_cad"],
-                      "midc_cad": round(float(g["us_price"].mean()), 2) if g["us_price"].notna().any() else None,
+                      "midc_cad": round(float(g["us_price_pk"].mean()), 2) if g["us_price_pk"].notna().any() else None,
                       "pool_cad": round(float(g["pool_cad"].mean()), 2) if g["pool_cad"].notna().any() else None})
     srcs = {}
     for k in ("us", "ab"):
@@ -434,11 +524,22 @@ def build_dashboard(df, last_midc, live):
     return {"generated": now.isoformat(timespec="minutes"), "midc_last_delivery": str(pd.Timestamp(last_midc).date()),
             "us5_bias": META_BIAS.get("v"),
             "periods": periods, "monthly": monthly, "daily": daily, "sources": srcs, "live": live,
+            "source_qa": qa or {},
+            "valuation": {"us": f"Mid-C day-ahead peak price; off-peak hours priced at {OFFPEAK_FACTOR}x (assumption)",
+                          "offpeak_factor": OFFPEAK_FACTOR,
+                          "offpeak_hours": "US Pacific prevailing time: hour-ending 23-6 Mon-Sat, all Sunday, NERC holidays "
+                                           "(New Year's, Memorial Day, Independence Day, Labor Day, Thanksgiving, Christmas; "
+                                           "Sunday holidays observed Monday)",
+                          "ab": "AESO hourly pool price"},
             "arbitrage_estimate": {
-                "note": "ESTIMATE / heuristic proxy from public flows and hub prices; NOT Powerex's actual trading profit "
-                        "(published only as multi-year ranges).",
+                "note": "Breakdown of the headline total, computed from the same hourly flows and hub prices. Both lines "
+                        "are PART OF the total (not additional) and overlap each other; do not add them to the total or "
+                        "to each other. Not Powerex's actual trading profit (published only as multi-year ranges).",
+                "labels": {"timing_cad": "Of the total above: gain from better-timed trades",
+                           "spread_cad": "Of the total above: margin on matched import/export volume",
+                           "peak_only": "Alternative valuation with the Mid-C peak price in every hour"},
                 "assumptions": {"offpeak_factor": OFFPEAK_FACTOR,
-                                "offpeak_hours": "Pacific hour-ending 23-6 Mon-Sat and all Sunday (holidays not included)",
+                                "offpeak_hours": "US Pacific prevailing hour-ending 23-6 Mon-Sat, all Sunday, NERC holidays",
                                 "applies_to": "Mid-C (BC-US) price only; AESO pool price is already hourly"},
                 "periods": arb_periods, "monthly": arb_monthly},
             "reported_context": reported_context(df)}
@@ -450,26 +551,30 @@ def main():
     check_tz()
     os.makedirs(D, exist_ok=True)
     meta = json.load(open(META)) if os.path.exists(META) else {}
+    aud = load_audit()
+    seed = "--seed-audit" in sys.argv
     h = pd.DataFrame(columns=["us_mw", "us_src", "ab_mw", "ab_src", "pool_cad"], index=pd.DatetimeIndex([], tz="UTC")) if full else load_hourly()
     now_utc = pd.Timestamp.now(tz="UTC").floor("h")
     since = START.tz_convert("UTC") if full else now_utc - pd.Timedelta(days=10)
     today = dt.date.today()
 
     # 1. BC Hydro official hourly XLS (check at most every 6 h; download only if changed)
-    if full or meta.get("xls_checked", "") < (now_utc - pd.Timedelta(hours=6)).isoformat():
+    if full or seed or meta.get("xls_checked", "") < (now_utc - pd.Timedelta(hours=6)).isoformat():
         try:
             links = bch_xls_links()
-            for y in ([2025, today.year] if full else sorted({today.year, (today - dt.timedelta(days=45)).year})):
+            for y in ([2025, today.year] if (full or seed) else sorted({today.year, (today - dt.timedelta(days=45)).year})):
                 if y not in links:
                     continue
-                hs = None if full else head_size(links[y])
+                hs = None if (full or seed) else head_size(links[y])
                 if hs is not None and meta.get(f"xls_{y}") == hs:
                     continue  # unchanged per HEAD; skip the multi-MB download
                 raw = get(links[y])
                 sig = f"{len(raw)}"
+                x = parse_bch_xls(raw)
+                aud = audit_put(aud, x["us"], "us_bch")
+                aud = audit_put(aud, x["ab"], "ab_bch")
                 if not full and meta.get(f"xls_{y}") == sig:
                     continue
-                x = parse_bch_xls(raw)
                 log(f"BC Hydro XLS {y}: {len(x)} h to {x.index.max()}")
                 h = merge_flow(h, x["us"], "us", "bch")
                 h = merge_flow(h, x["ab"], "ab", "bch")
@@ -481,7 +586,8 @@ def main():
     # 2. EIA US tie (only after last official hour)
     try:
         bch_end = h.index[h["us_src"] == "bch"].max() if (h["us_src"] == "bch").any() else since
-        e = eia_us(max(since, bch_end - pd.Timedelta(hours=1)))
+        e = eia_us(START.tz_convert("UTC") if seed else max(since, bch_end - pd.Timedelta(hours=1)))
+        aud = audit_put(aud, e, "us_eia")  # kept even where BC Hydro official data wins, for the EIA-vs-BCH check
         h = merge_flow(h, e, "us", "eia")
     except Exception as ex:
         log("EIA failed:", ex)
@@ -490,6 +596,8 @@ def main():
     live = {}
     try:
         m5, latest = bch_5min()
+        aud = audit_put(aud, m5["us"], "us_bch5_raw")
+        aud = audit_put(aud, m5["ab"], "ab_bch5")
         # The real-time page's BC-US figure reads lower than the official hourly/EIA series; calibrate it
         # with the median offset over overlapping hours and treat those hours as estimates.
         ov = h.loc[h.index.intersection(m5.index)]
@@ -524,6 +632,7 @@ def main():
                 s = aeso_bc_sched(d)
                 if s.empty:
                     log(f"  AESO metered {d}: not available"); continue
+                aud = audit_put(aud, s, "ab_aeso")
                 h = merge_flow(h, s, "ab", "aeso")
         except Exception as ex:
             log("AESO gap fill failed:", ex)
@@ -537,6 +646,9 @@ def main():
     for c in ("us_mw", "ab_mw", "pool_cad"):
         h[c] = pd.to_numeric(h[c], errors="coerce")
     h.to_csv(HOURLY, date_format="%Y-%m-%dT%H:%MZ", float_format="%.2f")
+    aud = aud[aud.index >= START.tz_convert("UTC")].sort_index().dropna(how="all")
+    aud.index.name = "t_utc"
+    aud.to_csv(AUDIT, date_format="%Y-%m-%dT%H:%MZ", float_format="%.1f")
     # Daily prices (Mid-C xlsx ~MBs, BoC FX) change at most daily: refresh at most hourly.
     if full or not os.path.exists(PRICES) or meta.get("prices_checked", "") < (now_utc - pd.Timedelta(minutes=55)).isoformat():
         try:
@@ -549,15 +661,17 @@ def main():
         prices = load_prices()
     META_BIAS["v"] = meta.get("us5_bias")
     df, last_midc = compute(h, prices)
-    dash = build_dashboard(df, last_midc, live)
+    dash = build_dashboard(df, last_midc, live, source_qa(aud))
     json.dump(dash, open(f"{D}/dashboard.json", "w"), indent=1, default=str)
     json.dump(meta, open(META, "w"), indent=1)
     for k, p in dash["periods"].items():
         t = p["total"]
         log(f"{p['label']:>18}: net {t['net_mwh']:>12,} MWh  net C${t['net_cad']:>14,}  (US {p['us']['net_cad']:,} / AB {p['ab']['net_cad']:,})")
         a = dash["arbitrage_estimate"]["periods"][k]
-        log(f"{'':>18}  arbitrage est: timing C${a['base']['timing_cad']:,} spread C${a['base']['spread_cad']:,} | off-peak x{OFFPEAK_FACTOR}: timing C${a['offpeak_sens']['timing_cad']:,} spread C${a['offpeak_sens']['spread_cad']:,}")
-    log("FY2026 calibration:", dash["reported_context"]["calibration_fy2026"])
+        log(f"{'':>18}  of which timing C${a['base']['timing_cad']:,}, matched-volume margin C${a['base']['spread_cad']:,} | peak-only: net C${a['peak_only']['net_cad']:,} timing C${a['peak_only']['timing_cad']:,} margin C${a['peak_only']['spread_cad']:,}")
+        log(f"{'':>18}  completeness {p['completeness']}")
+    log("FY2026 different measures:", dash["reported_context"]["different_measures_fy2026"])
+    log("source QA:", json.dumps(dash["source_qa"]))
 
 
 if __name__ == "__main__":
