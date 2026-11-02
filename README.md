@@ -4,7 +4,7 @@ BC Hydro intertie flows (BC–US and BC–Alberta) with an estimated wholesale d
 
 Dollar figures are market-price estimates (MW × hours × hub price), not BC Hydro/Powerex settlements.
 
-Repo secrets used by the workflow (runs every 15 minutes; source data lags): `EIA_API_KEY` (optional; falls back to DEMO_KEY), `AESO_API_KEY` (enables Alberta data).
+Repo secrets used by the workflow (scheduled every 15 minutes, best-effort; source data lags): `EIA_API_KEY` (optional; falls back to DEMO_KEY), `AESO_API_KEY` (enables Alberta data).
 
 Site: https://warrenboyle.github.io/bc-powerflow/
 
@@ -34,3 +34,20 @@ BC has been on permanent UTC−7 since November 2026 (BC Reg. 20/2026). BC-local
 - `docs/source_compare.csv` keeps every source's MW per hour (`us_bch`, `us_eia`, `us_bch5_raw` (uncorrected real-time page), `ab_bch`, `ab_bch5`, `ab_aeso`), not just the source that wins in `hourly.csv`. `source_qa` in `dashboard.json` publishes bias (mean/median), mean absolute error and correlation for each overlapping pair, e.g. EIA vs BC Hydro official on the US tie. When BC Hydro posts a new month's file, the comparison updates automatically.
 - Each period in `dashboard.json` has `completeness`: calendar hours in the period (up to the current hour), valued hours per tie, `missing_to_through` (holes before the tie's latest data hour) and `lag_hours` (hours not yet published). The page footer shows a one-line summary.
 - `python fetch.py --seed-audit` re-fills `source_compare.csv` with EIA and BC Hydro official data from 2025-01-01 (one-time).
+
+## Update schedule and reliability
+
+The workflow (`.github/workflows/update.yml`) has a `schedule` cron (minutes 7, 22, 37, 52) and a `workflow_dispatch` trigger. GitHub's scheduler is best-effort: on this repo only 2 of ~61 scheduled 15-minute slots actually ran between 2026-11-01 23:26 UTC and 2026-11-02 14:40 UTC (none failed; the rest were never started). The page therefore shows how old the data is and turns amber ("update delayed") when the last run is over 50 minutes old, and a **Data through** table lists the latest timestamp from each source (`data_through` in `dashboard.json`).
+
+### Optional: reliable external trigger (cron-job.org or similar)
+
+1. Create a **fine-grained personal access token** on GitHub (Settings → Developer settings → Fine-grained tokens): repository access *Only select repositories* → `warrenboyle/bc-powerflow`; permissions **Actions: Read and write** (Metadata: read is added automatically). Nothing else. Set an expiry and note it.
+2. On cron-job.org (free), create a job every 15 minutes (e.g. minutes 7,22,37,52):
+   - URL: `https://api.github.com/repos/warrenboyle/bc-powerflow/actions/workflows/update.yml/dispatches`
+   - Method: `POST`
+   - Headers: `Authorization: Bearer <token>`, `Accept: application/vnd.github+json`, `X-GitHub-Api-Version: 2022-11-28`, `Content-Type: application/json`
+   - Body: `{"ref":"main"}`
+   - Success is HTTP `204`.
+3. The workflow's `concurrency` group stops overlapping runs, and a run with no data change makes no commit, so the GitHub cron and the external trigger can both stay on.
+
+Equivalent curl: `curl -X POST -H "Authorization: Bearer $TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/repos/warrenboyle/bc-powerflow/actions/workflows/update.yml/dispatches -d '{"ref":"main"}'`

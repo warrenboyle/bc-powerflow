@@ -40,11 +40,15 @@ summary{cursor:pointer;font-weight:600;font-size:.92rem}
 .ctx th:first-child,.ctx td:first-child{text-align:left;white-space:normal}
 .ctx th{font-weight:600;background:#f3f4f6}
 a{color:var(--us)}
+.stale{background:#fef3c7;color:#92400e;border:1px solid #f59e0b;border-radius:8px;padding:2px 8px;font-weight:600}
+#thru{margin:4px 0 0;padding:6px 12px;font-size:.8rem}#thru summary{font-size:.8rem;font-weight:600;color:var(--mute)}
+#thru table{border-collapse:collapse;margin-top:6px}#thru td{padding:2px 10px 2px 0;vertical-align:top}
 footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
 </style></head>
 <body><main>
 <div class="head"><h1>BC electricity trade</h1><span class="k" id="upd"></span></div>
 <div class="live" id="live"></div>
+<details id="thru"><summary>Data through (each source lags differently)</summary><div id="thrut"></div></details>
 
 <div class="bar">
  <div class="tabs" id="tabs"><button data-v="total" class="on">All interties</button><button data-v="us">BC ⇄ US</button><button data-v="ab">BC ⇄ Alberta</button></div>
@@ -77,7 +81,7 @@ tabs('tabs','v',v=>view=v);tabs('mode','m',m=>mode=m);
 
 function render(){
  const d=data,L=d.live||{};
- document.getElementById('upd').textContent=`Updated ${T(d.generated)} BC time · refreshes every 15 minutes (source data lags)`;
+ upd(d);
  const lv=[];
  if(L.bch){lv.push(`Now: BC → US <b>${L.bch.us_mw} MW</b>`);lv.push(`BC → Alberta <b>${L.bch.ab_mw} MW</b>`);}
  if(L.pool_price)lv.push(`AB pool <b>${P(L.pool_price.cad_mwh)}</b>/MWh`);
@@ -85,6 +89,22 @@ function render(){
  if(lastDay)lv.push(`Mid-C peak <b>${P(lastDay.midc_cad)}</b>/MWh <span class="k">(${d.midc_last_delivery})</span>`);
  document.getElementById('live').innerHTML=lv.map(x=>`<div class="pill">${x}</div>`).join('')+`<span class="k" style="align-self:center">${L.bch?T(L.bch.t_utc)+' · ':''}negative MW = BC importing</span>`;
  cards(d);mainChart(d);
+}
+
+function ago(ms){const m=Math.round(ms/6e4);return m<60?`${Math.max(m,0)} min ago`:m<48*60?`${(m/60).toFixed(m<600?1:0)} h ago`:`${Math.round(m/1440)} days ago`;}
+function upd(d){
+ const age=Date.now()-new Date(d.generated),el=document.getElementById('upd');
+ const sched='checked every ~15 min when GitHub runs on time; source data lags';
+ el.innerHTML=age>50*6e4?`<span class="stale" title="Last run ${T(d.generated)} BC time. GitHub's scheduler delays or drops runs when busy.">Last updated ${ago(age)} (update delayed)</span> · ${sched}`
+  :`Updated ${ago(age)} (${T(d.generated)} BC time) · ${sched}`;
+}
+setInterval(()=>data&&upd(data),60000);
+function thru(d){
+ const X=d.data_through;if(!X)return '';
+ const row=(k,v)=>{const x=X[k];if(!x)return '';const val=x.t?T(x.t):x.date?D(x.date+'T12:00:00Z'):'none';
+  const lag=x.t?` <span class="k">(${ago(Date.now()-new Date(x.t))})</span>`:'';
+  return `<tr><td>${x.label}</td><td><b>${val}</b>${lag}${x.note?` <span class="k">– ${x.note}</span>`:''}</td></tr>`;};
+ return `<table>${['bch5','us_eia','us_bch','ab_bch','ab_aeso','pool','midc','fx'].map(k=>row(k)).join('')}</table><div class="k">Flow times are the end of the latest hour received, BC time. The newest hours use the 5-min page (provisional) until EIA/BC Hydro catch up.</div>`;
 }
 
 function cards(d){
@@ -159,6 +179,8 @@ function notes(d){
  const qa=e.mean_bias_mw!=null?`EIA vs BC Hydro official, BC–US, ${e.hours.toLocaleString()} overlapping hours (${D(e.from)} – ${D(e.to)}): mean bias ${e.mean_bias_mw} MW, median ${e.median_bias_mw} MW, mean abs. error ${e.mae_mw} MW.`:`EIA vs BC Hydro official: no overlapping hours yet.`;
  return [
  `<b>Value</b> = hourly flow × hub price, in C$ (Bank of Canada USD/CAD). Exports earn, imports cost. Not BC Hydro/Powerex settlements.`,
+ `<b>Mid-C</b> = Mid-Columbia trading hub (central Washington), the Pacific Northwest reference price. The value shown is the ICE day-ahead peak index (HE7–HE22 Mon–Sat), in US$ converted to C$. EIA publishes it with a lag of several days, so the latest price is carried forward.`,
+ `<b>Updates:</b> a GitHub Actions job is scheduled every 15 min, but GitHub's scheduler is best-effort and often delays or skips runs, so the page can be hours old (shown in amber). Each source also has its own lag; see "Data through".`,
  `<b>Prices:</b> BC–US uses the Mid-C day-ahead peak price, with off-peak hours priced at ${f.offpeak_factor??0.8}× (an assumption; off-peak = ${f.offpeak_hours||'nights, Sundays, NERC holidays'}). Latest delivery day ${d.midc_last_delivery}; later days carry it forward (partly est.). BC–Alberta uses the hourly AESO pool price. The "peak-price-only" line on the cards prices every US hour at peak.`,
  `<b>Flows:</b> BC Hydro official hourly data (${r('us_bch')}), then EIA BPA–BC Hydro tie (${r('us_eia')}), then BC Hydro's 5-min real-time page, offset-corrected by ~${Math.round(d.us5_bias||200)} MW (provisional). BC–AB ${r('ab_aeso')} uses AESO settled schedules as a stand-in until BC Hydro posts actuals. ${qa} Every source is kept per hour in <a href="source_compare.csv">source_compare.csv</a>.`,
  `<b>Trading breakdown</b>: both lines are part of the total, computed from the same data, and overlap each other, so don't add them to the total or to each other. <i>Better-timed trades</i> = each hour's flow × (that hour's price − the month's average price). Alberta has true hourly prices; on the US tie Mid-C is one price per day, so it reflects day-to-day timing (plus the assumed off-peak discount), not hour-to-hour. <i>Matched-volume margin</i> = volume BC both imported and exported in a month × (average export price − average import price).`,
@@ -171,6 +193,6 @@ function completeness(d){
   return `${nm[k]} ${m?m+' missing':'complete'}`;}).filter(Boolean).join(', ');
 }
 let staticDone=false;
-const _r=render;render=function(){_r();if(!staticDone){staticDone=true;document.getElementById('ctx').innerHTML=ctx(data);document.getElementById('notes').innerHTML=notes(data);
+const _r=render;render=function(){_r();if(!staticDone){staticDone=true;document.getElementById('ctx').innerHTML=ctx(data);document.getElementById('thrut').innerHTML=thru(data);document.getElementById('notes').innerHTML=notes(data);
  document.getElementById('foot').innerHTML=`Data: <a href="hourly.csv">hourly.csv</a> · <a href="daily_prices.csv">daily_prices.csv</a> · <a href="source_compare.csv">source_compare.csv</a> · <a href="dashboard.json">dashboard.json</a> · <a href="https://github.com/warrenboyle/bc-powerflow">code</a><br>Hourly data completeness: ${completeness(data)} · Times in BC time (UTC−7)`;}};
 </script></body></html>

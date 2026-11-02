@@ -545,6 +545,29 @@ def build_dashboard(df, last_midc, live, qa=None):
             "reported_context": reported_context(df)}
 
 
+def data_through(h, prices, live):
+    """Latest actual (not carried-forward) timestamp per source, so the page can show data freshness
+    separately from the run time. Flow times are the END of the latest hour present (hour-beginning + 1 h)."""
+    def last_hour(col, src):
+        m = h[f"{col}_src"] == src
+        m &= h[f"{col}_mw"].notna()
+        return (h.index[m].max() + pd.Timedelta(hours=1)).isoformat() if m.any() else None
+    pool = h.index[h["pool_cad"].notna()]
+    mid, fx = prices["midc_usd"].last_valid_index(), prices["usdcad"].last_valid_index()
+    return {
+        "us_eia": {"label": "BC–US flows (EIA hourly)", "t": last_hour("us", "eia")},
+        "us_bch": {"label": "BC–US flows (BC Hydro official)", "t": last_hour("us", "bch")},
+        "ab_bch": {"label": "BC–Alberta flows (BC Hydro official)", "t": last_hour("ab", "bch")},
+        "ab_aeso": {"label": "BC–Alberta flows (AESO settled schedules)", "t": last_hour("ab", "aeso")},
+        "bch5": {"label": "BC Hydro 5-min real-time page", "t": (live.get("bch") or {}).get("t_utc")},
+        "pool": {"label": "AESO pool price", "t": (pool.max() + pd.Timedelta(hours=1)).isoformat() if len(pool) else None},
+        "midc": {"label": "Mid-C peak price (delivery day)", "date": str(pd.Timestamp(mid).date()) if mid is not None else None,
+                 "note": "later days carry this price forward"},
+        "fx": {"label": "USD/CAD (Bank of Canada)", "date": str(pd.Timestamp(fx).date()) if fx is not None else None,
+               "note": "weekends/holidays use the last rate"},
+    }
+
+
 # ---------------------------------------------------------------- main
 def main():
     full = "--backfill" in sys.argv
@@ -662,6 +685,7 @@ def main():
     META_BIAS["v"] = meta.get("us5_bias")
     df, last_midc = compute(h, prices)
     dash = build_dashboard(df, last_midc, live, source_qa(aud))
+    dash["data_through"] = data_through(h, prices, live)
     json.dump(dash, open(f"{D}/dashboard.json", "w"), indent=1, default=str)
     json.dump(meta, open(META, "w"), indent=1)
     for k, p in dash["periods"].items():
@@ -672,6 +696,7 @@ def main():
         log(f"{'':>18}  completeness {p['completeness']}")
     log("FY2026 different measures:", dash["reported_context"]["different_measures_fy2026"])
     log("source QA:", json.dumps(dash["source_qa"]))
+    log("data through:", json.dumps({k: v.get("t") or v.get("date") for k, v in dash["data_through"].items()}))
 
 
 if __name__ == "__main__":
