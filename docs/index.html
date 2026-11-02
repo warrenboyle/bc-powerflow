@@ -3,7 +3,7 @@
 <title>BC electricity trade</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
-:root{--bg:#f6f7f9;--card:#fff;--ink:#1d2330;--mute:#6b7280;--exp:#0f8a5f;--imp:#c2410c;--us:#2563eb;--ab:#d97706;--arb:#7c3aed;--line:#e5e7eb}
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1d2330;--mute:#6b7280;--exp:#0f8a5f;--imp:#c2410c;--us:#2563eb;--ab:#d97706;--arb:#7c3aed;--line:#e5e7eb;--load:#0e7490}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.4}
 main{max-width:1100px;margin:0 auto;padding:16px}
 h1{font-size:1.4rem;margin:0}
@@ -22,7 +22,7 @@ h2{font-size:1rem;margin:22px 0 8px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column}
 .card h3{margin:0;font-size:.95rem;white-space:nowrap;display:flex;justify-content:space-between;align-items:baseline;gap:6px}
 .big{font-size:1.7rem;font-weight:700;margin:6px 0 0}
-.fl{display:grid;grid-template-columns:auto 1fr 1fr auto;gap:2px 6px;font-size:.82rem;text-align:right;white-space:nowrap}.fl>:nth-child(4n+1){text-align:left}
+.fl{display:grid;grid-template-columns:auto 1fr 1fr auto;gap:2px 4px;font-size:.79rem;text-align:right;white-space:nowrap}.fl>:nth-child(4n+1){text-align:left}
 .row{display:flex;justify-content:space-between;font-size:.85rem;padding:2px 0}
 .arb{margin-top:auto;padding-top:10px;border-top:1px dashed var(--line)}
 .arb .row b{color:var(--arb);white-space:nowrap;padding-left:8px}
@@ -43,6 +43,8 @@ a{color:var(--us)}
 .stale{background:#fef3c7;color:#92400e;border:1px solid #f59e0b;border-radius:8px;padding:2px 8px;font-weight:600}
 #thru{margin:4px 0 0;padding:6px 12px;font-size:.8rem}#thru summary{font-size:.8rem;font-weight:600;color:var(--mute)}
 #thru table{border-collapse:collapse;margin-top:6px}#thru td{padding:2px 10px 2px 0;vertical-align:top}
+.ld{font-size:.78rem;margin-top:6px;color:#374151}.ld b{font-weight:600}
+.fl .lrow{color:var(--load)}
 footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
 </style></head>
 <body><main>
@@ -60,6 +62,7 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
  <div class="tabs" id="mode"><button data-m="cad" class="on">Net value (C$)</button><button data-m="gwh">Volume (GWh)</button></div></div>
 <div class="chart"><canvas id="main"></canvas></div>
 
+<details id="loadsec"><summary>Load &amp; generation (BC internal demand)</summary><div id="lg"></div></details>
 <details id="reported"><summary>BC Hydro reported figures (fiscal years) – different measures</summary><div id="ctx"></div></details>
 <details id="method"><summary>Method &amp; caveats</summary><ul class="notes" id="notes"></ul></details>
 <footer id="foot"></footer>
@@ -74,6 +77,12 @@ const M$=n=>n==null?'n/a':(n<0?'−':'')+'C$'+Math.abs(n).toLocaleString()+'M';
 const BZ=s=>new Date(s)>=new Date('2026-03-08T10:00:00Z')?'Etc/GMT+7':'America/Vancouver';
 const T=s=>s?new Date(s).toLocaleString('en-CA',{timeZone:BZ(s),month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'n/a';
 const D=s=>s?new Date(s).toLocaleDateString('en-CA',{timeZone:BZ(s),month:'short',day:'numeric',year:'numeric'}):'n/a';
+const MW=n=>n==null?'n/a':Math.round(n).toLocaleString()+' MW';
+// hour-beginning ISO -> "Feb 3, 2025, 5–6 PM"
+const HR=(s,yr=true)=>{if(!s)return 'n/a';const a=new Date(s),b=new Date(a.getTime()+36e5),z=BZ(s);
+ const h=x=>x.toLocaleTimeString('en-US',{timeZone:z,hour:'numeric'});
+ return a.toLocaleDateString('en-CA',{timeZone:z,month:'short',day:'numeric',...(yr?{year:'numeric'}:{})})+', '+h(a).replace(/ (AM|PM)$/,h(a).slice(-2)===h(b).slice(-2)?'':' $1')+'–'+h(b);};
+const PCT=n=>n==null?'n/a':n.toFixed(n<10?1:0)+'%';
 let data,view='total',mode='cad',chart;
 fetch('dashboard.json?'+Date.now()).then(r=>r.json()).then(d=>{data=d;render();});
 const tabs=(id,attr,set)=>document.querySelectorAll(`#${id} button`).forEach(b=>b.onclick=()=>{set(b.dataset[attr]);document.querySelectorAll(`#${id} button`).forEach(x=>x.classList.toggle('on',x===b));render();});
@@ -104,7 +113,7 @@ function thru(d){
  const row=(k,v)=>{const x=X[k];if(!x)return '';const val=x.t?T(x.t):x.date?D(x.date+'T12:00:00Z'):'none';
   const lag=x.t?` <span class="k">(${ago(Date.now()-new Date(x.t))})</span>`:'';
   return `<tr><td>${x.label}</td><td><b>${val}</b>${lag}${x.note?` <span class="k">– ${x.note}</span>`:''}</td></tr>`;};
- return `<table>${['bch5','us_eia','us_bch','ab_bch','ab_aeso','pool','midc','fx'].map(k=>row(k)).join('')}</table><div class="k">Flow times are the end of the latest hour received, BC time. The newest hours use the 5-min page (provisional) until EIA/BC Hydro catch up.</div>`;
+ return `<table>${['bch5','us_eia','us_bch','ab_bch','ab_aeso','load','pool','midc','fx'].map(k=>row(k)).join('')}</table><div class="k">Flow times are the end of the latest hour received, BC time. The newest hours use the 5-min page (provisional) until EIA/BC Hydro catch up.</div>`;
 }
 
 function cards(d){
@@ -129,8 +138,23 @@ function cards(d){
   <div class="big ${s.net_cad>=0?'pos':'neg'}">${C(s.net_cad)} ${badge}</div>
   <div class="k" style="margin-bottom:6px">${s.net_mwh>=0?'Net export':'Net import'} ${G(Math.abs(s.net_mwh))}</div>
   <div class="fl"><span>Exports</span><span>${G(s.exp_mwh)}</span><span>${C(s.exp_cad)}</span><span class="k" title="average C$/MWh">@${s.avg_exp_price==null?'–':Math.round(s.avg_exp_price)}</span>
-  <span>Imports</span><span>${G(s.imp_mwh)}</span><span>${C(s.imp_cad)}</span><span class="k" title="average C$/MWh">@${s.avg_imp_price==null?'–':Math.round(s.avg_imp_price)}</span></div>
-  ${ly}${arb}</div>`;}).join('');
+  <span>Imports</span><span>${G(s.imp_mwh)}</span><span>${C(s.imp_cad)}</span><span class="k" title="average C$/MWh">@${s.avg_imp_price==null?'–':Math.round(s.avg_imp_price)}</span>
+  ${loadRow(p)}</div>
+  ${loadStats(p,k)}${ly}${arb}</div>`;}).join('');
+}
+// BC internal load (system-wide, not valued in C$); shown in the All interties view only
+const lastDay_=s=>D(new Date(new Date(s)-1).toISOString()).replace(/, \d{4}$/,'');
+function lthru(p){const l=p.load;if(!l||!l.load_through)return '';const e=new Date(p.end),t=new Date(l.load_through);
+ return t<e-36e5*2&&t<Date.now()-36e5*3?`to ${lastDay_(l.load_through)}`:'';}
+function loadRow(p){
+ if(view!=='total')return '';const l=p.load||{};
+ return `<span class="lrow" title="BC Hydro balancing authority load: everything consumed on BC's grid in the hour (incl. losses), whether supplied by BC generation or imports">Internal load</span><span class="lrow">${l.load_mwh!=null?G(l.load_mwh):'–'}</span><span class="k" style="grid-column:span 2" title="Load is energy used in BC, not traded, so it has no C$ value">not valued</span>`;}
+function loadStats(p,k){
+ if(view!=='total')return `<div class="ld k">Internal load and peaks: see All interties view</div>`;
+ const l=p.load||{};
+ if(!l.load_mwh)return `<div class="ld k">Load data not posted yet (BC Hydro posts each business day for the previous day).</div>`;
+ return `<div class="ld"><span title="Highest hourly-average load (not instantaneous)">Peak load <b>${MW(l.peak_load_mw)}</b> <span class="k">(${HR(l.peak_load_t,false)})</span></span> · <span title="Derived: load + net exports, highest hour">peak generation <b>${MW(l.peak_gen_mw)}</b> <span class="k">(${HR(l.peak_gen_t,false)})</span></span></div>
+ <div class="ld k">${lthru(p)?'Load data '+lthru(p)+' · ':''}Generation ${G(l.gen_mwh)} (${PCT(l.gen_to_load_pct)} of load) · avg load ${MW(l.avg_load_mw)} · load factor ${PCT(l.load_factor*100)} · net imports met ${PCT(l.import_share_of_load_pct)} of load</div>`;
 }
 
 function mainChart(d){
@@ -146,13 +170,17 @@ function mainChart(d){
    ds.push({type:'line',label:'Of the total: margin on matched import/export volume',data:M.map(m=>AM[m.month]?AM[m.month].spread_cad:null),borderColor:'#a78bfa',backgroundColor:'#a78bfa',borderDash:[2,3],pointRadius:2,tension:.25,stack:'s',hidden:true});}
   y={stacked:true,ticks:{callback:v=>C(v)}};
  }else{
-  if(view==='total')ds=[{type:'bar',label:'Exports',data:M.map(m=>m.exp_mwh/1000),backgroundColor:'#0f8a5f'},{type:'bar',label:'Imports (shown negative)',data:M.map(m=>-m.imp_mwh/1000),backgroundColor:'#c2410c'}];
+  if(view==='total'){ds=[{type:'bar',label:'Exports',data:M.map(m=>m.exp_mwh/1000),backgroundColor:'#0f8a5f'},{type:'bar',label:'Imports (shown negative)',data:M.map(m=>-m.imp_mwh/1000),backgroundColor:'#c2410c'}];
+   const lp=M.map(m=>m.load_partial);
+   ds.push({type:'line',label:'Internal load (not valued)',data:M.map(m=>m.load_mwh!=null?m.load_mwh/1000:null),borderColor:'#0e7490',backgroundColor:'#0e7490',
+     pointRadius:M.map((m,i)=>lp[i]?4:2),pointStyle:M.map((m,i)=>lp[i]?'rectRot':'circle'),tension:.25,stack:'load',order:-1});
+   ds.push({type:'line',label:'BC generation (derived)',data:M.map(m=>m.gen_mwh!=null?m.gen_mwh/1000:null),borderColor:'#64748b',backgroundColor:'#64748b',borderDash:[5,4],pointRadius:2,tension:.25,stack:'gen',order:-1,hidden:true});}
   else{const key=view==='us'?'us_net_mwh':'ab_net_mwh';ds=[{type:'bar',label:'Net GWh (+ = export)',data:M.map(m=>m[key]/1000),backgroundColor:M.map(m=>m[key]>=0?'#0f8a5f':'#c2410c')}];}
   y={stacked:true,title:{display:true,text:'GWh'}};
  }
  const fmt=mode==='cad'?C:v=>(v==null||isNaN(v))?'–':v.toFixed(0)+' GWh';
  chart=new Chart(document.getElementById('main'),{type:'bar',data:{labels:lab,datasets:ds},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-  scales:{x:{stacked:true},y},plugins:{legend:{labels:{boxWidth:12}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}}}});
+  scales:{x:{stacked:true},y},plugins:{legend:{labels:{boxWidth:12}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)+(c.dataset.stack==='load'&&M[c.dataIndex].load_partial?' (partial month: load to date)':'')}}}}});
 }
 
 function ctx(d){
@@ -184,6 +212,7 @@ function notes(d){
  `<b>Prices:</b> BC–US uses the Mid-C day-ahead peak price, with off-peak hours priced at ${f.offpeak_factor??0.8}× (an assumption; off-peak = ${f.offpeak_hours||'nights, Sundays, NERC holidays'}). Latest delivery day ${d.midc_last_delivery}; later days carry it forward (partly est.). BC–Alberta uses the hourly AESO pool price. The "peak-price-only" line on the cards prices every US hour at peak.`,
  `<b>Flows:</b> BC Hydro official hourly data (${r('us_bch')}), then EIA BPA–BC Hydro tie (${r('us_eia')}), then BC Hydro's 5-min real-time page, offset-corrected by ~${Math.round(d.us5_bias||200)} MW (provisional). BC–AB ${r('ab_aeso')} uses AESO settled schedules as a stand-in until BC Hydro posts actuals. ${qa} Every source is kept per hour in <a href="source_compare.csv">source_compare.csv</a>.`,
  `<b>Trading breakdown</b>: both lines are part of the total, computed from the same data, and overlap each other, so don't add them to the total or to each other. <i>Better-timed trades</i> = each hour's flow × (that hour's price − the month's average price). Alberta has true hourly prices; on the US tie Mid-C is one price per day, so it reflects day-to-day timing (plus the assumed off-peak discount), not hour-to-hour. <i>Matched-volume margin</i> = volume BC both imported and exported in a month × (average export price − average import price).`,
+ `<b>Internal load</b> = BC Hydro balancing-authority hourly Control Area Load (gross telemetered, MW averaged over each hour, incl. losses). BC Hydro is the balancing authority for BC's grid, so this is wider than BC Hydro's own customers (the Jan 12 2024 record was 12,334 MW here vs the 11,300 MW BC Hydro cited for customer demand). <b>Generation</b> is derived: load + net exports on the tie lines. Load is energy used in BC, not traded, so it has no C$ value. Peaks are the highest <i>hourly average</i>; BC Hydro publishes no instantaneous (5-min) load or generation. Posted each business day for the previous day, so it lags the flows.`,
  `* = month contains estimated hours. Positive = BC exporting/earning. Times are BC time (UTC−7; Pacific with DST before Nov 2026). Mid-C days and off-peak hours follow US Pacific time.`
  ].map(x=>`<li>${x}</li>`).join('');
 }
@@ -192,7 +221,32 @@ function completeness(d){
  return Object.keys(nm).map(k=>{const c=d.periods[k]?.completeness;if(!c)return '';const m=c.us.missing_to_through+c.ab.missing_to_through;
   return `${nm[k]} ${m?m+' missing':'complete'}`;}).filter(Boolean).join(', ');
 }
+function loadSec(d){
+ const X=d.load_context;if(!X)return '';const r=X.records||{},rp=X.record_peak,sc=X.statcan_check||{};
+ const P=d.periods,yrs=[['prev_year',P.prev_year],['ytd',P.ytd]];
+ const an=(X.annual||[]).slice().reverse(),y0=r.load_from?new Date(r.load_from).getFullYear():'';
+ const rec=`<table class="ctx" style="margin-top:8px"><tr><th>Records</th><th>MW (hourly avg)</th><th>Hour (BC time)</th></tr>
+  ${rp?`<tr><td><b>Record peak load</b> <span class="k">(BC Hydro data since ${X.record_since})</span></td><td><b>${MW(rp.peak_mw)}</b></td><td>${HR(rp.peak_t)}</td></tr>`:''}
+  <tr><td>Peak load, ${y0}–now</td><td>${MW(r.peak_load_mw)}</td><td>${HR(r.peak_load_t)}</td></tr>
+  <tr><td>Lowest load, ${y0}–now</td><td>${MW(r.min_load_mw)}</td><td>${HR(r.min_load_t)}</td></tr>
+  <tr><td>Peak generation (derived), ${y0}–now</td><td>${MW(r.peak_gen_mw)}</td><td>${HR(r.peak_gen_t)}</td></tr>
+  <tr><td>Peak net import, ${y0}–now</td><td>${MW(r.peak_net_import_mw)}</td><td>${HR(r.peak_net_import_t)}</td></tr>
+  <tr><td>Peak net export, ${y0}–now</td><td>${MW(r.peak_net_export_mw)}</td><td>${HR(r.peak_net_export_t)}</td></tr></table>`;
+ const req=`<table class="ctx" style="margin-top:10px"><tr><th>Generation requirement</th>${yrs.map(([k,p])=>`<th>${p.label}${k==='ytd'&&p.load?.load_through?`<br><span class="k">load to ${lastDay_(p.load.load_through)}</span>`:''}</th>`).join('')}</tr>
+  ${[['Internal load',l=>G(l.load_mwh)],['BC generation (derived)',l=>G(l.gen_mwh)],['Generation ÷ load',l=>PCT(l.gen_to_load_pct)],['Average load',l=>MW(l.avg_load_mw)],['Peak load',l=>MW(l.peak_load_mw)],
+     ['Load factor (avg ÷ peak)',l=>PCT(l.load_factor*100)],['Load met by net imports',l=>PCT(l.import_share_of_load_pct)],['Generation exported (net)',l=>PCT(l.export_share_of_gen_pct)],['Hours BC was a net importer',l=>PCT(l.net_import_hours_pct)]]
+     .map(([n,f])=>`<tr><td>${n}</td>${yrs.map(([k,p])=>`<td>${p.load&&p.load.load_mwh?f(p.load):'–'}</td>`).join('')}</tr>`).join('')}</table>`;
+ const hist=`<details style="margin-top:10px;padding:6px 10px"><summary style="font-size:.84rem">Annual load history (${an.length} years)</summary><div class="wrap"><table class="ctx">
+  <tr><th>Year</th><th>Load GWh</th><th>Avg MW</th><th>Peak MW</th><th>Peak hour</th><th>Load factor</th></tr>
+  ${an.map(a=>`<tr><td>${a.year}${a.partial?' <span class="k">to date</span>':''}</td><td>${a.load_gwh.toLocaleString()}</td><td>${a.avg_mw.toLocaleString()}</td><td>${a.peak_mw.toLocaleString()}</td><td>${HR(a.peak_t,false)}</td><td>${PCT(a.avg_mw/a.peak_mw*100)}</td></tr>`).join('')}</table></div></details>`;
+ const lm=(sc.months||[]).slice(-1)[0];
+ const chk=sc.mean_diff_pct!=null?`<li><b>Cross-check:</b> derived generation vs <a href="${sc.source}">Statistics Canada</a> BC monthly generation, ${sc.months.length} complete months: on average ${sc.mean_diff_pct}% (range ${sc.min_diff_pct}% to ${sc.max_diff_pct}%). StatCan also counts generation outside the telemetered grid load (off-grid, some industrial self-supply), so a few % lower is expected.${lm&&lm.statcan_hydro_pct!=null?` Hydro was ${PCT(lm.statcan_hydro_pct)} of BC generation in ${lm.month} (StatCan).`:''}</li>`:'';
+ return `<div class="wrap">${rec}${req}</div>${hist}<ul class="notes" style="margin-top:8px">
+ <li><b>Internal load</b>: BC Hydro balancing-authority hourly load (all of BC's interconnected grid, incl. losses). Not valued in C$. <b>Generation</b> = load + net exports on the tie lines, so load = generation + net imports by construction.</li>
+ <li><b>Peaks are hourly averages.</b> ${X.instantaneous}</li>${chk}
+ <li>Load factor = average ÷ peak hourly load. "Load met by net imports" sums only hours when BC was a net importer. Data: <a href="load_hourly.csv">load_hourly.csv</a>.</li></ul>`;
+}
 let staticDone=false;
-const _r=render;render=function(){_r();if(!staticDone){staticDone=true;document.getElementById('ctx').innerHTML=ctx(data);document.getElementById('thrut').innerHTML=thru(data);document.getElementById('notes').innerHTML=notes(data);
- document.getElementById('foot').innerHTML=`Data: <a href="hourly.csv">hourly.csv</a> · <a href="daily_prices.csv">daily_prices.csv</a> · <a href="source_compare.csv">source_compare.csv</a> · <a href="dashboard.json">dashboard.json</a> · <a href="https://github.com/warrenboyle/bc-powerflow">code</a><br>Hourly data completeness: ${completeness(data)} · Times in BC time (UTC−7)`;}};
+const _r=render;render=function(){_r();if(!staticDone){staticDone=true;document.getElementById('ctx').innerHTML=ctx(data);document.getElementById('thrut').innerHTML=thru(data);document.getElementById('notes').innerHTML=notes(data);document.getElementById('lg').innerHTML=loadSec(data);
+ document.getElementById('foot').innerHTML=`Data: <a href="hourly.csv">hourly.csv</a> · <a href="daily_prices.csv">daily_prices.csv</a> · <a href="source_compare.csv">source_compare.csv</a> · <a href="load_hourly.csv">load_hourly.csv</a> · <a href="dashboard.json">dashboard.json</a> · <a href="https://github.com/warrenboyle/bc-powerflow">code</a><br>Hourly data completeness: ${completeness(data)} · Times in BC time (UTC−7)`;}};
 </script></body></html>

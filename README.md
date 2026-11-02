@@ -29,6 +29,18 @@ BC has been on permanent UTC−7 since November 2026 (BC Reg. 20/2026). BC-local
 - **BC Hydro reported figures – different measures** (`reported_context`): static BC Hydro figures for FY2025 and FY2026 (imports, exports, net cost, consolidated trade revenue, and Powerex trade-income ranges), with source links, beside this site's FY2026 numbers. These are **different measures, not like-for-like**: tie-line flows include Powerex trading and other non-purchase flows valued at hub prices, while BC Hydro's reported trade is its domestic purchases and sales at Powerex transfer prices. The price ratios in `different_measures_fy2026` are descriptive only.
   - Sources: [BC Hydro 2025/26 Annual Service Plan Report](https://bcbudget.gov.bc.ca/Annual_Reports/2025_2026/pdf/agency/bchydro.pdf), [2024/25 report](https://bcbudget.gov.bc.ca/Annual_Reports/2024_2025/pdf/agency/bchydro.pdf), and the [2025/26 financial statements](https://www2.gov.bc.ca/assets/gov/british-columbians-our-governments/government-finances/public-accounts/2025-26/sup-e/bc-hydro-fs-2025-26.pdf).
 
+## BC load and generation
+- **Internal load**: BC Hydro balancing-authority (BCHA) hourly *Control Area Load* (gross telemetered MW, hour-ending, BC time) from
+  [Balancing Authority Load Data](https://www.bchydro.com/energy-in-bc/operations/transmission/transmission-system/balancing-authority-load-data.html):
+  `CurrentHourlyBALoad.xls` (current month, posted each business day for the previous day) and yearly `BalancingAuthorityLoad YYYY.xls`.
+  Cached in `docs/load_hourly.csv`; each 15-min run only HEAD-checks the files (current at most hourly, yearly every 6 h) and downloads on change.
+  This is the whole BCHA area (BC's interconnected grid), wider than BC Hydro's own customers: record 12,334 MW on 2024-01-12 HE18 vs the 11,300 MW BC Hydro cited for customer demand.
+- **Generation** is derived: load + net exports on the US and AB ties, so load = generation + net imports holds by construction.
+  Independent check: Statistics Canada table 25-10-0015-01 (BC monthly generation, all producers; `docs/statcan_bc_gen.csv`, refreshed daily).
+- Peaks are highest **hourly averages**. No public instantaneous/5-min BC load or generation exists (the 5-min page has tie flows only), and EIA-930 has no BCHA demand/generation.
+- `python fetch.py --load-history` (one-time) writes annual summaries for 2002-2024 to `docs/load_annual.csv` for record context.
+- Load is not valued in C$; it appears on the cards and as a line in the Volume (GWh) chart in the All interties view only.
+
 ## Data quality
 
 - `docs/source_compare.csv` keeps every source's MW per hour (`us_bch`, `us_eia`, `us_bch5_raw` (uncorrected real-time page), `ab_bch`, `ab_bch5`, `ab_aeso`), not just the source that wins in `hourly.csv`. `source_qa` in `dashboard.json` publishes bias (mean/median), mean absolute error and correlation for each overlapping pair, e.g. EIA vs BC Hydro official on the US tie. When BC Hydro posts a new month's file, the comparison updates automatically.
