@@ -142,8 +142,8 @@ function mainChart(d){
   ds=[];
   if(view!=='ab')ds.push({type:'bar',label:'BC–US net',data:M.map(m=>m.us_net_cad),backgroundColor:'#2563eb',stack:'n'});
   if(view!=='us')ds.push({type:'bar',label:'BC–Alberta net',data:M.map(m=>m.ab_net_cad),backgroundColor:'#d97706',stack:'n'});
-  if(view==='total'){ds.push({type:'line',label:'Of which: gain from better-timed trades (part of bars)',data:M.map(m=>AM[m.month]?AM[m.month].timing_cad:null),borderColor:'#7c3aed',backgroundColor:'#7c3aed',borderDash:[5,4],pointRadius:2,tension:.25,stack:'t'});
-   ds.push({type:'line',label:'Of which: margin on matched import/export volume (part of bars)',data:M.map(m=>AM[m.month]?AM[m.month].spread_cad:null),borderColor:'#a78bfa',backgroundColor:'#a78bfa',borderDash:[2,3],pointRadius:2,tension:.25,stack:'s',hidden:true});}
+  if(view==='total'){ds.push({type:'line',label:'Of the total: gain from better-timed trades',data:M.map(m=>AM[m.month]?AM[m.month].timing_cad:null),borderColor:'#7c3aed',backgroundColor:'#7c3aed',borderDash:[5,4],pointRadius:2,tension:.25,stack:'t'});
+   ds.push({type:'line',label:'Of the total: margin on matched import/export volume',data:M.map(m=>AM[m.month]?AM[m.month].spread_cad:null),borderColor:'#a78bfa',backgroundColor:'#a78bfa',borderDash:[2,3],pointRadius:2,tension:.25,stack:'s',hidden:true});}
   y={stacked:true,ticks:{callback:v=>C(v)}};
  }else{
   if(view==='total')ds=[{type:'bar',label:'Exports',data:M.map(m=>m.exp_mwh/1000),backgroundColor:'#0f8a5f'},{type:'bar',label:'Imports (shown negative)',data:M.map(m=>-m.imp_mwh/1000),backgroundColor:'#c2410c'}];
