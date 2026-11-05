@@ -1,59 +1,59 @@
 {
- "generated": "2026-11-04T16:34-07:00",
+ "generated": "2026-11-04T20:42-07:00",
  "midc_last_delivery": "2026-10-28",
- "us5_bias": 187.1,
+ "us5_bias": 178.2,
  "periods": {
   "mtd": {
    "us": {
-    "exp_mwh": 68093,
+    "exp_mwh": 70257,
     "imp_mwh": 0,
-    "net_mwh": 68093,
-    "exp_cad": 4663966,
+    "net_mwh": 70257,
+    "exp_cad": 4832645,
     "imp_cad": 0,
-    "net_cad": 4663966,
-    "hours": 87,
-    "est_hours": 87,
-    "prov_hours": 38,
-    "avg_exp_price": 68.49,
+    "net_cad": 4832645,
+    "hours": 91,
+    "est_hours": 91,
+    "prov_hours": 42,
+    "avg_exp_price": 68.78,
     "avg_imp_price": null,
-    "through": "2026-11-04T14:00:00-07:00"
+    "through": "2026-11-04T18:00:00-07:00"
    },
    "ab": {
-    "exp_mwh": 5013,
-    "imp_mwh": 18331,
-    "net_mwh": -13317,
-    "exp_cad": 742430,
-    "imp_cad": 315430,
-    "net_cad": 427000,
-    "hours": 87,
+    "exp_mwh": 5130,
+    "imp_mwh": 18498,
+    "net_mwh": -13368,
+    "exp_cad": 745975,
+    "imp_cad": 319947,
+    "net_cad": 426029,
+    "hours": 91,
     "est_hours": 0,
-    "prov_hours": 87,
-    "avg_exp_price": 148.09,
-    "avg_imp_price": 17.21,
-    "through": "2026-11-04T14:00:00-07:00"
+    "prov_hours": 91,
+    "avg_exp_price": 145.41,
+    "avg_imp_price": 17.3,
+    "through": "2026-11-04T18:00:00-07:00"
    },
    "total": {
-    "exp_mwh": 73106,
-    "imp_mwh": 18331,
-    "net_mwh": 54776,
-    "exp_cad": 5406396,
-    "imp_cad": 315430,
-    "net_cad": 5090966,
-    "avg_exp_price": 73.95,
-    "avg_imp_price": 17.21
+    "exp_mwh": 75388,
+    "imp_mwh": 18498,
+    "net_mwh": 56890,
+    "exp_cad": 5578620,
+    "imp_cad": 319947,
+    "net_cad": 5258674,
+    "avg_exp_price": 74.0,
+    "avg_imp_price": 17.3
    },
    "label": "November 2026 to date",
    "start": "2026-11-01T00:00:00-07:00",
-   "end": "2026-11-04T16:34:15.751310-07:00",
+   "end": "2026-11-04T20:42:29.580585-07:00",
    "completeness": {
-    "calendar_hours": 89,
+    "calendar_hours": 93,
     "us": {
-     "valued_hours": 87,
+     "valued_hours": 91,
      "missing_to_through": 0,
      "lag_hours": 2
     },
     "ab": {
-     "valued_hours": 87,
+     "valued_hours": 91,
      "missing_to_through": 0,
      "lag_hours": 2
     }
@@ -62,9 +62,9 @@
     "load_hours": 0,
     "peak_net_import_mw": 392,
     "peak_net_import_t": "2026-11-02T21:00:00-07:00",
-    "peak_net_export_mw": 1556,
+    "peak_net_export_mw": 1547,
     "peak_net_export_t": "2026-11-03T15:00:00-07:00",
-    "net_import_hours_pct": 6.9
+    "net_import_hours_pct": 7.7
    }
   },
   "prev_month": {
@@ -152,55 +152,55 @@
   },
   "ytd": {
    "us": {
-    "exp_mwh": 8330807,
+    "exp_mwh": 8332971,
     "imp_mwh": 943572,
-    "net_mwh": 7387235,
-    "exp_cad": 411814109,
+    "net_mwh": 7389399,
+    "exp_cad": 411982788,
     "imp_cad": 16105713,
-    "net_cad": 395708396,
-    "hours": 7382,
-    "est_hours": 159,
-    "prov_hours": 38,
-    "avg_exp_price": 49.43,
+    "net_cad": 395877075,
+    "hours": 7386,
+    "est_hours": 163,
+    "prov_hours": 42,
+    "avg_exp_price": 49.44,
     "avg_imp_price": 17.07,
-    "through": "2026-11-04T14:00:00-07:00"
+    "through": "2026-11-04T18:00:00-07:00"
    },
    "ab": {
-    "exp_mwh": 655335,
-    "imp_mwh": 1007759,
-    "net_mwh": -352423,
-    "exp_cad": 39275633,
-    "imp_cad": 15040454,
-    "net_cad": 24235179,
-    "hours": 7382,
+    "exp_mwh": 655452,
+    "imp_mwh": 1007926,
+    "net_mwh": -352474,
+    "exp_cad": 39279178,
+    "imp_cad": 15044971,
+    "net_cad": 24234208,
+    "hours": 7386,
     "est_hours": 0,
-    "prov_hours": 87,
+    "prov_hours": 91,
     "avg_exp_price": 59.93,
-    "avg_imp_price": 14.92,
-    "through": "2026-11-04T14:00:00-07:00"
+    "avg_imp_price": 14.93,
+    "through": "2026-11-04T18:00:00-07:00"
    },
    "total": {
-    "exp_mwh": 8986142,
-    "imp_mwh": 1951331,
-    "net_mwh": 7034812,
-    "exp_cad": 451089742,
-    "imp_cad": 31146167,
-    "net_cad": 419943575,
+    "exp_mwh": 8988424,
+    "imp_mwh": 1951498,
+    "net_mwh": 7036926,
+    "exp_cad": 451261966,
+    "imp_cad": 31150683,
+    "net_cad": 420111283,
     "avg_exp_price": 50.2,
     "avg_imp_price": 15.96
    },
    "label": "2026 to date",
    "start": "2026-01-01T00:00:00-08:00",
-   "end": "2026-11-04T16:34:15.751310-07:00",
+   "end": "2026-11-04T20:42:29.580585-07:00",
    "completeness": {
-    "calendar_hours": 7384,
+    "calendar_hours": 7388,
     "us": {
-     "valued_hours": 7382,
+     "valued_hours": 7386,
      "missing_to_through": 0,
      "lag_hours": 2
     },
     "ab": {
-     "valued_hours": 7382,
+     "valued_hours": 7386,
      "missing_to_through": 0,
      "lag_hours": 2
     }
@@ -233,13 +233,13 @@
     "gen_to_load_pct": 112.7
    },
    "same_period_last_year": {
-    "exp_mwh": 2007571,
-    "imp_mwh": 6507943,
-    "net_mwh": -4500372,
-    "exp_cad": 165719253,
-    "imp_cad": 223715178,
-    "net_cad": -57995925,
-    "avg_exp_price": 82.55,
+    "exp_mwh": 2008725,
+    "imp_mwh": 6508814,
+    "net_mwh": -4500089,
+    "exp_cad": 166720898,
+    "imp_cad": 223765250,
+    "net_cad": -57044352,
+    "avg_exp_price": 83.0,
     "avg_imp_price": 34.38
    }
   },
@@ -682,18 +682,18 @@
   },
   {
    "month": "2026-11",
-   "us_net_cad": 4663966,
-   "ab_net_cad": 427000,
+   "us_net_cad": 4832645,
+   "ab_net_cad": 426029,
    "load_mwh": null,
    "gen_mwh": null,
    "peak_load_mw": null,
    "avg_load_mw": null,
    "load_hours": 0,
    "load_partial": false,
-   "us_net_mwh": 68093,
-   "ab_net_mwh": -13317,
-   "exp_mwh": 73106,
-   "imp_mwh": 18331,
+   "us_net_mwh": 70257,
+   "ab_net_mwh": -13368,
+   "exp_mwh": 75388,
+   "imp_mwh": 18498,
    "est": true
   }
  ],
@@ -1231,21 +1231,21 @@
   },
   {
    "date": "2026-11-03",
-   "us_net_mwh": 29393,
+   "us_net_mwh": 29189,
    "ab_net_mwh": -11217,
-   "us_net_cad": 2131779,
+   "us_net_cad": 2116971,
    "ab_net_cad": -156885,
    "midc_cad": 77.24,
    "pool_cad": 21.03
   },
   {
    "date": "2026-11-04",
-   "us_net_mwh": 8675,
-   "ab_net_mwh": -194,
-   "us_net_cad": 604883,
-   "ab_net_cad": 40520,
-   "midc_cad": 77.08,
-   "pool_cad": 38.76
+   "us_net_mwh": 11043,
+   "ab_net_mwh": -244,
+   "us_net_cad": 788370,
+   "ab_net_cad": 39549,
+   "midc_cad": 77.07,
+   "pool_cad": 36.34
   }
  ],
  "sources": {
@@ -1256,8 +1256,8 @@
   },
   "us_bch5": {
    "from": "2026-11-03T01:00:00-07:00",
-   "to": "2026-11-04T14:00:00-07:00",
-   "hours": 38
+   "to": "2026-11-04T18:00:00-07:00",
+   "hours": 42
   },
   "us_eia": {
    "from": "2026-11-01T00:00:00-07:00",
@@ -1271,26 +1271,26 @@
   },
   "ab_bch5": {
    "from": "2026-11-01T00:00:00-07:00",
-   "to": "2026-11-04T14:00:00-07:00",
-   "hours": 87
+   "to": "2026-11-04T18:00:00-07:00",
+   "hours": 91
   }
  },
  "live": {
   "bch": {
-   "t_utc": "2026-11-04T22:30:00+00:00",
-   "us_mw": 557.0,
-   "ab_mw": 96.0
+   "t_utc": "2026-11-05T02:35:00+00:00",
+   "us_mw": 574.0,
+   "ab_mw": -328.0
   },
   "pool_price": {
-   "t_utc": "2026-11-04T22:00:00+00:00",
-   "cad_mwh": 27.52
+   "t_utc": "2026-11-05T02:00:00+00:00",
+   "cad_mwh": 19.33
   },
   "aeso": {
-   "as_of_mpt": "2026-11-04 17:33",
-   "bc_to_ab_mw": 66,
+   "as_of_mpt": "2026-11-04 21:41",
+   "bc_to_ab_mw": -362,
    "ties_into_ab_mw": {
-    "British Columbia": 66,
-    "Montana": 94,
+    "British Columbia": -362,
+    "Montana": -18,
     "Saskatchewan": 1
    }
   }
@@ -1368,28 +1368,28 @@
    "mtd": {
     "label": "November 2026 to date",
     "base": {
-     "timing_cad": 1077846,
-     "timing_us_cad": -21370,
-     "timing_ab_cad": 1099216,
-     "spread_cad": 1040168,
-     "matched_mwh": 18331,
-     "avg_exp_price": 73.95,
-     "avg_imp_price": 17.21,
-     "net_cad": 5090966,
-     "imp_cad": 315430,
-     "exp_cad": 5406396
+     "timing_cad": 1060873,
+     "timing_us_cad": -27119,
+     "timing_ab_cad": 1087991,
+     "spread_cad": 1048876,
+     "matched_mwh": 18498,
+     "avg_exp_price": 74.0,
+     "avg_imp_price": 17.3,
+     "net_cad": 5258674,
+     "imp_cad": 319947,
+     "exp_cad": 5578620
     },
     "peak_only": {
-     "timing_cad": 1100643,
-     "timing_us_cad": 1427,
-     "timing_ab_cad": 1099216,
-     "spread_cad": 1188129,
-     "matched_mwh": 18331,
-     "avg_exp_price": 82.02,
-     "avg_imp_price": 17.21,
-     "net_cad": 5681065,
-     "imp_cad": 315430,
-     "exp_cad": 5996495
+     "timing_cad": 1089449,
+     "timing_us_cad": 1457,
+     "timing_ab_cad": 1087991,
+     "spread_cad": 1193197,
+     "matched_mwh": 18498,
+     "avg_exp_price": 81.8,
+     "avg_imp_price": 17.3,
+     "net_cad": 5846855,
+     "imp_cad": 319947,
+     "exp_cad": 6166802
     }
    },
    "prev_month": {
@@ -1422,28 +1422,28 @@
    "ytd": {
     "label": "2026 to date",
     "base": {
-     "timing_cad": 57049203,
-     "timing_us_cad": 17441564,
-     "timing_ab_cad": 39607639,
-     "spread_cad": 51378452,
-     "matched_mwh": 1492756,
+     "timing_cad": 57032229,
+     "timing_us_cad": 17435815,
+     "timing_ab_cad": 39596414,
+     "spread_cad": 51387160,
+     "matched_mwh": 1492923,
      "avg_exp_price": 50.2,
      "avg_imp_price": 15.96,
-     "net_cad": 419943575,
-     "imp_cad": 31146167,
-     "exp_cad": 451089742
+     "net_cad": 420111283,
+     "imp_cad": 31150683,
+     "exp_cad": 451261966
     },
     "peak_only": {
-     "timing_cad": 60078864,
-     "timing_us_cad": 20471225,
-     "timing_ab_cad": 39607639,
-     "spread_cad": 57038270,
-     "matched_mwh": 1492756,
-     "avg_exp_price": 54.52,
+     "timing_cad": 60067670,
+     "timing_us_cad": 20471255,
+     "timing_ab_cad": 39596414,
+     "spread_cad": 57043338,
+     "matched_mwh": 1492923,
+     "avg_exp_price": 54.53,
      "avg_imp_price": 16.59,
-     "net_cad": 457551088,
-     "imp_cad": 32375744,
-     "exp_cad": 489926832
+     "net_cad": 457716878,
+     "imp_cad": 32380261,
+     "exp_cad": 490097139
     }
    },
    "prev_year": {
@@ -1653,11 +1653,11 @@
    },
    {
     "month": "2026-11",
-    "timing_cad": 1077846,
-    "spread_cad": 1040168,
-    "timing_cad_peak_only": 1100643,
-    "spread_cad_peak_only": 1188129,
-    "net_cad_peak_only": 5681065
+    "timing_cad": 1060873,
+    "spread_cad": 1048876,
+    "timing_cad_peak_only": 1089449,
+    "spread_cad_peak_only": 1193197,
+    "net_cad_peak_only": 5846855
    }
   ]
  },
@@ -2158,11 +2158,11 @@
   },
   "bch5": {
    "label": "BC Hydro 5-min real-time page",
-   "t": "2026-11-04T22:30:00+00:00"
+   "t": "2026-11-05T02:35:00+00:00"
   },
   "pool": {
    "label": "AESO pool price",
-   "t": "2026-11-04T23:00:00+00:00"
+   "t": "2026-11-05T03:00:00+00:00"
   },
   "load": {
    "label": "BC load (BC Hydro balancing authority, hourly)",
