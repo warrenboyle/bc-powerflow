@@ -1,0 +1,12 @@
+{
+ "_how_to": "BC Hydro peak events, edited by hand. One object per event. date = BC calendar day (YYYY-MM-DD). start/end = BC clock time (America/Vancouver, permanent UTC-7 from Nov 2026), 24-hour HH:MM on the hour; end is exclusive and may be 24:00. Example: start 17:00, end 21:00 covers 5-9 p.m. = hour-beginning 17,18,19,20 = hour-ending HE18,HE19,HE20,HE21 (BC Hydro's load files and the site's hourly data use these hours). source = where the event notice came from; note = free text. Keep the list in any order; the next data run picks up changes.",
+ "events": [
+  {
+   "date": "2026-11-19",
+   "start": "17:00",
+   "end": "21:00",
+   "source": "BC Hydro Peak Saver email to Warren",
+   "note": "First Peak Saver event: 'reduce your electricity use by 20% between 5 p.m. and 9 p.m.'"
+  }
+ ]
+}

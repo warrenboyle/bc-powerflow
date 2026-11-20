@@ -26,6 +26,7 @@ BC has been on permanent UTC−7 since November 2026 (BC Reg. 20/2026). BC-local
   - *Gain from better-timed trades* (`timing_cad`) = Σ hourly flow × (hourly price − that tie's simple average price for the calendar month). Alberta has true hourly prices. On the US tie Mid-C is one price per day, so this reflects day-to-day timing plus the assumed peak/off-peak split, not hour-to-hour timing.
   - *Margin on matched import/export volume* (`spread_cad`) = (flow-weighted avg export price − flow-weighted avg import price) × min(export MWh, import MWh), per month, both ties pooled.
   - Both are computed per calendar month; rolling totals are sums of months, and there is a `monthly` series.
+- **Peak events** (`peak_events`): see [Peak events](#peak-events).
 - **BC Hydro reported figures – different measures** (`reported_context`): static BC Hydro figures for FY2025 and FY2026 (imports, exports, net cost, consolidated trade revenue, and Powerex trade-income ranges), with source links, beside this site's FY2026 numbers. These are **different measures, not like-for-like**: tie-line flows include Powerex trading and other non-purchase flows valued at hub prices, while BC Hydro's reported trade is its domestic purchases and sales at Powerex transfer prices. The price ratios in `different_measures_fy2026` are descriptive only.
   - Sources: [BC Hydro 2025/26 Annual Service Plan Report](https://bcbudget.gov.bc.ca/Annual_Reports/2025_2026/pdf/agency/bchydro.pdf), [2024/25 report](https://bcbudget.gov.bc.ca/Annual_Reports/2024_2025/pdf/agency/bchydro.pdf), and the [2025/26 financial statements](https://www2.gov.bc.ca/assets/gov/british-columbians-our-governments/government-finances/public-accounts/2025-26/sup-e/bc-hydro-fs-2025-26.pdf).
 
@@ -40,6 +41,21 @@ BC has been on permanent UTC−7 since November 2026 (BC Reg. 20/2026). BC-local
 - Peaks are highest **hourly averages**. No public instantaneous/5-min BC load or generation exists (the 5-min page has tie flows only), and EIA-930 has no BCHA demand/generation.
 - `python fetch.py --load-history` (one-time) writes annual summaries for 2002-2024 to `docs/load_annual.csv` for record context.
 - Load is not valued in C$; it appears on the cards and as a line in the Volume (GWh) chart in the All interties view only.
+
+## Peak events
+
+The **Peak events** section compares trade during BC Hydro peak events (e.g. Peak Saver "reduce your use between 5 and 9 p.m." days) with ordinary days, to help judge whether an event lines up with grid need (high BC load) or with trading (ordinary load, exports and prices up). It does not draw a conclusion.
+
+- **Event list:** `docs/events.json`, edited by hand. Each event: `date` (BC calendar day), `start`, `end` (BC clock time, 24-hour `HH:MM` on the hour, end exclusive, `24:00` allowed), `source`, `note`. `start 17:00, end 21:00` = 5–9 p.m. = hour-beginning 17–20 = **hour-ending HE18–HE21**, the hour labels BC Hydro's load files use.
+- **To add an event:** append an object to `events` in `docs/events.json` (or edit it on GitHub), commit to `main`; the next data run picks it up. A future date shows as "upcoming". Bad rows are logged and skipped, and a broken file never blocks the data update.
+- **Baseline method:** the same BC clock hours on the **previous 10 weekdays (Mon–Fri)** that were not BC statutory holidays and not themselves event days (weekend/holiday events: the previous 4 weekend days/holidays). This "prior 10 like days" approach is the usual demand-response baseline: recent enough to match season, daylight and weather, and it leaves out other events. A baseline day counts for a measure only if it has every window hour for that measure, and the number of days used is published. Baseline max load = average of each day's highest window hour.
+- **Per event** (`peak_events` in `docs/dashboard.json`), for the event window and the baseline, with event − baseline deltas:
+  - BC load: average and max MW, max as % of the highest hourly load in the 365 days before the event day, and the share of those 365 days' hours below the event's peak hour.
+  - Per tie (US, AB) and both: average net export MW, net MWh, average hub price (AESO hourly; Mid-C is one daily price with the off-peak factor) and estimated value in C$.
+  - Whole event day value vs baseline days (while the day is in progress, against the same hours on baseline days).
+  - The event day hour by hour (load, flows, prices, value, plus the baseline's average for each hour) for the chart, with the window shaded.
+- **Pending data:** BC Hydro posts hourly load each business day for the previous day(s), so event load shows `pending` (status `pending`/`partial`, with hours available) for a day or more; deltas appear only once every window hour is in. Mid-C is published days late, so the US price for recent events is carried forward (flagged "partly est."). The newest AESO hours may also be carried forward up to 3 hours.
+- Same caveats as the rest of the site: market-price estimates, not Powerex settlements; the US tie has one Mid-C price per day, so hour-to-hour timing inside an event only means something on the Alberta tie.
 
 ## Data quality
 
