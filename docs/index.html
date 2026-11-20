@@ -45,6 +45,13 @@ a{color:var(--us)}
 #thru table{border-collapse:collapse;margin-top:6px}#thru td{padding:2px 10px 2px 0;vertical-align:top}
 .ld{font-size:.78rem;margin-top:6px;color:#374151}.ld b{font-weight:600}
 .fl .lrow{color:var(--load)}
+.ev td:first-child{min-width:175px}.ev tr.sel td{background:#f5f3ff}.ev tr[data-i]{cursor:pointer}
+.pend{font-size:.68rem;font-weight:600;padding:1px 7px;border-radius:99px;background:#e5e7eb;color:#374151;white-space:nowrap}
+.guide{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:.84rem;color:#374151;margin-bottom:10px}
+#evchartw{height:360px;margin-top:10px}
+.evm{display:none}.evc{margin-bottom:8px;cursor:pointer}.evc.sel{border-color:#a78bfa}.evr{display:flex;justify-content:space-between;gap:10px;font-size:.84rem;padding:5px 0;border-top:1px solid var(--line);text-align:right}.evr>span:first-child{text-align:left;flex:0 0 38%}
+#evdet td:first-child{min-width:150px}
+@media (max-width:640px){.evm{display:block}.evt{display:none}#evchartw{height:440px}}
 footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
 </style></head>
 <body><main>
@@ -61,6 +68,9 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
 <div class="bar" style="margin-top:22px"><h2 style="margin:0">Monthly</h2>
  <div class="tabs" id="mode"><button data-m="cad" class="on">Net value (C$)</button><button data-m="gwh">Volume (GWh)</button></div></div>
 <div class="chart"><canvas id="main"></canvas></div>
+
+<h2 id="peak-events">Peak events</h2>
+<div id="ev"></div>
 
 <details id="loadsec"><summary>Load &amp; generation (BC internal demand)</summary><div id="lg"></div></details>
 <details id="reported"><summary>BC Hydro reported figures (fiscal years) – different measures</summary><div id="ctx"></div></details>
@@ -246,7 +256,81 @@ function loadSec(d){
  <li><b>Peaks are hourly averages.</b> ${X.instantaneous}</li>${chk}
  <li>Load factor = average ÷ peak hourly load. "Load met by net imports" sums only hours when BC was a net importer. Data: <a href="load_hourly.csv">load_hourly.csv</a>.</li></ul>`;
 }
+
+// ---- Peak events (BC Hydro Peak Saver etc.; list in events.json)
+const SG=(n,f)=>n==null?'–':(n>0?'+':'')+f(n);
+const MWs=n=>n==null?'–':(n<0?'−':'')+Math.abs(Math.round(n)).toLocaleString()+' MW';
+const PEND='<span class="pend" title="Not published yet">pending</span>';
+const part=(t,n)=>t.status==='partial'?` <span class="pend" title="${t.hours_available} of ${n} event hours have data so far">${t.hours_available}/${n} h</span>`:'';
+let evSel=0,evChart;
+function peakSec(d){
+ const X=d.peak_events,el=document.getElementById('ev');
+ if(!X){el.innerHTML=`<div class="guide">Event figures appear after the next data update.</div>`;return;}
+ if(!X.events||!X.events.length){el.innerHTML=`<div class="guide">No peak events listed yet. Add them to <a href="https://github.com/warrenboyle/bc-powerflow/blob/main/docs/events.json">events.json</a>.</div>`;return;}
+ const E=X.events,cardsM=[];
+ const win=e=>{const a=+e.start.slice(0,2),b=+e.end.slice(0,2),f=h=>{const x=h%24,ap=x<12?'a.m.':'p.m.';return (x%12||12)+' '+ap;};return `${f(a)} – ${f(b)}`;};
+ const rows=E.map((e,i)=>{
+  const day=new Date(e.date+'T12:00:00Z').toLocaleDateString('en-CA',{timeZone:'UTC',weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  const head=`<td><b>${day}</b><br><span class="k">${win(e)} · HE${e.hour_ending[0]}–${e.hour_ending.slice(-1)[0]}</span></td>`;
+  if(e.status==='upcoming')return `<tr data-i="${i}">${head}<td colspan="5" class="k">Upcoming</td></tr>`;
+  const n=e.hour_ending.length,l=e.load,t=e.trade.total,ab=e.trade.ab;
+  const ld=l.status==='pending'?`${PEND}<br><span class="k">baseline ${MW(l.baseline.avg_mw)} avg</span>`
+   :`${MW(l.event.avg_mw)} avg · ${MW(l.event.max_mw)} max${part(l,n)}<br><span class="k">baseline ${MW(l.baseline.avg_mw)} / ${MW(l.baseline.max_mw)}${l.delta.avg_mw!=null?` · Δ ${SG(l.delta.avg_mw,MWs)}`:''}</span>`;
+  const pk=l.event.max_pct_of_365d_peak!=null?`${PCT(l.event.max_pct_of_365d_peak)}<br><span class="k">higher than ${PCT(l.event.max_pctile_of_365d_hours)} of hours</span>`:`${PEND}<br><span class="k">baseline ${PCT(l.baseline.max_pct_of_365d_peak)}</span>`;
+  const nx=t.status==='pending'?PEND:`${MWs(t.event.avg_net_mw)}${part(t,n)}<br><span class="k">baseline ${MWs(t.baseline.avg_net_mw)}${t.delta.avg_net_mw!=null?` · Δ ${SG(t.delta.avg_net_mw,MWs)}`:''}</span>`;
+  const pr=ab.event.avg_price_cad==null?PEND:`${P(ab.event.avg_price_cad)}${ab.price_est_hours?` <span class="badge" title="${ab.price_est_hours} event hour(s) use the last published pool price (carried forward) until AESO posts the hour">partly est.</span>`:''}<br><span class="k">baseline ${P(ab.baseline.avg_price_cad)}</span>`;
+  const est=(e.trade.us.est_hours||e.trade.ab.est_hours)?` <span class="badge" title="Some event hours use a carried-forward price (Mid-C is published days late) or estimated flows">partly est.</span>`:'';
+  const vl=t.status==='pending'?PEND:`<b class="${t.event.value_cad>=0?'pos':'neg'}">${C(t.event.value_cad)}</b>${est}${part(t,n)}<br><span class="k">baseline ${C(t.baseline.value_cad)}${t.delta.value_cad!=null?` · Δ ${SG(t.delta.value_cad,C)}`:''}</span>`;
+  cardsM.push(`<div class="card evc${i===evSel?' sel':''}" data-i="${i}"><h3>${day} <span class="k">${win(e)}</span></h3>${[['BC load',ld],['Event peak hour, % of 365-day peak',pk],['Net export, both ties',nx],['Alberta price',pr],['Trade value, event hours (est.)',vl]].map(([a,b])=>`<div class="evr"><span class="k">${a}</span><span>${b}</span></div>`).join('')}</div>`);
+  return `<tr data-i="${i}" class="${i===evSel?'sel':''}">${head}<td>${ld}</td><td>${pk}</td><td>${nx}</td><td>${pr}</td><td>${vl}</td></tr>`;}).join('');
+ const e=E[evSel];
+ let det='';
+ if(e&&e.status!=='upcoming'){
+  const n=e.hour_ending.length,tr=e.trade,dt_=e.day_total;
+  const r=(lab,t,price)=>`<tr><td>${lab}</td><td>${t.status==='pending'?PEND:MWs(t.event.avg_net_mw)+part(t,n)}</td><td>${MWs(t.baseline.avg_net_mw)}</td><td>${t.status==='pending'?'–':Math.round(t.event.net_mwh).toLocaleString()+' MWh'}</td><td>${t.baseline.net_mwh==null?'–':Math.round(t.baseline.net_mwh).toLocaleString()+' MWh'}</td><td>${price}</td><td>${t.status==='pending'?'–':C(t.event.value_cad)}</td><td>${C(t.baseline.value_cad)}</td><td>${SG(t.delta.value_cad,C)}</td></tr>`;
+  det=`<div class="wrap" id="evdet"><table class="ctx">
+  <tr><th>${new Date(e.date+'T12:00:00Z').toLocaleDateString('en-CA',{timeZone:'UTC',month:'short',day:'numeric'})}, event hours</th><th>Net export<br><span class="k">event avg</span></th><th>Net export<br><span class="k">baseline avg</span></th><th>Energy<br><span class="k">event</span></th><th>Energy<br><span class="k">baseline</span></th><th>Hub price<br><span class="k">event / baseline</span></th><th>Value<br><span class="k">event</span></th><th>Value<br><span class="k">baseline</span></th><th>Value<br><span class="k">Δ</span></th></tr>
+  ${r('BC ⇄ US <span class="k">(Mid-C, daily price)</span>',tr.us,`${P(tr.us.event.avg_price_cad)} / ${P(tr.us.baseline.avg_price_cad)}${tr.us.price_est_hours?' <span class="badge" title="Mid-C for this day is not published yet; the last published day is carried forward">carried fwd</span>':''}`)}
+  ${r('BC ⇄ Alberta <span class="k">(AESO, hourly price)</span>',tr.ab,`${P(tr.ab.event.avg_price_cad)} / ${P(tr.ab.baseline.avg_price_cad)}${tr.ab.price_est_hours?` <span class="badge" title="${tr.ab.price_est_hours} hour(s) carried forward until AESO posts">partly est.</span>`:''}`)}
+  ${r('<b>Both ties</b>',tr.total,'')}
+  </table></div>
+  <div class="ld">Whole event day${dt_.status==='partial'?` so far (${dt_.hours} of 24 h)`:''}: <b class="${dt_.event_day_value_cad>=0?'pos':'neg'}">${C(dt_.event_day_value_cad)}</b> · ${dt_.status==='partial'?`baseline days, same hours: ${C(dt_.baseline_same_hours_value_cad)} <span class="k">(full-day baseline ${C(dt_.baseline_day_value_cad)}, ${dt_.baseline_days} days)</span>`:`baseline days: ${C(dt_.baseline_day_value_cad)} <span class="k">(${dt_.baseline_days} days)</span>`}</div>
+  <div class="ld k">Baseline days: ${e.baseline_days.map(x=>new Date(x+'T12:00:00Z').toLocaleDateString('en-CA',{timeZone:'UTC',month:'short',day:'numeric'})).join(', ')} (load: ${e.load.baseline.days} of them posted). Load % of peak uses the highest hour in the prior 365 days: ${MW(e.load.peak_365d_mw)} (${HR(e.load.peak_365d_t)}).${e.source?` Source: ${e.source}.`:''}${e.note?` ${e.note}`:''}</div>
+  <div class="chart" id="evchartw"><canvas id="evchart"></canvas></div>`;
+ }
+ el.innerHTML=`<div class="guide"><b>How to read this.</b> Each BC Hydro peak event is compared with the same hours on ordinary recent weekdays (the baseline). If BC load during the event is ordinary for the season but exports and prices jump, the event lines up with trading. If load is near its yearly peak, it lines up with grid need. Both can be true at once.</div>
+ <div class="evm">${cardsM.join('')}</div><div class="wrap evt"><table class="ctx ev"><tr><th>Event (BC time)</th><th>BC load<br><span class="k">event vs baseline</span></th><th>Event peak hour<br><span class="k">% of 365-day peak</span></th><th>Net export, both ties<br><span class="k">avg MW, + = BC exporting</span></th><th>Alberta price<br><span class="k">avg C$/MWh</span></th><th>Trade value, both ties<br><span class="k">event hours, est.</span></th></tr>${rows}</table></div>
+ ${det}
+ <ul class="notes" style="margin-top:8px">
+ <li><b>Baseline:</b> ${X.baseline_method}</li>
+ <li>Trade values are market-price estimates (MWh × hub price), not Powerex or BC Hydro settlements. The US tie has one Mid-C price per day, so hour-to-hour timing inside an event only means something on the Alberta tie.</li>
+ <li>BC Hydro posts hourly load each business day for the previous day, so event load shows <i>pending</i> for a day or more. Newest flows come from BC Hydro's real-time page (provisional) until official data arrives.</li>
+ <li>Events are listed by hand in <a href="https://github.com/warrenboyle/bc-powerflow/blob/main/docs/events.json">events.json</a>. Hour-ending (HE) 18 = 5–6 p.m. BC time.</li></ul>`;
+ el.querySelectorAll('[data-i]').forEach(tr=>tr.onclick=()=>{evSel=+tr.dataset.i;peakSec(d);});
+ if(e&&e.hourly)evHourly(e);
+}
+function evHourly(e){
+ (Chart.getChart('evchart')||evChart)?.destroy();
+ const H=e.hourly,lab=H.map(h=>'HE'+h.he),i0=H.findIndex(h=>h.in_event),i1=H.length-1-[...H].reverse().findIndex(h=>h.in_event);
+ const shade={id:'shade',beforeDraw(c){const x=c.scales.x,a=c.chartArea;if(i0<0)return;const w=x.getPixelForValue(1)-x.getPixelForValue(0);
+  const l=x.getPixelForValue(i0)-w/2,r=x.getPixelForValue(i1)+w/2;const g=c.ctx;g.save();g.fillStyle='rgba(124,58,237,.09)';g.fillRect(l,a.top,r-l,a.bottom-a.top);
+  g.fillStyle='#7c3aed';g.font='600 11px system-ui';g.fillText('event',l+4,a.top+12);g.restore();}};
+ const noLoad=H.every(h=>h.load_mw==null);
+ evChart=new Chart(document.getElementById('evchart'),{type:'bar',plugins:[shade],data:{labels:lab,datasets:[
+  {type:'bar',label:'Net export, both ties (MW)',data:H.map(h=>h.net_mw),backgroundColor:H.map(h=>h.net_mw>=0?'#0f8a5f':'#c2410c'),yAxisID:'y',order:3},
+  {type:'line',label:'Baseline net export (MW)',data:H.map(h=>h.base_net_mw),borderColor:'#6b7280',borderDash:[4,3],pointRadius:0,borderWidth:1.5,yAxisID:'y',order:2},
+  {type:'line',label:noLoad?'BC load (MW) – pending':'BC load (MW)',data:H.map(h=>h.load_mw),borderColor:'#0e7490',backgroundColor:'#0e7490',pointRadius:2,tension:.2,yAxisID:'yl',order:1},
+  {type:'line',label:'Baseline BC load (MW)',data:H.map(h=>h.base_load_mw),borderColor:'#67b7c7',borderDash:[5,4],pointRadius:0,borderWidth:1.5,yAxisID:'yl',order:1},
+  {type:'line',label:'Alberta pool price (C$/MWh)',data:H.map(h=>h.ab_price_cad),borderColor:'#d97706',backgroundColor:'#d97706',pointRadius:H.map(h=>h.ab_price_est?4:2),pointStyle:H.map(h=>h.ab_price_est?'rectRot':'circle'),tension:.2,yAxisID:'y2',order:0},
+  {type:'line',label:'Baseline Alberta price',data:H.map(h=>h.base_ab_price_cad),borderColor:'#f5b460',borderDash:[2,3],pointRadius:0,borderWidth:1.5,yAxisID:'y2',order:0,hidden:true}]},
+  options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+  scales:{x:{title:{display:true,text:'Hour ending, BC time ('+new Date(e.date+'T12:00:00Z').toLocaleDateString('en-CA',{timeZone:'UTC',month:'short',day:'numeric'})+')'}},yl:{stack:'v',stackWeight:1,offset:true,beginAtZero:false,grace:'10%',title:{display:true,text:'BC load MW'},ticks:{callback:v=>v.toLocaleString()}},y:{stack:'v',stackWeight:1,offset:true,title:{display:true,text:'Net export MW'},ticks:{callback:v=>v.toLocaleString()}},y2:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'C$/MWh'}}},
+  plugins:{legend:{labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{title:c=>HR(H[c[0].dataIndex].t,false)+(H[c[0].dataIndex].in_event?' (event)':''),
+   label:c=>{const v=c.raw;if(v==null)return c.dataset.label+': '+(c.dataset.label.startsWith('BC load')?'pending':'n/a');const h=H[c.dataIndex];
+    return c.dataset.label+': '+(c.dataset.yAxisID==='y2'?P(v)+(c.datasetIndex===4&&h.ab_price_est?' (carried forward)':''):Math.round(v).toLocaleString());},
+   afterBody:c=>{const h=H[c[0].dataIndex];return h.value_cad!=null?'Trade value (est.): '+C(h.value_cad):'';}}}}}});
+}
 let staticDone=false;
-const _r=render;render=function(){_r();if(!staticDone){staticDone=true;document.getElementById('ctx').innerHTML=ctx(data);document.getElementById('thrut').innerHTML=thru(data);document.getElementById('notes').innerHTML=notes(data);document.getElementById('lg').innerHTML=loadSec(data);
+const _r=render;render=function(){_r();if(!staticDone){staticDone=true;document.getElementById('ctx').innerHTML=ctx(data);document.getElementById('thrut').innerHTML=thru(data);document.getElementById('notes').innerHTML=notes(data);document.getElementById('lg').innerHTML=loadSec(data);peakSec(data);
  document.getElementById('foot').innerHTML=`Data: <a href="hourly.csv">hourly.csv</a> · <a href="daily_prices.csv">daily_prices.csv</a> · <a href="source_compare.csv">source_compare.csv</a> · <a href="load_hourly.csv">load_hourly.csv</a> · <a href="dashboard.json">dashboard.json</a> · <a href="https://github.com/warrenboyle/bc-powerflow">code</a><br>Hourly data completeness: ${completeness(data)} · Times in BC time (UTC−7)`;}};
 </script></body></html>

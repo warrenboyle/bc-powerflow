@@ -811,6 +811,206 @@ def data_through(h, prices, live, load=None):
     }
 
 
+# ---------------------------------------------------------------- peak events
+EVENTS = f"{D}/events.json"
+EVENT_BASE_DAYS = 10  # baseline: this many previous non-event weekdays (non-holiday), same clock hours
+
+
+def bc_holidays(years):
+    """BC statutory holidays (weekday observance). Used only to keep holidays out of the event baseline."""
+    out = set()
+    for y in years:
+        a = y % 19; b, c = divmod(y, 100); d, e = divmod(b, 4); g = (8 * b + 13) // 25
+        h = (19 * a + b - d - g + 15) % 30; i, k = divmod(c, 4); l = (32 + 2 * e + 2 * i - h - k) % 7
+        m = (a + 11 * h + 19 * l) // 433; mo = (h + l - 7 * m + 90) // 25; dy = (h + l - 7 * m + 33 * mo + 19) % 32
+        easter = pd.Timestamp(y, mo, dy)
+        nth_mon = lambda month, n: pd.Timestamp(y, month, 1) + pd.Timedelta(days=(0 - pd.Timestamp(y, month, 1).dayofweek) % 7 + 7 * (n - 1))
+        fixed = [pd.Timestamp(y, 1, 1), pd.Timestamp(y, 7, 1), pd.Timestamp(y, 9, 30), pd.Timestamp(y, 11, 11), pd.Timestamp(y, 12, 25)]
+        moving = [nth_mon(2, 3), easter - pd.Timedelta(days=2), pd.Timestamp(y, 5, 24) - pd.Timedelta(days=pd.Timestamp(y, 5, 24).dayofweek),
+                  nth_mon(8, 1), nth_mon(9, 1), nth_mon(10, 2)]
+        for x in fixed:  # weekend holiday -> next Monday
+            out.add((x + pd.Timedelta(days=(7 - x.dayofweek) % 7) if x.dayofweek >= 5 else x).date())
+        out.update(x.date() for x in moving)
+    return out
+
+
+def load_events(path=EVENTS):
+    """events.json -> list of dicts with parsed date and BC-local hour-beginning list. Bad rows are logged and skipped."""
+    if not os.path.exists(path):
+        return []
+    try:
+        j = json.load(open(path))
+    except Exception as ex:
+        log("events.json unreadable:", ex)
+        return []
+    out = []
+    for e in (j.get("events", []) if isinstance(j, dict) else j):
+        try:
+            d = dt.date.fromisoformat(str(e["date"]))
+            sh, sm = map(int, str(e["start"]).split(":")); eh, em = map(int, str(e["end"]).split(":"))
+            if sm or em or not (0 <= sh < eh <= 24):
+                raise ValueError("start/end must be on the hour with start < end <= 24:00")
+            out.append({**e, "_d": d, "_hb": list(range(sh, eh))})
+        except Exception as ex:
+            log("events.json: skipping", e, ex)
+    return sorted(out, key=lambda x: (x["_d"], x["_hb"][0]), reverse=True)
+
+
+def _r(x, nd=0):
+    return None if x is None or pd.isna(x) else (round(float(x), nd) if nd else int(round(float(x))))
+
+
+def _win(sub, hb):
+    """Metrics for one day's window. sub = compute() rows for one BC day; hb = BC hour-beginning list."""
+    w = sub[sub["_hb"].isin(hb)]
+    n = len(hb)
+    L = w["load_mw"].dropna()
+    o = {"hours": n, "load_hours": int(len(L)),
+         "avg_load_mw": float(L.mean()) if len(L) else None, "max_load_mw": float(L.max()) if len(L) else None}
+    tot_ok = True
+    for k in ("us", "ab"):
+        ok = w[f"{k}_ok"]
+        net_mwh = float((w[f"{k}_exp_mwh"] - w[f"{k}_imp_mwh"]).sum())
+        pr = w[f"{k}_price"].dropna()
+        o[k] = {"flow_hours": int(ok.sum()), "est_hours": int(w[f"{k}_est"].sum()), "prov_hours": int(w[f"{k}_prov"].sum()),
+                "price_est_hours": int(w[f"{k}_price_est"].reindex(pr.index).fillna(False).astype(bool).sum()),
+                "avg_net_mw": float(w.loc[ok, f"{k}_mw"].astype(float).mean()) if ok.any() else None,
+                "net_mwh": net_mwh if ok.any() else None,
+                "value_cad": float((w[f"{k}_exp_cad"] - w[f"{k}_imp_cad"]).sum()) if ok.any() else None,
+                "avg_price_cad": float(pr.mean()) if len(pr) else None}
+        tot_ok &= int(ok.sum()) == n
+    both = w["us_ok"] & w["ab_ok"]
+    o["total"] = {"flow_hours": int(both.sum()),
+                  "avg_net_mw": float((w.loc[both, "us_mw"].astype(float) + w.loc[both, "ab_mw"].astype(float)).mean()) if both.any() else None,
+                  "net_mwh": (o["us"]["net_mwh"] or 0) + (o["ab"]["net_mwh"] or 0) if both.any() else None,
+                  "value_cad": (o["us"]["value_cad"] or 0) + (o["ab"]["value_cad"] or 0) if both.any() else None}
+    return o
+
+
+def _status(have, need):
+    return "complete" if have >= need else ("partial" if have else "pending")
+
+
+def event_block(df):
+    """Per event: event-window metrics vs a baseline of the previous EVENT_BASE_DAYS non-event, non-holiday weekdays
+    (same BC clock hours), plus the event day hour by hour. Values are market-price estimates like the rest of the site."""
+    evs = load_events()
+    if not evs:
+        return {"events": []}
+    loc = df["local"]
+    df = df.assign(_day=loc.dt.date, _hb=loc.dt.hour)
+    days = dict(tuple(df.groupby("_day")))
+    ev_days = {e["_d"] for e in evs}
+    hol = bc_holidays(range(min(ev_days).year - 1, max(ev_days).year + 1))
+    today = pd.Timestamp.now(tz=TZ).date()
+    L_all = df["load_mw"].dropna()
+    out = []
+    for e in evs:
+        d, hb, n = e["_d"], e["_hb"], len(e["_hb"])
+        t0 = pd.Timestamp(d).tz_localize(TZ)
+        rec = {k: e.get(k) for k in ("date", "start", "end", "source", "note")}
+        rec.update({"hour_ending": [h + 1 for h in hb], "weekday": t0.strftime("%A"),
+                    "window_start": (t0 + pd.Timedelta(hours=hb[0])).isoformat(), "window_end": (t0 + pd.Timedelta(hours=hb[-1] + 1)).isoformat()})
+        if d > today:
+            rec["status"] = "upcoming"; out.append(rec); continue
+        # baseline day set: weekday events -> previous non-event, non-holiday Mon-Fri; weekend/holiday events -> previous
+        # non-event weekend days/holidays (same idea, smaller pool: 4 days)
+        weekendlike = lambda x: x.weekday() >= 5 or x in hol
+        want, need = weekendlike(d), (4 if weekendlike(d) else EVENT_BASE_DAYS)
+        base, x = [], d
+        while len(base) < need and (d - x).days < 120:
+            x -= dt.timedelta(days=1)
+            if x not in ev_days and weekendlike(x) == want:
+                base.append(x)
+        ev = _win(days.get(d, df.iloc[:0]), hb)
+        bw = [(b, _win(days[b], hb)) for b in base if b in days]
+        # trailing-365-day load peak before the event day (hourly average); event-peak percentile among those hours
+        L365 = L_all[(L_all.index >= (t0 - pd.Timedelta(days=365)).tz_convert("UTC")) & (L_all.index < t0.tz_convert("UTC"))]
+        pk = float(L365.max()) if len(L365) else None
+        pct = lambda v: _r(v / pk * 100, 1) if v is not None and pk else None
+
+        def bavg(get, full_only, src=None):
+            vals = [get(m) for b, m in (bw if src is None else src) if full_only(m)]
+            vals = [v for v in vals if v is not None]
+            return (sum(vals) / len(vals) if vals else None), len(vals)
+        lf = lambda m: m["load_hours"] == n
+        b_avg_load, nl = bavg(lambda m: m["avg_load_mw"], lf)
+        b_max_load, _ = bavg(lambda m: m["max_load_mw"], lf)
+        load = {"status": _status(ev["load_hours"], n), "hours_available": ev["load_hours"],
+                "event": {"avg_mw": _r(ev["avg_load_mw"]), "max_mw": _r(ev["max_load_mw"]), "max_pct_of_365d_peak": pct(ev["max_load_mw"]),
+                          "max_pctile_of_365d_hours": _r((L365 < ev["max_load_mw"]).mean() * 100, 1) if ev["max_load_mw"] is not None and len(L365) else None},
+                "baseline": {"avg_mw": _r(b_avg_load), "max_mw": _r(b_max_load), "max_pct_of_365d_peak": pct(b_max_load), "days": nl},
+                "peak_365d_mw": _r(pk), "peak_365d_t": _t(L365.idxmax()) if len(L365) else None}
+        load["delta"] = {"avg_mw": _r(ev["avg_load_mw"] - b_avg_load) if ev["load_hours"] == n and b_avg_load is not None else None,
+                         "max_mw": _r(ev["max_load_mw"] - b_max_load) if ev["load_hours"] == n and b_max_load is not None else None}
+        if 0 < ev["load_hours"] < n:  # partial load: no like-for-like delta yet
+            load["note"] = f"{ev['load_hours']} of {n} event hours posted so far"
+        rec["load"] = load
+        ties = {}
+        for k in ("us", "ab", "total"):
+            ff = lambda m, k=k: m[k]["flow_hours"] == n
+            em = ev[k]; full = em["flow_hours"] == n
+            t = {"status": _status(em["flow_hours"], n), "hours_available": em["flow_hours"], "event": {}, "baseline": {}, "delta": {}}
+            for f, nd in (("avg_net_mw", 0), ("net_mwh", 0), ("value_cad", 0)) + ((("avg_price_cad", 2),) if k != "total" else ()):
+                bv, nb = bavg(lambda m, f=f, k=k: m[k][f], ff if f != "avg_price_cad" else (lambda m, k=k: m[k]["avg_price_cad"] is not None))
+                t["event"][f] = _r(em[f], nd)
+                t["baseline"][f] = _r(bv, nd)
+                t["delta"][f] = _r(em[f] - bv, nd) if (full or f == "avg_price_cad") and em[f] is not None and bv is not None else None
+                t["baseline"]["days"] = nb if f == "value_cad" else t["baseline"].get("days", nb)
+            if k != "total":
+                t.update({"est_hours": em["est_hours"], "prov_hours": em["prov_hours"], "price_est_hours": em["price_est_hours"]})
+            ties[k] = t
+        ties["us"]["price_note"] = ("Mid-C is one day-ahead peak price per day (off-peak hours at the assumed factor), so the US "
+                                    "price cannot show what happened hour to hour inside the window.")
+        ties["ab"]["price_note"] = "AESO hourly pool price (C$), a true hourly price."
+        rec["trade"] = ties
+        # whole event day vs baseline whole days (complete days only)
+        dsub = days.get(d, df.iloc[:0])
+        dw = _win(dsub, list(range(24)))
+        bwd = [(b, _win(days[b], list(range(24)))) for b in base if b in days]
+        bday, nbd = bavg(lambda m: m["total"]["value_cad"], lambda m: m["total"]["flow_hours"] >= 23, bwd)
+        have = sorted(int(x) for x in dsub.loc[dsub["us_ok"] & dsub["ab_ok"], "_hb"])
+        bsame, nbs = bavg(lambda m: m["total"]["value_cad"], lambda m: m["total"]["flow_hours"] == len(have),
+                          [(b, _win(days[b], have)) for b in base if b in days]) if have else (None, 0)
+        rec["day_total"] = {"event_day_value_cad": _r(dw["total"]["value_cad"]), "hours": dw["total"]["flow_hours"],
+                            "baseline_day_value_cad": _r(bday), "baseline_days": nbd,
+                            "baseline_same_hours_value_cad": _r(bsame), "baseline_same_hours_days": nbs,
+                            "status": "complete" if dw["total"]["flow_hours"] >= 23 and d < today else "partial"}
+        rec["baseline_days"] = [str(b) for b in base]
+        # event day hour by hour, with the baseline's average for the same hour
+        bh = pd.concat([days[b] for b in base if b in days]) if any(b in days for b in base) else df.iloc[:0]
+        bg = bh.groupby("_hb")
+        bl, bn, bp = bg["load_mw"].mean(), bg.apply(lambda g: (g["us_mw"].astype(float) + g["ab_mw"].astype(float)).mean()), bg["ab_price"].mean()
+        hrs = []
+        for h in range(24):
+            r = dsub[dsub["_hb"] == h]
+            r = r.iloc[0] if len(r) else None
+            g = lambda c: (None if r is None or pd.isna(r[c]) else r[c])
+            us, ab = g("us_mw"), g("ab_mw")
+            val = None
+            if r is not None and (r["us_ok"] or r["ab_ok"]):
+                val = sum(float(r[f"{k}_exp_cad"] - r[f"{k}_imp_cad"]) for k in ("us", "ab") if r[f"{k}_ok"])
+            hrs.append({"he": h + 1, "t": (t0 + pd.Timedelta(hours=h)).isoformat(), "in_event": h in hb,
+                        "load_mw": _r(g("load_mw")), "us_mw": _r(us), "ab_mw": _r(ab),
+                        "net_mw": _r(float(us) + float(ab)) if us is not None and ab is not None else None,
+                        "ab_price_cad": _r(g("ab_price"), 2), "ab_price_est": bool(r["ab_price_est"]) if r is not None and g("ab_price") is not None else None,
+                        "us_price_cad": _r(g("us_price"), 2), "value_cad": _r(val),
+                        "base_load_mw": _r(bl.get(h)), "base_net_mw": _r(bn.get(h)) if len(bn) else None, "base_ab_price_cad": _r(bp.get(h), 2)})
+        rec["hourly"] = hrs
+        parts = [load["status"], ties["us"]["status"], ties["ab"]["status"]]
+        rec["status"] = "complete" if all(p == "complete" for p in parts) else ("pending" if all(p == "pending" for p in parts) else "partial")
+        out.append(rec)
+    return {"events": out,
+            "baseline_method": f"Average of the same BC clock hours on the previous {EVENT_BASE_DAYS} weekdays (Mon-Fri) that were not "
+                               "BC statutory holidays and not event days (weekend/holiday events: previous 4 weekend days/holidays). "
+                               "A baseline day counts for a measure only if it has every window hour for that measure; the number of "
+                               "days used is shown. Baseline max load = average of each day's highest window hour.",
+            "notes": ["Trade values are market-price estimates (MWh x hub price), not Powerex/BC Hydro settlements.",
+                      "The BC-US tie uses one Mid-C price per day, so hour-to-hour timing inside an event is only meaningful on the BC-Alberta tie.",
+                      "BC load is posted by BC Hydro each business day for the previous day(s); until then load shows as pending.",
+                      "Load % of peak uses the highest hourly load in the 365 days before the event day."]}
+
+
 # ---------------------------------------------------------------- main
 def main():
     full = "--backfill" in sys.argv
@@ -940,6 +1140,11 @@ def main():
     df["load_mw"] = lo[~lo.index.duplicated(keep="last")].reindex(df.index)
     dash = build_dashboard(df, last_midc, live, source_qa(aud), statcan)
     dash["data_through"] = data_through(h, prices, live, lo)
+    try:
+        dash["peak_events"] = event_block(df)
+    except Exception as ex:  # never let a bad events.json block the data update
+        log("peak events failed:", ex)
+        dash["peak_events"] = {"events": [], "error": str(ex)}
     json.dump(dash, open(f"{D}/dashboard.json", "w"), indent=1, default=str)
     json.dump(meta, open(META, "w"), indent=1)
     for k, p in dash["periods"].items():
@@ -955,6 +1160,9 @@ def main():
     log("StatCan check:", json.dumps({k: v for k, v in lc["statcan_check"].items() if k != "months"}))
     log("FY2026 different measures:", dash["reported_context"]["different_measures_fy2026"])
     log("source QA:", json.dumps(dash["source_qa"]))
+    for e in dash["peak_events"].get("events", []):
+        log(f"peak event {e['date']} {e['start']}-{e['end']} [{e.get('status')}]:", json.dumps({k: e.get(k) for k in ("load", "day_total")}),
+            "| total trade:", json.dumps((e.get("trade") or {}).get("total")))
     log("data through:", json.dumps({k: v.get("t") or v.get("date") for k, v in dash["data_through"].items()}))
 
 
