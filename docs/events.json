@@ -6,7 +6,8 @@
    "start": "17:00",
    "end": "21:00",
    "source": "BC Hydro Peak Saver email to Warren",
-   "note": "First Peak Saver event: 'reduce your electricity use by 20% between 5 p.m. and 9 p.m.'"
+   "note": "First Peak Saver event: 'reduce your electricity use by 20% between 5 p.m. and 9 p.m.'",
+   "noticed_at": "2026-11-19T00:14:00+00:00"
   }
  ]
 }
