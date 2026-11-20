@@ -891,7 +891,109 @@ def _status(have, need):
     return "complete" if have >= need else ("partial" if have else "pending")
 
 
-def event_block(df):
+TEMPS = f"{D}/bc_temps.csv"
+TEMP_CITIES = {"vancouver": (49.2827, -123.1207), "victoria": (48.4284, -123.3656),
+               "kelowna": (49.8880, -119.4960), "prince_george": (53.9171, -122.7497)}
+
+
+def temps_series():
+    if os.path.exists(TEMPS):
+        x = pd.read_csv(TEMPS)
+        x.index = pd.to_datetime(x.pop("t_utc"), utc=True)
+        return x
+    return pd.DataFrame(columns=list(TEMP_CITIES), index=pd.DatetimeIndex([], tz="UTC"))
+
+
+def update_temps(meta, now_utc):
+    """Hourly 2 m temperature for 4 BC cities, last ~75 days, from Open-Meteo's historical-forecast API (keyless; each hour
+    is the model's first-hours value, a stand-in for what happened). Refreshed at most every 6 h; cached in bc_temps.csv.
+    Used only for the peak-event 'similar days' comparison."""
+    old = temps_series()
+    if meta.get("temps_checked", "") >= (now_utc - pd.Timedelta(hours=6)).isoformat():
+        return old
+    try:
+        a, b = (now_utc - pd.Timedelta(days=75)).tz_convert(TZ).date(), now_utc.tz_convert(TZ).date()
+        q = ("https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=" + ",".join(str(v[0]) for v in TEMP_CITIES.values())
+             + "&longitude=" + ",".join(str(v[1]) for v in TEMP_CITIES.values()) + f"&hourly=temperature_2m&timezone=GMT&start_date={a}&end_date={b}")
+        j = json.loads(get(q, timeout=60))
+        j = j if isinstance(j, list) else [j]
+        new = pd.DataFrame({k: pd.Series(r["hourly"]["temperature_2m"], index=pd.to_datetime(r["hourly"]["time"]).tz_localize("UTC"), dtype=float)
+                            for k, r in zip(TEMP_CITIES, j)}).dropna(how="all")
+        new = new[new.index <= now_utc]  # the API also returns forecast hours; keep only past hours
+        out = new.combine_first(old).sort_index()
+        out = out[out.index >= now_utc - pd.Timedelta(days=400)]
+        out.index.name = "t_utc"
+        out.to_csv(TEMPS, date_format="%Y-%m-%dT%H:%MZ", float_format="%.1f")
+        meta["temps_checked"] = now_utc.isoformat()
+        log(f"  temps: {len(new)} h to {new.index.max()}")
+        return out
+    except Exception as ex:
+        log("temps failed, using cached:", ex)
+        return old
+
+
+def load_snapshots():
+    try:
+        return json.load(open(f"{D}/event_snapshots.json")).get("snapshots", {}) if os.path.exists(f"{D}/event_snapshots.json") else {}
+    except Exception as ex:
+        log("event_snapshots.json unreadable:", ex)
+        return {}
+
+
+def similar_days(df, temps, d, hb, ev_days, today, lookback=45):
+    """Recent non-event days whose event-window hours were as cold or colder (4-city average temperature <= event + 1 C)
+    and had an Alberta pool price at least 80% of the event's. Correlation only."""
+    tw = temps.mean(axis=1) if len(temps) else pd.Series(dtype=float)
+
+    def day_stats(x):
+        t0 = pd.Timestamp(x).tz_localize(TZ)
+        idx = [(t0 + pd.Timedelta(hours=h)).tz_convert("UTC") for h in hb]
+        tv = tw.reindex(idx)
+        sub = df.reindex(idx)
+        pool = sub["pool_cad"] if "pool_cad" in sub else pd.Series(dtype=float)
+        L = sub["load_mw"]
+        net = sub["us_mw"].astype(float) + sub["ab_mw"].astype(float)
+        return {"date": str(x), "weekday": t0.strftime("%a"), "weekend": x.weekday() >= 5,
+                "temp_avg_c": round(float(tv.mean()), 1) if tv.notna().all() else None,
+                "temp_min_c": round(float(tv.min()), 1) if tv.notna().all() else None,
+                "ab_price_cad": round(float(pool.mean()), 2) if pool.notna().sum() * 2 >= len(hb) else None,
+                "ab_price_hours": int(pool.notna().sum()),
+                "bc_load_avg_mw": _r(L.mean()) if L.notna().all() else None,
+                "net_export_mw": _r(net.mean()) if net.notna().all() else None}
+    ev = day_stats(d)
+    out = {"event": ev, "lookback_days": lookback, "criteria": "Non-event days in the previous 45 days and since the event, "
+           "where the event hours had a 4-city average temperature no more than 1 C warmer than the event and an average "
+           "Alberta pool price at least 80% of the event's. A price average needs at least half the window hours settled.", "note": "Shows correlation, not intent: BC Hydro's reasons for "
+           "calling an event aren't published, and conditions can differ in ways not measured here (forecasts at notice time, "
+           "outages, reservoir levels, US prices by hour)."}
+    if ev["temp_avg_c"] is None or ev["ab_price_cad"] is None:
+        out.update({"status": "pending", "days": [], "candidates": 0, "similar": 0})
+        return out
+    cands = []
+    x = d - dt.timedelta(days=lookback)
+    while x < today:
+        if x != d and x not in ev_days:
+            s = day_stats(x)
+            if s["temp_avg_c"] is not None and s["ab_price_cad"] is not None:
+                cands.append(s)
+        x += dt.timedelta(days=1)
+    sim = [c for c in cands if c["temp_avg_c"] <= ev["temp_avg_c"] + 1.0 and c["ab_price_cad"] >= 0.8 * ev["ab_price_cad"]]
+    out.update({"status": "ok", "candidates": len(cands), "similar": len(sim), "similar_weekdays": sum(not c["weekend"] for c in sim),
+                "colder_or_same": sum(c["temp_avg_c"] <= ev["temp_avg_c"] + 1.0 for c in cands),
+                "price_same_or_higher": sum(c["ab_price_cad"] >= 0.8 * ev["ab_price_cad"] for c in cands),
+                "days": sorted(sim, key=lambda c: c["date"], reverse=True)})
+    return out
+
+
+def pick_capture(caps):
+    """Prefer the earliest capture taken at notice time; otherwise the latest retroactive one."""
+    live = [c for c in caps if not c.get("retroactive")]
+    if live:
+        return min(live, key=lambda c: c["captured_at"])
+    return max(caps, key=lambda c: c["captured_at"]) if caps else None
+
+
+def event_block(df, temps=None):
     """Per event: event-window metrics vs a baseline of the previous EVENT_BASE_DAYS non-event, non-holiday weekdays
     (same BC clock hours), plus the event day hour by hour. Values are market-price estimates like the rest of the site."""
     evs = load_events()
@@ -905,6 +1007,7 @@ def event_block(df):
     today = pd.Timestamp.now(tz=TZ).date()
     L_all = df["load_mw"].dropna()
     out = []
+    snaps = load_snapshots()
     for e in evs:
         d, hb, n = e["_d"], e["_hb"], len(e["_hb"])
         t0 = pd.Timestamp(d).tz_localize(TZ)
@@ -912,7 +1015,9 @@ def event_block(df):
         rec.update({"hour_ending": [h + 1 for h in hb], "weekday": t0.strftime("%A"),
                     "window_start": (t0 + pd.Timedelta(hours=hb[0])).isoformat(), "window_end": (t0 + pd.Timedelta(hours=hb[-1] + 1)).isoformat()})
         if d > today:
-            rec["status"] = "upcoming"; out.append(rec); continue
+            caps = snaps.get(f"{e['date']} {e['start']}-{e['end']}", [])
+            rec.update({"status": "upcoming", "conditions": pick_capture(caps), "conditions_captures": len(caps), "noticed_at": e.get("noticed_at")})
+            out.append(rec); continue
         # baseline day set: weekday events -> previous non-event, non-holiday Mon-Fri; weekend/holiday events -> previous
         # non-event weekend days/holidays (same idea, smaller pool: 4 days)
         weekendlike = lambda x: x.weekday() >= 5 or x in hol
@@ -997,6 +1102,15 @@ def event_block(df):
                         "us_price_cad": _r(g("us_price"), 2), "value_cad": _r(val),
                         "base_load_mw": _r(bl.get(h)), "base_net_mw": _r(bn.get(h)) if len(bn) else None, "base_ab_price_cad": _r(bp.get(h), 2)})
         rec["hourly"] = hrs
+        caps = snaps.get(f"{e['date']} {e['start']}-{e['end']}", [])
+        rec["conditions"] = pick_capture(caps)
+        rec["conditions_captures"] = len(caps)
+        rec["noticed_at"] = e.get("noticed_at")
+        try:
+            rec["similar_days"] = similar_days(df, temps if temps is not None else temps_series(), d, hb, ev_days, today)
+        except Exception as ex:
+            log("similar days failed:", ex)
+            rec["similar_days"] = {"status": "error", "error": str(ex)}
         parts = [load["status"], ties["us"]["status"], ties["ab"]["status"]]
         rec["status"] = "complete" if all(p == "complete" for p in parts) else ("pending" if all(p == "pending" for p in parts) else "partial")
         out.append(rec)
@@ -1141,7 +1255,7 @@ def main():
     dash = build_dashboard(df, last_midc, live, source_qa(aud), statcan)
     dash["data_through"] = data_through(h, prices, live, lo)
     try:
-        dash["peak_events"] = event_block(df)
+        dash["peak_events"] = event_block(df, update_temps(meta, now_utc))
     except Exception as ex:  # never let a bad events.json block the data update
         log("peak events failed:", ex)
         dash["peak_events"] = {"events": [], "error": str(ex)}

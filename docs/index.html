@@ -51,6 +51,7 @@ a{color:var(--us)}
 #evchartw{height:360px;margin-top:10px}
 .evm{display:none}.evc{margin-bottom:8px;cursor:pointer}.evc.sel{border-color:#a78bfa}.evr{display:flex;justify-content:space-between;gap:10px;font-size:.84rem;padding:5px 0;border-top:1px solid var(--line);text-align:right}.evr>span:first-child{text-align:left;flex:0 0 38%}
 #evdet td:first-child{min-width:150px}
+h3.sub{font-size:.9rem;margin:16px 0 0}.cond td:first-child{width:30%;min-width:150px}.cond td{vertical-align:top}table.sim th:first-child{min-width:200px}code{font-size:.8em;background:#f3f4f6;padding:0 4px;border-radius:4px}
 @media (max-width:640px){.evm{display:block}.evt{display:none}#evchartw{height:440px}}
 footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
 </style></head>
@@ -296,9 +297,10 @@ function peakSec(d){
   </table></div>
   <div class="ld">Whole event day${dt_.status==='partial'?` so far (${dt_.hours} of 24 h)`:''}: <b class="${dt_.event_day_value_cad>=0?'pos':'neg'}">${C(dt_.event_day_value_cad)}</b> · ${dt_.status==='partial'?`baseline days, same hours: ${C(dt_.baseline_same_hours_value_cad)} <span class="k">(full-day baseline ${C(dt_.baseline_day_value_cad)}, ${dt_.baseline_days} days)</span>`:`baseline days: ${C(dt_.baseline_day_value_cad)} <span class="k">(${dt_.baseline_days} days)</span>`}</div>
   <div class="ld k">Baseline days: ${e.baseline_days.map(x=>new Date(x+'T12:00:00Z').toLocaleDateString('en-CA',{timeZone:'UTC',month:'short',day:'numeric'})).join(', ')} (load: ${e.load.baseline.days} of them posted). Load % of peak uses the highest hour in the prior 365 days: ${MW(e.load.peak_365d_mw)} (${HR(e.load.peak_365d_t)}).${e.source?` Source: ${e.source}.`:''}${e.note?` ${e.note}`:''}</div>
+  <h3 class="sub">Conditions when the event was called</h3>${condSec(e)}
   <div class="chart" id="evchartw"><canvas id="evchart"></canvas></div>`;
- }
- el.innerHTML=`<div class="guide"><b>How to read this.</b> Each BC Hydro peak event is compared with the same hours on ordinary recent weekdays (the baseline). If BC load during the event is ordinary for the season but exports and prices jump, the event lines up with trading. If load is near its yearly peak, it lines up with grid need. Both can be true at once.</div>
+ }else if(e){det=`<h3 class="sub">Conditions when the event was called</h3>${condSec(e)}`;}
+ el.innerHTML=`<div class="guide"><b>How to read this.</b> Each BC Hydro peak event is compared with the same hours on ordinary recent weekdays (the baseline). If BC load during the event is ordinary for the season but exports and prices jump, the event lines up with trading. If load is near its yearly peak, it lines up with grid need. Both can be true at once. The conditions panel shows what was publicly visible when the notice went out.</div>
  <div class="evm">${cardsM.join('')}</div><div class="wrap evt"><table class="ctx ev"><tr><th>Event (BC time)</th><th>BC load<br><span class="k">event vs baseline</span></th><th>Event peak hour<br><span class="k">% of 365-day peak</span></th><th>Net export, both ties<br><span class="k">avg MW, + = BC exporting</span></th><th>Alberta price<br><span class="k">avg C$/MWh</span></th><th>Trade value, both ties<br><span class="k">event hours, est.</span></th></tr>${rows}</table></div>
  ${det}
  <ul class="notes" style="margin-top:8px">
@@ -307,7 +309,42 @@ function peakSec(d){
  <li>BC Hydro posts hourly load each business day for the previous day, so event load shows <i>pending</i> for a day or more. Newest flows come from BC Hydro's real-time page (provisional) until official data arrives.</li>
  <li>Events are listed by hand in <a href="https://github.com/warrenboyle/bc-powerflow/blob/main/docs/events.json">events.json</a>. Hour-ending (HE) 18 = 5–6 p.m. BC time.</li></ul>`;
  el.querySelectorAll('[data-i]').forEach(tr=>tr.onclick=()=>{evSel=+tr.dataset.i;peakSec(d);});
- if(e&&e.hourly)evHourly(e);
+ if(e&&e.hourly&&e.status!=='upcoming')evHourly(e);
+}
+
+// "Conditions when the event was called" (docs/event_snapshots.json via peak_events) + similar days without an event
+function condSec(e){
+ const c=e.conditions;const V=f=>f&&f.value!=null?f.value:null;
+ const src=f=>{if(!f)return '';const u=f.source&&/^https?:/.test(f.source)?`<a href="${f.source.split(' ')[0]}">source</a>`:(f.source||'');
+  return `<span class="k">${u}${f.as_of?` · as of ${/^\d{4}-\d\d-\d\dT/.test(f.as_of)?T(f.as_of):f.as_of}`:''}</span>`;};
+ const na=f=>`<span class="pend" title="${(f&&f.reason||'not captured').replace(/"/g,'&quot;')}">n/a</span> <span class="k">${(f&&f.reason||'not captured').slice(0,110)}</span>`;
+ let h='';
+ if(!c){h=`<div class="ld k">No snapshot of conditions at notice time for this event. Run <code>scripts/snapshot_event.py</code> when the notice arrives (see README).</div>`;}
+ else{
+  const A=c.alberta||{},W=c.weather,B=c.bc||{},ab=e.trade?.ab;
+  const fp=A.forecast_pool,fa=A.forecast_ail,wi=A.wind,so=A.solar,gc=A.grid_condition,cu=A.supply_cushion_derived;
+  const act=ab&&ab.event.avg_price_cad!=null?`actual ${P(ab.event.avg_price_cad)}${ab.price_est_hours?' <span class="badge" title="some hours carried forward until AESO posts">partly est.</span>':''}`:'actual pending';
+  const rows=[
+   ['Alberta pool price, event hours',V(fp)?`forecast ${P(V(fp).avg)} (max ${P(V(fp).max)}, ${V(fp).hours} h) · ${act} ${src(fp)}`:`forecast: ${na(fp)}<br>${act}`],
+   ['Alberta forecast load (AIL), event hours',V(fa)?`${MW(V(fa).avg)} avg · ${MW(V(fa).max)} max${V(A.forecast_ail_day_max)!=null?` · day max ${MW(V(A.forecast_ail_day_max))}`:''} ${src(fa)}`:na(fa)],
+   ['BC temperatures, event hours (forecast)',V(W)?`coldest ${V(W).min_all.toFixed(1)}°C · 4-city avg ${V(W).avg_4city.toFixed(1)}°C<br><span class="k">${Object.entries(V(W).cities).map(([n,x])=>`${n} min ${x.min==null?'–':x.min.toFixed(1)+'°'}${x.day0_min!=null?` (actual ≈${x.day0_min.toFixed(1)}°)`:''}`).join(' · ')}</span><br><span class="k">${W.label||''}</span> ${src(W)}`:na(W)],
+   ['BC load, latest posted day',V(B.bc_load_latest_day)?`${D(V(B.bc_load_latest_day).date+'T12:00:00Z')}: peak ${MW(V(B.bc_load_latest_day).peak_mw)} = ${PCT(V(B.bc_load_latest_day).peak_pct_of_365d)} of the 365-day peak (${MW(V(B.bc_load_365d_peak)?.mw)})<br><span class="k">${B.bc_load_latest_day.note||''}</span>`:na(B.bc_load_latest_day)],
+   ['Mid-C, latest price',V(B.midc_latest)?`US$${V(B.midc_latest).usd_mwh.toFixed(2)} (delivery ${V(B.midc_latest).delivery_date}) <span class="k">${B.midc_latest.note||''}</span>`:na(B.midc_latest)],
+   ['Alberta grid condition',V(gc)?`${V(gc)} ${src(gc)}`:na(gc)],
+   ['Alberta unused dispatchable capability (rough)',V(cu)!=null?`${MW(V(cu))} ${src(cu)}<br><span class="k">${cu.note||''}</span>`:na(cu)],
+   ['Alberta wind / solar forecast, event hours',V(wi)||V(so)?`wind ${V(wi)?MW(V(wi).avg):'n/a'}${V(wi)?.capacity_mw?` of ${MW(V(wi).capacity_mw)}`:''} · solar ${V(so)?MW(V(so).avg):'n/a'} ${src(wi)}`:na(wi)],
+   ['BC Hydro reservoirs',na(B.bc_reservoirs)]];
+  h=`<div class="wrap"><table class="ctx cond"><tr><th colspan="2">${c.retroactive?'Snapshot taken after the event':'Snapshot at notice time'}${c.retroactive?' <span class="badge" title="Captured after the fact. Uses kept history (e.g. the forecast issued ~24 h before each hour), which is not the same as what was visible at notice time.">retroactive</span>':''}<br><span class="k">notice ${T(c.noticed_at)} · captured ${T(c.captured_at)}${e.conditions_captures>1?` · ${e.conditions_captures} captures`:''}</span></th></tr>
+  ${rows.map(([a,b])=>`<tr><td>${a}</td><td style="text-align:left;white-space:normal">${b}</td></tr>`).join('')}</table></div>
+  ${A.note?`<div class="ld k">${A.note}${A.retro_note?' '+A.retro_note:''}</div>`:''}`;
+ }
+ const S=e.similar_days;
+ if(S&&S.status==='ok'){const ev=S.event;
+  h+=`<div class="wrap"><table class="ctx sim"><tr><th>Similar days without an event<br><span class="k">${new Date(e.date+'T12:00:00Z').toLocaleDateString('en-CA',{timeZone:'UTC',month:'short',day:'numeric'})} event hours: ${ev.temp_avg_c}°C 4-city avg · Alberta ${P(ev.ab_price_cad)}${ev.ab_price_hours<e.hour_ending.length?` (${ev.ab_price_hours} of ${e.hour_ending.length} h settled)`:''}</span></th><th>Temp avg / min</th><th>Alberta price</th><th>BC load avg</th><th>Net export</th></tr>
+  ${S.days.length?S.days.map(x=>`<tr><td>${x.weekday} ${new Date(x.date+'T12:00:00Z').toLocaleDateString('en-CA',{timeZone:'UTC',month:'short',day:'numeric'})}${x.weekend?' <span class="k">weekend</span>':''}</td><td>${x.temp_avg_c}° / ${x.temp_min_c}°</td><td>${P(x.ab_price_cad)}</td><td>${x.bc_load_avg_mw!=null?MW(x.bc_load_avg_mw):'<span class="pend">pending</span>'}</td><td>${MWs(x.net_export_mw)}</td></tr>`).join(''):`<tr><td colspan="5" class="k">None in the window.</td></tr>`}</table></div>
+  <div class="ld k">Of ${S.candidates} recent non-event days, ${S.colder_or_same} were as cold or colder in these hours, ${S.price_same_or_higher} had a comparable or higher Alberta price, and ${S.similar} had both (${S.similar_weekdays} weekdays). ${S.criteria} <b>${S.note}</b></div>`;}
+ else if(S)h+=`<div class="ld k">Similar days: pending (needs the event's temperatures and Alberta prices).</div>`;
+ return h;
 }
 function evHourly(e){
  (Chart.getChart('evchart')||evChart)?.destroy();
