@@ -46,6 +46,12 @@ a{color:var(--us)}
 .two{display:grid;grid-template-columns:1.1fr .9fr;gap:12px;min-width:0}
 .mapwrap{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 8px 4px;overflow:auto;max-width:100%}
 svg.map{width:100%;height:auto;display:block;min-width:640px}
+#headline{font-size:.95rem;margin:2px 0 12px;max-width:62rem;color:var(--ink);line-height:1.45}
+#headline b{font-weight:700}
+.flip{font-size:.8rem;color:#374151;margin:4px 0 8px}
+details.breakdown{margin-top:8px;padding:6px 10px}
+details.breakdown summary{font-size:.82rem;font-weight:600;color:#374151}
+h3.chart-title{font-size:.95rem;margin:0 0 8px}
 svg.map text{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 16px;margin-top:10px}
 summary{cursor:pointer;font-weight:600;font-size:.92rem}
@@ -67,20 +73,23 @@ summary{cursor:pointer;font-weight:600;font-size:.92rem}
 #evdet td:first-child{min-width:150px}
 h3.sub{font-size:.9rem;margin:16px 0 0}.cond td:first-child{width:30%;min-width:150px}.cond td{vertical-align:top}table.sim th:first-child{min-width:200px}code{font-size:.8em;background:#f3f4f6;padding:0 4px;border-radius:4px}
 footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
+@media (max-width:1100px){
+  .evm{display:block}.evt{display:none}#evchartw{height:440px}
+}
 @media (max-width:800px){
   .grid4{grid-template-columns:repeat(2,minmax(0,1fr))}
   .two{grid-template-columns:1fr}
   .big{font-size:1.35rem}
-  svg.map{min-width:560px}
 }
 @media (max-width:640px){
-  .evm{display:block}.evt{display:none}#evchartw{height:440px}
   .markets .card h3,.card h3{white-space:normal}
   .fl{white-space:normal;grid-template-columns:1fr 1fr;font-size:.75rem}
   .arb .row b{white-space:normal;padding-left:0}
   .ctx th,.ctx td{white-space:normal}
   .wrap,.mapwrap{overflow-x:auto;max-width:100%}
   main{overflow-x:hidden;padding:12px}
+  svg.map{min-width:0}
+  svg.map .cup-lab-sec{display:none}
 }
 </style></head>
 <body>
@@ -94,12 +103,13 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
 </div>
 <nav class="nav">
   <a href="#now">Now</a>
+  <a href="#markets">Trade value</a>
   <a href="#map">Teacup map</a>
-  <a href="#peak-events">Peak events</a>
   <a href="#reservoirs">Reservoirs</a>
-  <a href="#markets">Markets &amp; interties</a>
-  <a href="#load">Load &amp; weather</a>
+  <a href="#load">Load</a>
+  <a href="#peak-events">Peak events</a>
 </nav>
+<p id="headline"></p>
 <div class="live pillrow" id="live"></div>
 <details id="thru"><summary>Data through (each source lags differently)</summary><div id="thrut"></div></details>
 
@@ -108,29 +118,62 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
   <div class="grid grid4" id="kpis"></div>
 </section>
 
+<section id="markets" class="sec markets">
+  <h2>Trade value</h2>
+  <div class="bar">
+    <div class="tabs" id="tabs"><button data-v="total" class="on">All interties</button><button data-v="us">BC ⇄ US</button><button data-v="ab">BC ⇄ Alberta</button></div>
+    <span class="k">C$ = tie-line flows × hub prices (Mid-C, off-peak at 0.8×; AESO pool), not BC Hydro's import bill or Powerex's margin.</span>
+  </div>
+  <div class="grid" id="cards"></div>
+  <div class="bar" style="margin-top:22px"><h2 style="margin:0">Monthly</h2>
+    <div class="tabs" id="mode"><button data-m="cad" class="on">Net value (C$)</button><button data-m="gwh">Volume (GWh)</button></div>
+    <label class="k" style="display:flex;align-items:center;gap:6px;white-space:nowrap"><input type="checkbox" id="rollnet" checked> 12-month rolling net</label></div>
+  <div class="chart"><canvas id="main"></canvas></div>
+</section>
+
 <section id="map" class="sec">
   <h2>Where the water and the ties are</h2>
   <p class="caption"><b>Each teacup is one reservoir.</b> The size of the cup is its usable storage, the fill is how full that range is today, the dashed line is the typical level for this date (Williston) or the IJC maximum for this date (Kootenay Lake), and the label is today’s percent, the change over seven days, and estimated stored energy.</p>
   <div class="mapwrap">
-    <svg class="map" viewBox="0 0 1000 700" role="img" aria-label="Teacup map of Peace, Columbia and Kootenay Lake reservoirs in British Columbia">
-<rect x="0" y="0" width="1000" height="700" fill="#f4f7fb"/>
-<rect x="0" y="551.3" width="1000" height="148.7" fill="#eef2f6"/>
-<text x="970" y="28" text-anchor="end" font-size="12" fill="#6b7280">Alberta</text>
-<text x="970" y="58" text-anchor="end" font-size="10.5" fill="#4b5563">Williston is 32 MAF live storage.</text>
-<text x="970" y="72" text-anchor="end" font-size="10.5" fill="#4b5563">Site C is 0.4% of that; Dinosaur is 0.06%.</text>
-<text x="700" y="688" font-size="12" fill="#6b7280">United States  ↓</text>
+    <svg class="map" viewBox="0 0 1120 820" role="img" aria-label="Teacup map of Peace, Columbia and West Kootenay reservoirs in British Columbia">
+<rect x="0" y="0" width="1120" height="820" fill="#f4f7fb"/>
+<rect x="0" y="551.3" width="1120" height="268.7" fill="#eef2f6"/>
+<text x="1090" y="28" text-anchor="end" font-size="12" fill="#6b7280">Alberta</text>
+<text x="1090" y="58" text-anchor="end" font-size="10.5" fill="#4b5563">Williston is 32 MAF live storage.</text>
+<text x="1090" y="72" text-anchor="end" font-size="10.5" fill="#4b5563">Site C is 0.4% of that; Dinosaur is 0.06%.</text>
+<text x="790" y="780" font-size="12" fill="#6b7280">United States</text>
 <text x="36" y="28" font-size="16" font-weight="700" fill="#1d2330">British Columbia</text>
-<text id="map-asof" x="36" y="46" font-size="11" fill="#6b7280">Peace and Columbia storage</text>
-<path d="M56.1,56.3 L574.6,56.3 L574.6,335.3 L593.6,357.8 L612.6,389.2 L634.4,425.3 L661.6,461.3 L688.8,497.2 L716.0,528.8 L735.9,551.3 L645.3,551.3 L547.4,551.3 L498.4,551.3 L488.9,550.3 L486.2,535.5 L488.9,519.8 L468.5,513.0 L444.0,504.0 L427.7,490.5 L405.9,486.0 L370.6,468.0 L348.8,447.8 L352.9,420.8 L337.9,393.8 L321.6,364.5 L305.3,333.0 L291.7,303.8 L297.1,279.0 L302.6,254.2 L299.8,229.5 L280.8,204.7 L248.2,184.5 L218.2,155.3 L188.3,126.0 L153.0,99.0 L112.2,78.8 L76.8,65.3 L56.1,56.3 Z" fill="#e7edf2" stroke="#94a3b8" stroke-width="1.4" stroke-linejoin="round"/>
+<text id="map-asof" x="36" y="46" font-size="11" fill="#6b7280">Peace, Columbia and Kootenay storage</text>
+<path d="M56.1,56.3 L574.6,56.3 L574.6,335.3 L593.6,357.8 L612.6,389.2 L634.4,425.3 L700,448 L820,480 L940,515 L1070,551.3 L645.3,551.3 L547.4,551.3 L498.4,551.3 L488.9,550.3 L486.2,535.5 L488.9,519.8 L468.5,513.0 L444.0,504.0 L427.7,490.5 L405.9,486.0 L370.6,468.0 L348.8,447.8 L352.9,420.8 L337.9,393.8 L321.6,364.5 L305.3,333.0 L291.7,303.8 L297.1,279.0 L302.6,254.2 L299.8,229.5 L280.8,204.7 L248.2,184.5 L218.2,155.3 L188.3,126.0 L153.0,99.0 L112.2,78.8 L76.8,65.3 L56.1,56.3 Z" fill="#e7edf2" stroke="#94a3b8" stroke-width="1.4" stroke-linejoin="round"/>
 <path d="M486.2,581.9 L476.6,571.5 L452.2,570.2 L427.7,558.0 L400.5,535.5 L367.8,513.0 L344.7,486.0 L347.4,473.9 L373.3,481.5 L411.4,508.5 L442.6,531.0 L473.9,544.5 L486.2,558.0 L489.7,576.0 L486.2,581.9 Z" fill="#e7edf2" stroke="#94a3b8" stroke-width="1.2"/>
 <path d="M272.6,414.0 L259.0,407.2 L242.7,384.7 L223.7,353.3 L221.0,319.5 L237.3,315.0 L259.0,348.8 L275.4,384.7 L272.6,414.0 Z" fill="#e7edf2" stroke="#94a3b8" stroke-width="1"/>
 <path d="M414.1,177.8 L427.7,204.7 L446.7,227.2 L471.2,234.0" fill="none" stroke="#7dd3fc" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M454.9,274.5 L463.0,256.5 L473.9,240.8 L479.4,234.0" fill="none" stroke="#7dd3fc" stroke-width="5.0" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M416.8,198.0 L433.1,220.5 L457.6,234.0 L484.8,235.3 L514.7,235.3 L533.8,231.8 L549.8,227.2 L574.6,229.5 L609.9,229.5" fill="none" stroke="#38bdf8" stroke-width="4.0" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M687.4,495.0 L686.1,474.7 L679.3,447.8 L669.8,425.3 L650.7,414.0 L629.0,409.5 L614.0,411.8 L620.8,438.8 L623.5,459.0 L627.6,483.8 L633.0,510.8 L634.4,535.9 L638.5,546.8 L639.8,558.0" fill="none" stroke="#38bdf8" stroke-width="4.0" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M657.8,486.0 L658.9,504.0 L660.2,524.2 L661.6,542.2 L645.3,544.5 L639.8,549.0" fill="none" stroke="#7dd3fc" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M657.5,481.5 L657.8,495.0" fill="none" stroke="#7dd3fc" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M687.4,495.0 L686.1,474.7 L679.3,447.8 L669.8,425.3 L650.7,414.0 L629.0,409.5 L614.0,411.8 L620.8,438.8 L623.5,459.0 L627.6,483.8 L633.0,510.8 L634.4,535.9 L638.5,546.8 L639.8,558.0 L630,620 L620,720" fill="none" stroke="#38bdf8" stroke-width="4.0" stroke-linecap="round" stroke-linejoin="round"/>
 
+
+<!-- West Kootenay waters -->
+<path d="M1000,448 L990,460 L940,470 L915,474" fill="none" stroke="#38bdf8" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="kootenay-lake" d="M892,468 C892,456 922,456 924,468 L928,522 C930,542 910,550 896,546 C884,544 878,538 868,528 C880,516 892,514 898,516 L900,476 C898,470 892,470 892,468 Z" fill="#7dd3fc" fill-opacity="0.55" stroke="#0284c7" stroke-width="1.3"/>
+<path d="M868,524 C840,512 820,508 790,508 C760,508 740,508 716,508 C690,510 675,516 668,522 L655,548 L640,555" fill="none" stroke="#38bdf8" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M790,508 C780,498 774,492 764,490 C754,488 748,498 744,508" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round"/>
+<path d="M790,508 C780,518 774,524 764,524 C754,524 748,516 744,508" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round"/>
+<path d="M786,532 C760,534 740,534 720,530" fill="none" stroke="#0e7490" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="6 3"/>
+<ellipse cx="732" cy="458" rx="10" ry="14" fill="#7dd3fc" fill-opacity="0.45" stroke="#0284c7" stroke-width="1"/>
+<path d="M732,472 L724,492 L716,508" fill="none" stroke="#7dd3fc" stroke-width="2.2" stroke-linecap="round"/>
+<path d="M910,670 L908,620 L906,560 L910,548" fill="none" stroke="#38bdf8" stroke-width="3.0" stroke-linecap="round"/>
+<path d="M780,800 L774,700 L768,600 L760,560 L748,548 L720,620 L690,632 L650,650 L630,670 L620,720" fill="none" stroke="#7dd3fc" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="744" y="450" font-size="9" font-style="italic" fill="#0284c7" text-anchor="middle" stroke="white" stroke-width="3" paint-order="stroke">Slocan Lake</text>
+<text x="744" y="450" font-size="9" font-style="italic" fill="#0284c7" text-anchor="middle">Slocan Lake</text>
+<text x="948" y="618" font-size="9.5" font-style="italic" fill="#0284c7" stroke="white" stroke-width="3" paint-order="stroke">Kootenay R.</text>
+<text x="948" y="618" font-size="9.5" font-style="italic" fill="#0284c7">Kootenay R.</text>
+<text x="948" y="632" font-size="8.5" font-style="italic" fill="#6b7280">flow north</text>
+<text x="700" y="700" font-size="9.5" font-style="italic" fill="#0284c7" stroke="white" stroke-width="3" paint-order="stroke">Pend d&apos;Oreille R.</text>
+<text x="700" y="700" font-size="9.5" font-style="italic" fill="#0284c7">Pend d&apos;Oreille R.</text>
+<text x="788" y="760" font-size="8.5" font-style="italic" fill="#6b7280">flow north</text>
+
+  
 <text x="672.4" y="415.0" font-size="10.5" font-style="italic" fill="#0284c7" text-anchor="start" stroke="white" stroke-width="3" paint-order="stroke">Columbia R.</text><text x="672.4" y="415.0" font-size="10.5" font-style="italic" fill="#0284c7" text-anchor="start">Columbia R.</text>
 <circle cx="489.7" cy="538.6" r="2.2" fill="#64748b"/>
 <text x="481.7" y="530.6" font-size="10" fill="#6b7280" text-anchor="end" stroke="white" stroke-width="3" paint-order="stroke">Vancouver</text>
@@ -141,12 +184,6 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
 <circle cx="551.4" cy="225.0" r="2.2" fill="#64748b"/>
 
 
-  <g>
-      <g>
-    <rect x="619.8" y="455.0" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
-    <text x="613.8" y="437.0" text-anchor="end" font-size="11" font-weight="600" fill="#4b5563">Revelstoke</text>
-    <text x="613.8" y="451.0" text-anchor="end" font-size="9.5" fill="#6b7280">run-of-river · no teacup</text>
-  </g>
   
   <g class="cup" id="cup-williston" transform="translate(461.7,244.9)" aria-label="Williston">
     <ellipse cx="0" cy="3.2" rx="29.9" ry="4.4" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
@@ -159,7 +196,7 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
   <g class="cup" id="cup-dinosaur" transform="translate(520.7,263.3)" aria-label="Dinosaur">
     <ellipse cx="0" cy="3.2" rx="10.1" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
     <polygon class="cup-shell" points="-13.6,-36.0 13.6,-36.0 6.0,0 -6.0,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
-    <polygon class="cup-fill" points="-6,0 6,0 6,0 -6,0" fill="#64748b" opacity="0.92"/>
+    <polygon class="cup-fill" points="-6,0 6,0 6,0 -6,0" fill="#0e7490" opacity="0.92"/>
     <polygon points="-13.6,-36.0 13.6,-36.0 6.0,0 -6.0,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
     <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
     <g class="cup-lab"></g>
@@ -167,7 +204,7 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
   <g class="cup" id="cup-sitec" transform="translate(571.8,221.2)" aria-label="Site C">
     <ellipse cx="0" cy="3.2" rx="9.7" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
     <polygon class="cup-shell" points="-14.0,-38.0 14.0,-38.0 6.2,0 -6.2,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
-    <polygon class="cup-fill" points="-6.2,0 6.2,0 6.2,0 -6.2,0" fill="#7c3aed" opacity="0.92"/>
+    <polygon class="cup-fill" points="-6.2,0 6.2,0 6.2,0 -6.2,0" fill="#0e7490" opacity="0.92"/>
     <polygon points="-14.0,-38.0 14.0,-38.0 6.2,0 -6.2,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
     <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
     <line x1="22" y1="-20" x2="44" y2="-48" stroke="#64748b" stroke-width="1"/>
@@ -184,28 +221,108 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
   <g class="cup" id="cup-arrow" transform="translate(612.4,522.5)" aria-label="Arrow">
     <ellipse cx="0" cy="3.2" rx="18.2" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
     <polygon class="cup-shell" points="-24.1,-56.1 24.1,-56.1 10.6,0 -10.6,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
-    <polygon class="cup-fill" points="-10.6,0 10.6,0 10.6,0 -10.6,0" fill="#d97706" opacity="0.92"/>
+    <polygon class="cup-fill" points="-10.6,0 10.6,0 10.6,0 -10.6,0" fill="#0e7490" opacity="0.92"/>
     <polygon points="-24.1,-56.1 24.1,-56.1 10.6,0 -10.6,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
     <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
     <g class="cup-lab"></g>
   </g>
-  <g class="cup" id="cup-duncan" transform="translate(685.8,477.0)" aria-label="Duncan">
+  <g class="cup" id="cup-duncan" transform="translate(1000,448)" aria-label="Duncan">
     <ellipse cx="0" cy="3.2" rx="12.4" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
     <polygon class="cup-shell" points="-16.3,-39.4 16.3,-39.4 7.2,0 -7.2,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
-    <polygon class="cup-fill" points="-7.2,0 7.2,0 7.2,0 -7.2,0" fill="#2563eb" opacity="0.92"/>
+    <polygon class="cup-fill" points="-7.2,0 7.2,0 7.2,0 -7.2,0" fill="#0e7490" opacity="0.92"/>
     <polygon points="-16.3,-39.4 16.3,-39.4 7.2,0 -7.2,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
     <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
     <g class="cup-lab"></g>
   </g>
 
-  <g class="cup" id="cup-kootenay" transform="translate(778,542)" aria-label="Kootenay Lake">
+  <g class="cup" id="cup-kootenay" transform="translate(905,528)" aria-label="Kootenay Lake">
     <ellipse cx="0" cy="3.2" rx="12.6" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
     <polygon class="cup-shell" points="-16.8,-40.0 16.8,-40.0 7.4,0 -7.4,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
-    <polygon class="cup-fill" points="-7.4,0 7.4,0 7.4,0 -7.4,0" fill="#0f766e" opacity="0.92"/>
+    <polygon class="cup-fill" points="-7.4,0 7.4,0 7.4,0 -7.4,0" fill="#0e7490" opacity="0.92"/>
     <polygon points="-16.8,-40.0 16.8,-40.0 7.4,0 -7.4,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
     <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
     <g class="cup-lab"></g>
   </g>
+
+<g transform="translate(910,670)" aria-label="Libby Dam">
+    <ellipse cx="0" cy="3.2" rx="11" ry="3.0" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+    <polygon points="-14.5,-34 14.5,-34 6.6,0 -6.6,0" fill="#f8fafc" stroke="#334155" stroke-width="1.4" stroke-linejoin="round"/>
+    <text x="20" y="-20" font-size="11" font-weight="600" fill="#1d2330" stroke="white" stroke-width="3" paint-order="stroke">Libby Dam</text>
+    <text x="20" y="-20" font-size="11" font-weight="600" fill="#1d2330">Libby Dam</text>
+    <text x="20" y="-6" font-size="9.5" fill="#6b7280" stroke="white" stroke-width="3" paint-order="stroke">600 MW · 1975</text>
+    <text x="20" y="-6" font-size="9.5" fill="#6b7280">600 MW · 1975</text>
+    <text x="20" y="8" font-size="9" fill="#6b7280" stroke="white" stroke-width="3" paint-order="stroke">USACE · no live fill</text>
+    <text x="20" y="8" font-size="9" fill="#6b7280">USACE · no live fill</text>
+  </g>
+  <g class="plant" transform="translate(800,508)">
+    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="-11" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155" stroke="white" stroke-width="3" paint-order="stroke">COR</text>
+    <text x="0" y="-11" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155">COR</text>
+  </g>
+  <g class="plant" transform="translate(768,470)">
+    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="-11" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155" stroke="white" stroke-width="3" paint-order="stroke">NEL</text>
+    <text x="0" y="-11" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155">NEL</text>
+  </g>
+  <g class="plant" transform="translate(768,528)">
+    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="10" y="14" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155" stroke="white" stroke-width="3" paint-order="stroke">UBO</text>
+    <text x="10" y="14" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155">UBO</text>
+  </g>
+  <g class="plant" transform="translate(744,508)">
+    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="-11" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155" stroke="white" stroke-width="3" paint-order="stroke">LBO</text>
+    <text x="0" y="-11" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155">LBO</text>
+  </g>
+  <g class="plant" transform="translate(716,508)">
+    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="14" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155" stroke="white" stroke-width="3" paint-order="stroke">SLC</text>
+    <text x="0" y="14" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155">SLC</text>
+  </g>
+  <g class="plant" transform="translate(736,540)">
+    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="14" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155" stroke="white" stroke-width="3" paint-order="stroke">KCL</text>
+    <text x="0" y="14" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155">KCL</text>
+  </g>
+  <g class="plant" transform="translate(650,522)">
+    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="-11" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155" stroke="white" stroke-width="3" paint-order="stroke">BRD</text>
+    <text x="0" y="-11" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155">BRD</text>
+  </g>
+  <g class="plant" transform="translate(690,632)">
+    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="-12" text-anchor="middle" font-size="10" font-weight="600" fill="#4b5563" stroke="white" stroke-width="3" paint-order="stroke">Seven Mile</text>
+    <text x="0" y="-12" text-anchor="middle" font-size="10" font-weight="600" fill="#4b5563">Seven Mile</text>
+  </g>
+  <g class="plant" transform="translate(650,650)">
+    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="-10" y="16" text-anchor="end" font-size="10" font-weight="600" fill="#4b5563" stroke="white" stroke-width="3" paint-order="stroke">Waneta</text>
+    <text x="-10" y="16" text-anchor="end" font-size="10" font-weight="600" fill="#4b5563">Waneta</text>
+  </g>
+  <g transform="translate(888,688)">
+    <rect x="0" y="0" width="220" height="122" rx="7" fill="#ffffff" fill-opacity="0.96" stroke="#e5e7eb"/>
+    <text x="10" y="15" font-size="11" font-weight="700" fill="#1d2330">West Kootenay plants</text>
+    <text x="10" y="28" font-size="9" fill="#6b7280">Nameplate capacity, not live output</text>
+    <text x="10" y="44" font-size="10" fill="#374151">COR  Corra Linn · 51 MW · 1932</text>
+    <text x="10" y="56" font-size="10" fill="#374151">NEL  City of Nelson · 16 MW</text>
+    <text x="10" y="68" font-size="10" fill="#374151">UBO  Upper Bonnington · 66 MW · 1907</text>
+    <text x="10" y="80" font-size="10" fill="#374151">LBO  Lower Bonnington · 54 MW · 1954</text>
+    <text x="10" y="92" font-size="10" fill="#374151">SLC  South Slocan · 54 MW · 1954</text>
+    <text x="10" y="104" font-size="10" fill="#374151">KCL  Kootenay Canal · 580 MW · 1976</text>
+    <text x="10" y="116" font-size="10" fill="#374151">BRD  Brilliant Dam · 265 MW · 1944</text>
+  </g>
+  <g transform="translate(872,512)">
+    <circle r="2.4" fill="#0f766e" stroke="#134e4a" stroke-width="0.7"/>
+    <text x="-8" y="-7" text-anchor="end" font-size="8.5" fill="#6b7280" stroke="white" stroke-width="3" paint-order="stroke">Nelson</text>
+    <text x="-8" y="-7" text-anchor="end" font-size="8.5" fill="#6b7280">Nelson</text>
+  </g>
+  <g transform="translate(888,540)">
+    <circle r="2.4" fill="#0f766e" stroke="#134e4a" stroke-width="0.7"/>
+    <text x="-8" y="14" text-anchor="end" font-size="8.5" fill="#6b7280" stroke="white" stroke-width="3" paint-order="stroke">Queens Bay</text>
+    <text x="-8" y="14" text-anchor="end" font-size="8.5" fill="#6b7280">Queens Bay</text>
+  </g>
+  <text x="822" y="484" text-anchor="middle" font-size="8.5" font-style="italic" fill="#6b7280" stroke="white" stroke-width="3" paint-order="stroke">Grohman Narrows</text>
+  <text x="822" y="484" text-anchor="middle" font-size="8.5" font-style="italic" fill="#6b7280">Grohman Narrows</text>
 
   <defs>
     <marker id="ah_us" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -217,14 +334,14 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
   </defs>
   <g class="tie">
     <line id="tie-us-line" x1="478.0" y1="544.5" x2="478.0" y2="576.0" stroke="#2563eb" stroke-width="3.2" marker-end="url(#ah_us)"/>
-    <text id="tie-us-label" x="488.0" y="578.0" font-size="12" font-weight="700" fill="#2563eb">BC → US</text>
-    <text id="tie-us-sub" x="488.0" y="592.0" font-size="10.5" fill="#4b5563">latest hour</text>
+    <text id="tie-us-label" x="488.0" y="578.0" font-size="12" font-weight="700" fill="#2563eb" stroke="white" stroke-width="3" paint-order="stroke">BC → US</text>
+    <text id="tie-us-sub" x="488.0" y="592.0" font-size="10.5" fill="#4b5563" stroke="white" stroke-width="3" paint-order="stroke">latest hour</text>
   </g>
 
   <g class="tie">
-    <line id="tie-ab-line" x1="722.8" y1="563.9" x2="687.4" y2="563.9" stroke="#d97706" stroke-width="3.2" marker-end="url(#ah_ab)"/>
-    <text id="tie-ab-label" x="705.1" y="553.9" text-anchor="middle" font-size="12" font-weight="700" fill="#d97706">BC ⇄ Alberta</text>
-    <text id="tie-ab-sub" x="705.1" y="579.9" text-anchor="middle" font-size="10.5" fill="#4b5563">latest hour</text>
+    <line id="tie-ab-line" x1="1110" y1="528" x2="1036" y2="528" stroke="#d97706" stroke-width="3.2" marker-end="url(#ah_ab)"/>
+    <text id="tie-ab-label" x="1058" y="502" text-anchor="middle" font-size="12" font-weight="700" fill="#d97706" stroke="white" stroke-width="3" paint-order="stroke">BC ⇄ Alberta</text>
+    <text id="tie-ab-sub" x="1058" y="516" text-anchor="middle" font-size="10.5" fill="#4b5563" stroke="white" stroke-width="3" paint-order="stroke">latest hour</text>
   </g>
 
   <g transform="translate(24,548)">
@@ -236,7 +353,7 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
       <polygon points="-16,-50 16,-50 8,0 -8,0" fill="none" stroke="#334155" stroke-width="1.3"/>
       <line x1="-14" y1="-36" x2="14" y2="-36" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3 2"/>
     </g>
-    <text x="66" y="46" font-size="11" fill="#374151">Blue fill = how full the usable range is today.</text>
+    <text x="66" y="46" font-size="11" fill="#374151">Teal fill = how full the usable range is today.</text>
     <text x="66" y="62" font-size="11" fill="#374151">Dashed line = typical for this date (Williston) or IJC maximum (Kootenay Lake).</text>
     <text x="66" y="78" font-size="11" fill="#374151">Cup size ≈ usable storage (square-root scaled so small ponds stay visible).</text>
     <text x="66" y="94" font-size="11" fill="#374151">Label = % full · change over 7 days · estimated stored energy.</text>
@@ -250,37 +367,24 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
   <div class="k" id="map-note" style="margin-top:8px"></div>
 </section>
 
-<section id="peak-events" class="sec">
-  <h2>Peak events</h2>
-  <p class="caption">Trade during BC Hydro peak events versus the previous 10 like weekdays. This does not draw a conclusion about why an event was called. Click a row for conditions at notice time, similar days, and the hourly chart.</p>
-  <div id="ev"></div>
-</section>
-
 <section id="reservoirs" class="sec">
   <h2>Reservoirs &amp; stored energy</h2>
-  <p class="caption">Percent of usable range, 7-day change, and estimated stored energy. Assumptions are in Method. A year of Corps (Mica, Arrow, Duncan) history is seeded; Peace hydromet history will deepen as the 15-minute job appends hours.</p>
-  <div class="two">
-    <div class="wrap"><table class="ctx" id="restable"></table></div>
-    <div class="chart" style="height:280px"><canvas id="reschart"></canvas></div>
-  </div>
-</section>
-
-<section id="markets" class="sec markets">
-  <h2>Markets &amp; interties</h2>
-  <div class="bar">
-    <div class="tabs" id="tabs"><button data-v="total" class="on">All interties</button><button data-v="us">BC ⇄ US</button><button data-v="ab">BC ⇄ Alberta</button></div>
-    <span class="k">C$ = tie-line flows × hub prices (Mid-C, off-peak at 0.8×; AESO pool), not BC Hydro's import bill or Powerex's margin.</span>
-  </div>
-  <div class="grid" id="cards"></div>
-  <div class="bar" style="margin-top:22px"><h2 style="margin:0">Monthly</h2>
-    <div class="tabs" id="mode"><button data-m="cad" class="on">Net value (C$)</button><button data-m="gwh">Volume (GWh)</button></div></div>
-  <div class="chart"><canvas id="main"></canvas></div>
+  <p class="caption">Percent of usable range over time. The dashed gold line is Williston’s typical level for each date. Assumptions are in Method. A year of Corps (Mica, Arrow, Duncan) history is seeded; Peace hydromet history will deepen as the 15-minute job appends hours. A compact table sits under the teacup map.</p>
+  <h3 class="chart-title">Reservoir levels over time</h3>
+  <div class="chart" style="height:320px"><canvas id="reschart"></canvas></div>
 </section>
 
 <section id="load" class="sec">
-  <h2>Load &amp; weather</h2>
+  <h2>Load</h2>
   <div id="lg"></div>
 </section>
+
+<section id="peak-events" class="sec">
+  <h2>Peak events</h2>
+  <p class="caption">Trade during BC Hydro peak events versus the previous 10 like weekdays. This does not draw a conclusion about why an event was called. Open Event detail for hourly trade, conditions at notice time, and similar days.</p>
+  <div id="ev"></div>
+</section>
+
 
 <details id="reported"><summary>BC Hydro reported figures (fiscal years) – different measures</summary><div id="ctx"></div></details>
 <details id="method"><summary>Method &amp; caveats</summary><ul class="notes" id="notes"></ul></details>
@@ -288,7 +392,7 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
 </main>
 
 <script>
-const C=n=>n==null?'n/a':(Math.abs(n)>=1e6?(n<0?'−':'')+'C$'+(Math.abs(n)/1e6).toFixed(1)+'M':(n<0?'−':'')+'C$'+Math.round(Math.abs(n)/1e3).toLocaleString()+'k');
+const C=n=>{if(n==null||n!==n)return 'n/a';if(n===0)return 'C$0';const neg=n<0,a=Math.abs(n);return (neg?'−':'')+'C$'+(a>=1e6?(a/1e6).toFixed(1)+'M':Math.round(a/1e3).toLocaleString()+'k');};
 const G=n=>(n/1000).toLocaleString(undefined,{maximumFractionDigits:n&&Math.abs(n)<1e5?1:0})+' GWh';
 const P=n=>n==null?'n/a':'C$'+n.toFixed(0);
 const M$=n=>n==null?'n/a':(n<0?'−':'')+'C$'+Math.abs(n).toLocaleString()+'M';
@@ -298,26 +402,56 @@ const BZ=s=>new Date(s)>=new Date('2026-03-08T10:00:00Z')?'Etc/GMT+7':'America/V
 const T=s=>s?new Date(s).toLocaleString('en-CA',{timeZone:BZ(s),month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'n/a';
 const D=s=>s?new Date(s).toLocaleDateString('en-CA',{timeZone:BZ(s),month:'short',day:'numeric',year:'numeric'}):'n/a';
 const MW=n=>n==null?'n/a':Math.round(n).toLocaleString()+' MW';
+const pctW=n=>n==null?'n/a':Math.round(Number(n))+'%';
+const flowTie=(mw,a,b)=>{if(mw==null)return '–';const n=Math.abs(Math.round(mw)).toLocaleString()+' MW';return mw>=0?`${a} → ${b} ${n}`:`${b} → ${a} ${n}`;};
+const flowWords=mw=>{if(mw==null)return '–';const n=Math.abs(Math.round(mw)).toLocaleString()+' MW';return mw>=0?'exporting '+n:'importing '+n;};
 // hour-beginning ISO -> "Feb 3, 2025, 5–6 PM"
 const HR=(s,yr=true)=>{if(!s)return 'n/a';const a=new Date(s),b=new Date(a.getTime()+36e5),z=BZ(s);
  const h=x=>x.toLocaleTimeString('en-US',{timeZone:z,hour:'numeric'});
  return a.toLocaleDateString('en-CA',{timeZone:z,month:'short',day:'numeric',...(yr?{year:'numeric'}:{})})+', '+h(a).replace(/ (AM|PM)$/,h(a).slice(-2)===h(b).slice(-2)?'':' $1')+'–'+h(b);};
 const PCT=n=>n==null?'n/a':n.toFixed(n<10?1:0)+'%';
-let data,view='total',mode='cad',chart;
+let data,view='total',mode='cad',chart,showRoll=true;
 fetch('dashboard.json?'+Date.now()).then(r=>r.json()).then(d=>{data=d;render();});
 const tabs=(id,attr,set)=>document.querySelectorAll(`#${id} button`).forEach(b=>b.onclick=()=>{set(b.dataset[attr]);document.querySelectorAll(`#${id} button`).forEach(x=>x.classList.toggle('on',x===b));render();});
 tabs('tabs','v',v=>view=v);tabs('mode','m',m=>mode=m);
+document.getElementById('rollnet').onchange=e=>{showRoll=e.target.checked;if(data)render();};
 
 function render(){
  const d=data,L=d.live||{};
  upd(d);
  const lv=[];
- if(L.bch){lv.push(`Now: BC → US <b>${L.bch.us_mw} MW</b>`);lv.push(`BC → Alberta <b>${L.bch.ab_mw} MW</b>`);}
+ if(L.bch){
+  const us=flowTie(L.bch.us_mw,'BC','US'), ab=flowTie(L.bch.ab_mw,'BC','Alberta');
+  lv.push('Now: '+us.replace(/(BC|US|Alberta) → (BC|US|Alberta) /,'$1 → $2 <b>').replace(/ MW$/,' MW</b>'));
+  lv.push(ab.replace(/(BC|US|Alberta) → (BC|US|Alberta) /,'$1 → $2 <b>').replace(/ MW$/,' MW</b>'));
+ }
  if(L.pool_price)lv.push(`AB pool <b>${P(L.pool_price.cad_mwh)}</b>/MWh`);
  const lastDay=d.daily.filter(x=>x.midc_cad).slice(-1)[0];
  if(lastDay)lv.push(`Mid-C peak <b>${P(lastDay.midc_cad)}</b>/MWh <span class="k">(${d.midc_last_delivery})</span>`);
- document.getElementById('live').innerHTML=lv.map(x=>`<div class="pill">${x}</div>`).join('')+`<span class="k" style="align-self:center">${L.bch?T(L.bch.t_utc)+' · ':''}negative MW = BC importing</span>`;
- cards(d);mainChart(d);
+ document.getElementById('live').innerHTML=lv.map(x=>`<div class="pill">${x}</div>`).join('')+(L.bch?`<span class="k" style="align-self:center">${T(L.bch.t_utc)}</span>`:'');
+ headline(d);cards(d);mainChart(d);
+}
+function headline(d){
+ const el=document.getElementById('headline');if(!el)return;
+ const L=d.live||{},b=L.bch||{},bits=[];
+ if(b.us_mw!=null&&b.ab_mw!=null){
+  const net=b.us_mw+b.ab_mw,n=Math.abs(Math.round(net)).toLocaleString();
+  bits.push(net>=0?`Right now BC is exporting <b>${n} MW</b>.`:`Right now BC is importing <b>${n} MW</b>.`);
+ }
+ const w=(d.reservoirs&&d.reservoirs.projects&&d.reservoirs.projects.williston)||{};
+ if(w.ok&&w.pct!=null){
+  const typ=w.typical&&w.typical.pct;
+  bits.push(`Williston is <b>${pctW(w.pct)} full</b>${typ!=null?` (typical for the date ${pctW(typ)})`:''}.`);
+ }
+ const t=d.periods&&d.periods.mtd&&d.periods.mtd.total;
+ if(t&&t.net_cad!=null){
+  let s=`This month BC is ${t.net_cad>=0?'up':'down'} <b>${C(Math.abs(t.net_cad))}</b> on trade`;
+  if(t.net_mwh<0&&t.net_cad>0)s+=', despite importing more than it exported';
+  else if(t.net_mwh>0&&t.net_cad<0)s+=', despite exporting more than it imported';
+  s+='.';
+  bits.push(s);
+ }
+ el.innerHTML=bits.join(' ');
 }
 
 function ago(ms){const m=Math.round(ms/6e4);return m<60?`${Math.max(m,0)} min ago`:m<48*60?`${(m/60).toFixed(m<600?1:0)} h ago`:`${Math.round(m/1440)} days ago`;}
@@ -354,13 +488,15 @@ function cards(d){
       <div class="row" title="${tTip}"><span>Of the total above: gain from better-timed trades</span><b>${C(tm)}</b></div>
    ${view==='total'?`<div class="row" title="Part of the total above, not extra. Each month, the volume BC both imported and exported × (average export price − average import price). It overlaps the timing line, so don't add the two together."><span>Of the total above: margin on matched import/export volume</span><b>${C(b.spread_cad)}</b></div>`:''}
    ${view!=='ab'?`<div class="k" style="margin-top:2px" title="Alternative valuation: Mid-C peak price applied to every hour (no off-peak discount)">Peak-price-only alternative: ${C(view==='total'?o.net_cad:o.net_cad-ab.net_cad)}</div>`:''}</div>`;}
+  const flip=(s.net_mwh<0&&s.net_cad>0)?`<div class="flip">Net importer by volume, net earner by value: sold at ${P(s.avg_exp_price)}, bought at ${P(s.avg_imp_price)}.</div>`
+   :(s.net_mwh>0&&s.net_cad<0)?`<div class="flip">Net exporter by volume, net cost by value: sold at ${P(s.avg_exp_price)}, bought at ${P(s.avg_imp_price)}.</div>`:'';
+  const br=arb?`<details class="breakdown"><summary>Trading breakdown</summary>${arb}</details>`:'';
   return `<div class="card"><h3>${names[k]} <span class="k">${p.label.replace(' to date','')}</span></h3>
   <div class="big ${s.net_cad>=0?'pos':'neg'}">${C(s.net_cad)} ${badge}</div>
   <div class="k" style="margin-bottom:6px">${s.net_mwh>=0?'Net export':'Net import'} ${G(Math.abs(s.net_mwh))}</div>
   <div class="fl"><span>Exports</span><span>${G(s.exp_mwh)}</span><span>${C(s.exp_cad)}</span><span class="k" title="average C$/MWh">@${s.avg_exp_price==null?'–':Math.round(s.avg_exp_price)}</span>
-  <span>Imports</span><span>${G(s.imp_mwh)}</span><span>${C(s.imp_cad)}</span><span class="k" title="average C$/MWh">@${s.avg_imp_price==null?'–':Math.round(s.avg_imp_price)}</span>
-  ${loadRow(p)}</div>
-  ${loadStats(p,k)}${ly}${arb}</div>`;}).join('');
+  <span>Imports</span><span>${G(s.imp_mwh)}</span><span>${C(s.imp_cad)}</span><span class="k" title="average C$/MWh">@${s.avg_imp_price==null?'–':Math.round(s.avg_imp_price)}</span></div>
+  ${flip}${ly}${br}</div>`;}).join('');
 }
 // BC internal load (system-wide, not valued in C$); shown in the All interties view only
 const lastDay_=s=>D(new Date(new Date(s)-1).toISOString()).replace(/, \d{4}$/,'');
@@ -382,20 +518,25 @@ function mainChart(d){
  const M=d.monthly,AM=Object.fromEntries((d.arbitrage_estimate?.monthly||[]).map(m=>[m.month,m]));
  const lab=M.map(m=>new Date(m.month+'-15').toLocaleDateString('en-CA',{month:'short',year:'2-digit'})+(m.est?'*':''));
  let ds,y;
+ const roll=keyFn=>{const out=M.map(()=>null);const q=[];let acc=0,n=0;
+  M.forEach((m,i)=>{const v=keyFn(m);q.push(v);if(v!=null){acc+=v;n++;}if(q.length>12){const old=q.shift();if(old!=null){acc-=old;n--;}}out[i]=n===12?acc:null;});return out;};
  if(mode==='cad'){
   ds=[];
   if(view!=='ab')ds.push({type:'bar',label:'BC–US net',data:M.map(m=>m.us_net_cad),backgroundColor:'#2563eb',stack:'n'});
   if(view!=='us')ds.push({type:'bar',label:'BC–Alberta net',data:M.map(m=>m.ab_net_cad),backgroundColor:'#d97706',stack:'n'});
+  const netCad=m=>view==='us'?m.us_net_cad:view==='ab'?m.ab_net_cad:((m.us_net_cad||0)+(m.ab_net_cad||0));
+  if(showRoll)ds.push({type:'line',label:'12-month rolling net',data:roll(netCad),borderColor:'#334155',backgroundColor:'#334155',pointRadius:0,borderWidth:2,tension:.2,stack:'roll',yAxisID:'y'});
   if(view==='total'){ds.push({type:'line',label:'Of the total: gain from better-timed trades',data:M.map(m=>AM[m.month]?AM[m.month].timing_cad:null),borderColor:'#7c3aed',backgroundColor:'#7c3aed',borderDash:[5,4],pointRadius:2,tension:.25,stack:'t'});
    ds.push({type:'line',label:'Of the total: margin on matched import/export volume',data:M.map(m=>AM[m.month]?AM[m.month].spread_cad:null),borderColor:'#a78bfa',backgroundColor:'#a78bfa',borderDash:[2,3],pointRadius:2,tension:.25,stack:'s',hidden:true});}
   y={stacked:true,ticks:{callback:v=>C(v)}};
  }else{
   if(view==='total'){ds=[{type:'bar',label:'Exports',data:M.map(m=>m.exp_mwh/1000),backgroundColor:'#0f8a5f'},{type:'bar',label:'Imports (shown negative)',data:M.map(m=>-m.imp_mwh/1000),backgroundColor:'#c2410c'}];
+   if(showRoll)ds.push({type:'line',label:'12-month rolling net',data:roll(m=>((m.us_net_mwh||0)+(m.ab_net_mwh||0))/1000),borderColor:'#334155',backgroundColor:'#334155',pointRadius:0,borderWidth:2,tension:.2,stack:'roll'});
    const lp=M.map(m=>m.load_partial);
    ds.push({type:'line',label:'Internal load (not valued)',data:M.map(m=>m.load_mwh!=null?m.load_mwh/1000:null),borderColor:'#0e7490',backgroundColor:'#0e7490',
      pointRadius:M.map((m,i)=>lp[i]?4:2),pointStyle:M.map((m,i)=>lp[i]?'rectRot':'circle'),tension:.25,stack:'load',order:-1});
    ds.push({type:'line',label:'BC generation (derived)',data:M.map(m=>m.gen_mwh!=null?m.gen_mwh/1000:null),borderColor:'#64748b',backgroundColor:'#64748b',borderDash:[5,4],pointRadius:2,tension:.25,stack:'gen',order:-1,hidden:true});}
-  else{const key=view==='us'?'us_net_mwh':'ab_net_mwh';ds=[{type:'bar',label:'Net GWh (+ = export)',data:M.map(m=>m[key]/1000),backgroundColor:M.map(m=>m[key]>=0?'#0f8a5f':'#c2410c')}];}
+  else{const key=view==='us'?'us_net_mwh':'ab_net_mwh';ds=[{type:'bar',label:'Net GWh (green = export, red = import)',data:M.map(m=>m[key]/1000),backgroundColor:M.map(m=>m[key]>=0?'#0f8a5f':'#c2410c')}];if(showRoll)ds.push({type:'line',label:'12-month rolling net',data:roll(m=>m[key]/1000),borderColor:'#334155',backgroundColor:'#334155',pointRadius:0,borderWidth:2,tension:.2,stack:'roll'});}
   y={stacked:true,title:{display:true,text:'GWh'}};
  }
  const fmt=mode==='cad'?C:v=>(v==null||isNaN(v))?'–':v.toFixed(0)+' GWh';
@@ -466,7 +607,13 @@ function loadSec(d){
   ${an.map(a=>`<tr><td>${a.year}${a.partial?' <span class="k">to date</span>':''}</td><td>${a.load_gwh.toLocaleString()}</td><td>${a.avg_mw.toLocaleString()}</td><td>${a.peak_mw.toLocaleString()}</td><td>${HR(a.peak_t,false)}</td><td>${PCT(a.avg_mw/a.peak_mw*100)}</td></tr>`).join('')}</table></div></details>`;
  const lm=(sc.months||[]).slice(-1)[0];
  const chk=sc.mean_diff_pct!=null?`<li><b>Cross-check:</b> derived generation vs <a href="${sc.source}">Statistics Canada</a> BC monthly generation, ${sc.months.length} complete months: on average ${sc.mean_diff_pct}% (range ${sc.min_diff_pct}% to ${sc.max_diff_pct}%). StatCan also counts generation outside the telemetered grid load (off-grid, some industrial self-supply), so a few % lower is expected.${lm&&lm.statcan_hydro_pct!=null?` Hydro was ${PCT(lm.statcan_hydro_pct)} of BC generation in ${lm.month} (StatCan).`:''}</li>`:'';
- return `<div class="wrap">${rec}${req}</div>${hist}<ul class="notes" style="margin-top:8px">
+ const per=[['mtd','This month'],['prev_month','Last month'],['ytd','Year to date']].map(([k,lab])=>{
+  const l=(P[k]&&P[k].load)||{};
+  if(!l.load_mwh)return `<tr><td>${lab}</td><td colspan="4" class="k">${lthru(P[k]||{})?'Load data '+lthru(P[k])+' · ':' '}not posted yet</td></tr>`;
+  return `<tr><td>${lab}${lthru(P[k])?` <span class="k">${lthru(P[k])}</span>`:''}</td><td>${MW(l.peak_load_mw)}<br><span class="k">${HR(l.peak_load_t,false)}</span></td><td>${MW(l.peak_gen_mw)}<br><span class="k">${HR(l.peak_gen_t,false)}</span></td><td>${PCT(l.load_factor*100)}</td><td>${G(l.gen_mwh)} (${PCT(l.gen_to_load_pct)} of load)</td></tr>`;
+ }).join('');
+ const perTbl=`<table class="ctx" style="margin-top:8px"><tr><th>Period</th><th>Peak load</th><th>Peak generation (derived)</th><th>Load factor</th><th>Generation</th></tr>${per}</table>`;
+ return `<div class="wrap">${perTbl}${rec}${req}</div>${hist}<ul class="notes" style="margin-top:8px">
  <li><b>Internal load</b>: BC Hydro balancing-authority hourly load (all of BC's interconnected grid, incl. losses). Not valued in C$. <b>Generation</b> = load + net exports on the tie lines, so load = generation + net imports by construction.</li>
  <li><b>Peaks are hourly averages.</b> ${X.instantaneous}</li>${chk}
  <li>Load factor = average ÷ peak hourly load. "Load met by net imports" sums only hours when BC was a net importer. Data: <a href="load_hourly.csv">load_hourly.csv</a>.</li></ul>`;
@@ -492,31 +639,35 @@ function peakSec(d){
   const ld=l.status==='pending'?`${PEND}<br><span class="k">baseline ${MW(l.baseline.avg_mw)} avg</span>`
    :`${MW(l.event.avg_mw)} avg · ${MW(l.event.max_mw)} max${part(l,n)}<br><span class="k">baseline ${MW(l.baseline.avg_mw)} / ${MW(l.baseline.max_mw)}${l.delta.avg_mw!=null?` · Δ ${SG(l.delta.avg_mw,MWs)}`:''}</span>`;
   const pk=l.event.max_pct_of_365d_peak!=null?`${PCT(l.event.max_pct_of_365d_peak)}<br><span class="k">higher than ${PCT(l.event.max_pctile_of_365d_hours)} of hours</span>`:`${PEND}<br><span class="k">baseline ${PCT(l.baseline.max_pct_of_365d_peak)}</span>`;
-  const nx=t.status==='pending'?PEND:`${MWs(t.event.avg_net_mw)}${part(t,n)}<br><span class="k">baseline ${MWs(t.baseline.avg_net_mw)}${t.delta.avg_net_mw!=null?` · Δ ${SG(t.delta.avg_net_mw,MWs)}`:''}</span>`;
+  const nx=t.status==='pending'?PEND:`${flowWords(t.event.avg_net_mw)}${part(t,n)}<br><span class="k">baseline ${flowWords(t.baseline.avg_net_mw)}${t.delta.avg_net_mw!=null?` · Δ ${SG(t.delta.avg_net_mw,MWs)}`:''}</span>`;
   const pr=ab.event.avg_price_cad==null?PEND:`${P(ab.event.avg_price_cad)}${ab.price_est_hours?` <span class="badge" title="${ab.price_est_hours} event hour(s) use the last published pool price (carried forward) until AESO posts the hour">partly est.</span>`:''}<br><span class="k">baseline ${P(ab.baseline.avg_price_cad)}</span>`;
   const est=(e.trade.us.est_hours||e.trade.ab.est_hours)?` <span class="badge" title="Some event hours use a carried-forward price (Mid-C is published days late) or estimated flows">partly est.</span>`:'';
   const vl=t.status==='pending'?PEND:`<b class="${t.event.value_cad>=0?'pos':'neg'}">${C(t.event.value_cad)}</b>${est}${part(t,n)}<br><span class="k">baseline ${C(t.baseline.value_cad)}${t.delta.value_cad!=null?` · Δ ${SG(t.delta.value_cad,C)}`:''}</span>`;
-  cardsM.push(`<div class="card evc${i===evSel?' sel':''}" data-i="${i}"><h3>${day} <span class="k">${win(e)}</span></h3>${[['BC load',ld],['Event peak hour, % of 365-day peak',pk],['Net export, both ties',nx],['Alberta price',pr],['Trade value, event hours (est.)',vl]].map(([a,b])=>`<div class="evr"><span class="k">${a}</span><span>${b}</span></div>`).join('')}</div>`);
+  cardsM.push(`<div class="card evc${i===evSel?' sel':''}" data-i="${i}"><h3>${day} <span class="k">${win(e)}</span></h3>${[['BC load',ld],['Event peak hour, % of 365-day peak',pk],['Flow, both ties',nx],['Alberta price',pr],['Trade value, event hours (est.)',vl]].map(([a,b])=>`<div class="evr"><span class="k">${a}</span><span>${b}</span></div>`).join('')}</div>`);
   return `<tr data-i="${i}" class="${i===evSel?'sel':''}">${head}<td>${ld}</td><td>${pk}</td><td>${nx}</td><td>${pr}</td><td>${vl}</td></tr>`;}).join('');
  const e=E[evSel];
  let det='';
  if(e&&e.status!=='upcoming'){
   const n=e.hour_ending.length,tr=e.trade,dt_=e.day_total;
-  const r=(lab,t,price)=>`<tr><td>${lab}</td><td>${t.status==='pending'?PEND:MWs(t.event.avg_net_mw)+part(t,n)}</td><td>${MWs(t.baseline.avg_net_mw)}</td><td>${t.status==='pending'?'–':Math.round(t.event.net_mwh).toLocaleString()+' MWh'}</td><td>${t.baseline.net_mwh==null?'–':Math.round(t.baseline.net_mwh).toLocaleString()+' MWh'}</td><td>${price}</td><td>${t.status==='pending'?'–':C(t.event.value_cad)}</td><td>${C(t.baseline.value_cad)}</td><td>${SG(t.delta.value_cad,C)}</td></tr>`;
+  const flowCell=(t,pair)=>t.status==='pending'?PEND:(pair==='us'?flowTie(t.event.avg_net_mw,'BC','US'):pair==='ab'?flowTie(t.event.avg_net_mw,'BC','Alberta'):flowWords(t.event.avg_net_mw))+part(t,n);
+  const baseCell=(t,pair)=>pair==='us'?flowTie(t.baseline.avg_net_mw,'BC','US'):pair==='ab'?flowTie(t.baseline.avg_net_mw,'BC','Alberta'):flowWords(t.baseline.avg_net_mw);
+  const r=(lab,t,price,pair)=>`<tr><td>${lab}</td><td>${flowCell(t,pair)}</td><td>${baseCell(t,pair)}</td><td>${t.status==='pending'?'–':Math.round(t.event.net_mwh).toLocaleString()+' MWh'}</td><td>${t.baseline.net_mwh==null?'–':Math.round(t.baseline.net_mwh).toLocaleString()+' MWh'}</td><td>${price}</td><td>${t.status==='pending'?'–':C(t.event.value_cad)}</td><td>${C(t.baseline.value_cad)}</td><td>${SG(t.delta.value_cad,C)}</td></tr>`;
   det=`<div class="wrap" id="evdet"><table class="ctx">
   <tr><th>${new Date(e.date+'T12:00:00Z').toLocaleDateString('en-CA',{timeZone:'UTC',month:'short',day:'numeric'})}, event hours</th><th>Net export<br><span class="k">event avg</span></th><th>Net export<br><span class="k">baseline avg</span></th><th>Energy<br><span class="k">event</span></th><th>Energy<br><span class="k">baseline</span></th><th>Hub price<br><span class="k">event / baseline</span></th><th>Value<br><span class="k">event</span></th><th>Value<br><span class="k">baseline</span></th><th>Value<br><span class="k">Δ</span></th></tr>
-  ${r('BC ⇄ US <span class="k">(Mid-C, daily price)</span>',tr.us,`${P(tr.us.event.avg_price_cad)} / ${P(tr.us.baseline.avg_price_cad)}${tr.us.price_est_hours?' <span class="badge" title="Mid-C for this day is not published yet; the last published day is carried forward">carried fwd</span>':''}`)}
-  ${r('BC ⇄ Alberta <span class="k">(AESO, hourly price)</span>',tr.ab,`${P(tr.ab.event.avg_price_cad)} / ${P(tr.ab.baseline.avg_price_cad)}${tr.ab.price_est_hours?` <span class="badge" title="${tr.ab.price_est_hours} hour(s) carried forward until AESO posts">partly est.</span>`:''}`)}
-  ${r('<b>Both ties</b>',tr.total,'')}
+  ${r('BC ⇄ US <span class="k">(Mid-C, daily price)</span>',tr.us,`${P(tr.us.event.avg_price_cad)} / ${P(tr.us.baseline.avg_price_cad)}${tr.us.price_est_hours?' <span class="badge" title="Mid-C for this day is not published yet; the last published day is carried forward">carried fwd</span>':''}`,'us')}
+  ${r('BC ⇄ Alberta <span class="k">(AESO, hourly price)</span>',tr.ab,`${P(tr.ab.event.avg_price_cad)} / ${P(tr.ab.baseline.avg_price_cad)}${tr.ab.price_est_hours?` <span class="badge" title="${tr.ab.price_est_hours} hour(s) carried forward until AESO posts">partly est.</span>`:''}`,'ab')}
+  ${r('<b>Both ties</b>',tr.total,'','both')}
   </table></div>
   <div class="ld">Whole event day${dt_.status==='partial'?` so far (${dt_.hours} of 24 h)`:''}: <b class="${dt_.event_day_value_cad>=0?'pos':'neg'}">${C(dt_.event_day_value_cad)}</b> · ${dt_.status==='partial'?`baseline days, same hours: ${C(dt_.baseline_same_hours_value_cad)} <span class="k">(full-day baseline ${C(dt_.baseline_day_value_cad)}, ${dt_.baseline_days} days)</span>`:`baseline days: ${C(dt_.baseline_day_value_cad)} <span class="k">(${dt_.baseline_days} days)</span>`}</div>
   <div class="ld k">Baseline days: ${e.baseline_days.map(x=>new Date(x+'T12:00:00Z').toLocaleDateString('en-CA',{timeZone:'UTC',month:'short',day:'numeric'})).join(', ')} (load: ${e.load.baseline.days} of them posted). Load % of peak uses the highest hour in the prior 365 days: ${MW(e.load.peak_365d_mw)} (${HR(e.load.peak_365d_t)}).${e.source?` Source: ${e.source}.`:''}${e.note?` ${e.note}`:''}</div>
   <h3 class="sub">Conditions when the event was called</h3>${condSec(e)}
   <div class="chart" id="evchartw"><canvas id="evchart"></canvas></div>`;
  }else if(e){det=`<h3 class="sub">Conditions when the event was called</h3>${condSec(e)}`;}
+ const open=document.getElementById('ev-detail')&&document.getElementById('ev-detail').open;
+ const detBlock=det?`<details id="ev-detail"${open?' open':''}><summary>Event detail: hourly trade, conditions at notice time, similar days</summary>${det}</details>`:'';
  el.innerHTML=`<div class="guide"><b>How to read this.</b> Each BC Hydro peak event is compared with the same hours on ordinary recent weekdays (the baseline). If BC load during the event is ordinary for the season but exports and prices jump, the event lines up with trading. If load is near its yearly peak, it lines up with grid need. Both can be true at once. The conditions panel shows what was publicly visible when the notice went out.</div>
- <div class="evm">${cardsM.join('')}</div><div class="wrap evt"><table class="ctx ev"><tr><th>Event (BC time)</th><th>BC load<br><span class="k">event vs baseline</span></th><th>Event peak hour<br><span class="k">% of 365-day peak</span></th><th>Net export, both ties<br><span class="k">avg MW, + = BC exporting</span></th><th>Alberta price<br><span class="k">avg C$/MWh</span></th><th>Trade value, both ties<br><span class="k">event hours, est.</span></th></tr>${rows}</table></div>
- ${det}
+ <div class="evm">${cardsM.join('')}</div><div class="wrap evt"><table class="ctx ev"><tr><th>Event (BC time)</th><th>BC load<br><span class="k">event vs baseline</span></th><th>Event peak hour<br><span class="k">% of 365-day peak</span></th><th>Flow, both ties<br><span class="k">average, latest event hours</span></th><th>Alberta price<br><span class="k">avg C$/MWh</span></th><th>Trade value, both ties<br><span class="k">event hours, est.</span></th></tr>${rows}</table></div>
+ ${detBlock}
  <ul class="notes" style="margin-top:8px">
  <li><b>Baseline:</b> ${X.baseline_method}</li>
  <li>Trade values are market-price estimates (MWh × hub price), not Powerex or BC Hydro settlements. The US tie has one Mid-C price per day, so hour-to-hour timing inside an event only means something on the Alberta tie.</li>
@@ -581,7 +732,7 @@ function evHourly(e){
   g.fillStyle='#7c3aed';g.font='600 11px system-ui';g.fillText('event',l+4,a.top+12);g.restore();}};
  const noLoad=H.every(h=>h.load_mw==null);
  evChart=new Chart(document.getElementById('evchart'),{type:'bar',plugins:[shade],data:{labels:lab,datasets:[
-  {type:'bar',label:'Net export, both ties (MW)',data:H.map(h=>h.net_mw),backgroundColor:H.map(h=>h.net_mw>=0?'#0f8a5f':'#c2410c'),yAxisID:'y',order:3},
+  {type:'bar',label:'Net export (green = BC exporting, red = importing)',data:H.map(h=>h.net_mw),backgroundColor:H.map(h=>h.net_mw>=0?'#0f8a5f':'#c2410c'),yAxisID:'y',order:3},
   {type:'line',label:'Baseline net export (MW)',data:H.map(h=>h.base_net_mw),borderColor:'#6b7280',borderDash:[4,3],pointRadius:0,borderWidth:1.5,yAxisID:'y',order:2},
   {type:'line',label:noLoad?'BC load (MW) – pending':'BC load (MW)',data:H.map(h=>h.load_mw),borderColor:'#0e7490',backgroundColor:'#0e7490',pointRadius:2,tension:.2,yAxisID:'yl',order:1},
   {type:'line',label:'Baseline BC load (MW)',data:H.map(h=>h.base_load_mw),borderColor:'#67b7c7',borderDash:[5,4],pointRadius:0,borderWidth:1.5,yAxisID:'yl',order:1},
@@ -597,22 +748,21 @@ function evHourly(e){
 // ----- At a glance, teacup map, reservoirs (driven by dashboard.json) -----
 const CUP={
  williston:{top:40,bot:17.6,H:90,color:'#0e7490',lab:'end',lx:-50,ly:-84},
- dinosaur:{top:13.6,bot:6.0,H:36,color:'#64748b',lab:'middle',lx:0,ly:18},
- sitec:{top:14.0,bot:6.2,H:38,color:'#7c3aed',lab:'callout'},
+ dinosaur:{top:13.6,bot:6.0,H:36,color:'#0e7490',lab:'middle',lx:0,ly:18},
+ sitec:{top:14.0,bot:6.2,H:38,color:'#0e7490',lab:'callout'},
  mica:{top:28.4,bot:12.5,H:65.4,color:'#0e7490',lab:'end',lx:-38.4,ly:-59.4},
- arrow:{top:24.1,bot:10.6,H:56.1,color:'#d97706',lab:'end',lx:-34.1,ly:-50.1},
- duncan:{top:16.3,bot:7.2,H:39.4,color:'#2563eb',lab:'start',lx:26.3,ly:-33.4},
- kootenay:{top:16.8,bot:7.4,H:40,color:'#0f766e',lab:'start',lx:20,ly:-36}
+ arrow:{top:24.1,bot:10.6,H:56.1,color:'#0e7490',lab:'end',lx:-34.1,ly:-50.1},
+ duncan:{top:16.3,bot:7.2,H:39.4,color:'#0e7490',lab:'end',lx:-22,ly:-34},
+ kootenay:{top:16.8,bot:7.4,H:40,color:'#0e7490',lab:'start',lx:24,ly:18}
 };
 function fmtGwh(n){if(n==null)return 'n/a';const x=Number(n);return (x>=100?Math.round(x).toLocaleString():x.toFixed(1))+' GWh';}
-function fmtD7(d){if(!d||d.pct_pt==null)return '';const s=d.pct_pt>0?'up':d.pct_pt<0?'down':'unchanged';const a=Math.abs(d.pct_pt);
- return s==='unchanged'?'unchanged this week':`${s} ${a.toFixed(1)} pt this week`;}
+function fmtD7(d){if(!d||d.pct_pt==null)return '';const a=Math.round(Math.abs(d.pct_pt));if(!a)return 'unchanged this week';return (d.pct_pt>0?'up':'down')+' '+a+' pt this week';}
 function kpiSec(d){
  const el=document.getElementById('kpis');if(!el)return;
  const p=d.periods&&d.periods.mtd, tot=p&&p.total||{};
  const res=d.reservoirs||{}, proj=res.projects||{};
  const bits=[];
- if(proj.williston&&proj.williston.gwh!=null)bits.push('Williston '+fmtGwh(proj.williston.gwh)+(proj.williston.pct!=null?` (${proj.williston.pct}% of licence live)`:''));
+ if(proj.williston&&proj.williston.gwh!=null)bits.push('Williston '+fmtGwh(proj.williston.gwh)+(proj.williston.pct!=null?` (${pctW(proj.williston.pct)} of licence live)`:''));
  if(proj.mica&&proj.mica.gwh!=null)bits.push('Mica '+fmtGwh(proj.mica.gwh));
  if(proj.arrow&&proj.arrow.gwh!=null)bits.push('Arrow '+fmtGwh(proj.arrow.gwh));
  const small=[proj.sitec,proj.dinosaur].filter(x=>x&&x.gwh!=null).reduce((s,x)=>s+Number(x.gwh),0);
@@ -636,8 +786,15 @@ function kpiSec(d){
        ld?MW(ld.peak_mw):'n/a',
        ld?`Peak on ${D(ld.date+'T12:00:00Z')}${ld.peak_pct_of_365d!=null?` — ${ld.peak_pct_of_365d}% of the 365-day peak (${MW(ld.peak_365d_mw)})`:''}. Posted each business day for the previous day.`:'Load not in this dashboard yet.'),
   card(`Last Peak Saver <span class="k">${last?evDay+', '+evWin:''}</span>`,
-       evDelta==null?'n/a':((evDelta>=0?'+':'')+C(evDelta)),
-       last?(last.load&&last.load.status==='pending'?'Event-hour trade vs weekday baseline. BC load still pending.':'Event-hour trade vs weekday baseline.'):'No peak event listed yet.',
+       evDelta==null?'n/a':((evDelta>0?'+':'')+C(evDelta)+' vs a normal weekday'),
+       (function(){
+         if(!last)return 'No peak event listed yet.';
+         const ev=last.trade&&last.trade.total, evv=ev&&ev.event&&ev.event.value_cad, bv=ev&&ev.baseline&&ev.baseline.value_cad;
+         const pend=last.load&&last.load.status==='pending'?' BC load still pending.':'';
+         if(evv==null||bv==null)return 'Event-hour trade vs weekday baseline.'+pend;
+         const evWord=evv>=0?'earned':'lost', bWord=bv>=0?'earned':'lost';
+         return `Event hours ${evWord} ${C(Math.abs(evv))}; the same hours on normal weekdays ${bWord} ${C(Math.abs(bv))}.`+pend;
+       })(),
        evDelta==null?'':(evDelta>=0?'pos':'neg'))
  ].join('');
 }
@@ -665,25 +822,28 @@ function teacupMap(d){
   }
   const lab=g.querySelector('.cup-lab');
   if(lab){
-    const name={williston:'Williston',dinosaur:'Dinosaur',sitec:'Site C',mica:'Mica / Kinbasket',arrow:'Arrow',duncan:'Duncan',kootenay:'Kootenay Lake'}[id];
-    const l1=pct==null?'no public level in this run':(pct+'%'+(p.d7&&p.d7.pct_pt!=null?`  ·  ${fmtD7(p.d7)}`:''));
-    const l2=p.gwh!=null?('est. '+fmtGwh(p.gwh)):(id==='duncan'?'no local generation':id==='kootenay'?(p.ft_below_ijc_max!=null?(p.ft_below_ijc_max>=0?p.ft_below_ijc_max.toFixed(2)+' ft below IJC max':Math.abs(p.ft_below_ijc_max).toFixed(2)+' ft above IJC max'):'IJC 6-ft band'):'');
-    const l3=id==='williston'&&typ!=null?(`typical ${new Date((p.as_of||d.generated)).toLocaleDateString('en-CA',{timeZone:'Etc/GMT+7',month:'short',day:'numeric'})}: ${Math.round(typ)}%`)
+    const name={williston:'Williston',dinosaur:'Dinosaur',sitec:'Site C',mica:'Mica / Kinbasket',arrow:'Arrow',duncan:'Duncan (DDM)',kootenay:'Kootenay Lake'}[id];
+    const l1=pct==null?'no public level in this run':(pctW(pct)+(p.d7&&p.d7.pct_pt!=null?`  ·  ${fmtD7(p.d7)}`:''));
+    const l2=p.gwh!=null?('est. '+fmtGwh(p.gwh)):(id==='duncan'?'0 MW · 1967 · no local generation':id==='kootenay'?(p.ft_below_ijc_max!=null?(p.ft_below_ijc_max>=0?p.ft_below_ijc_max.toFixed(2)+' ft below IJC max':Math.abs(p.ft_below_ijc_max).toFixed(2)+' ft above IJC max'):'IJC 6-ft band'):'');
+    const l3=id==='williston'&&typ!=null?(`typical ${new Date((p.as_of||d.generated)).toLocaleDateString('en-CA',{timeZone:'Etc/GMT+7',month:'short',day:'numeric'})}: ${pctW(typ)}`)
             :id==='sitec'?'1.8 m operating range · Naache Mege'
             :id==='dinosaur'?'re-regulating pond'
             :id==='duncan'?'storage only'
             :id==='kootenay'?'Corra Linn · FortisBC':'';
-    const lines=[[name,12.8,700], [l1,10.7,500], l2?[l2,10.7,500]:null, l3?[l3,9.5,400]:null].filter(Boolean);
+    const l4=(id!=='williston'&&id!=='kootenay')?'no typical line yet':'';
+    const lines=[[name,12.8,700,false], [l1,10.7,500,false], l2?[l2,10.7,500,true]:null, l3?[l3,9.5,400,true]:null, l4?[l4,9.5,400,true]:null].filter(Boolean);
+    const txt=(L,i,x,y,anchor)=>{
+      const fillc=i===0?'#1d2330':(L[2]<500?'#6b7280':'#374151');
+      const cls=L[3]?' class="cup-lab-sec"':'';
+      const common=`${cls} x="${x}" y="${y}" text-anchor="${anchor}" font-size="${L[1]}" font-weight="${L[2]>=700?700:500}"`;
+      return `<text${common} fill="white" stroke="white" stroke-width="3" paint-order="stroke">${L[0]}</text>`+
+             `<text${common} fill="${fillc}">${L[0]}</text>`;
+    };
     if(cfg.lab==='callout'){
-      lab.innerHTML=lines.map((L,i)=>`<text x="0" y="${i*15}" font-size="${L[1]}" font-weight="${L[2]>=700?700:500}" fill="${i===0?'#1d2330':i===3?'#6b7280':'#374151'}">${L[0]}</text>`).join('');
+      lab.innerHTML=lines.map((L,i)=>txt(L,i,0,i*15,'start')).join('');
     }else{
       const anchor=cfg.lab, x=cfg.lx, y0=cfg.ly;
-      lab.innerHTML=lines.map((L,i)=>{
-        const yy=y0+i*14.2;
-        const fillc=i===0?'#1d2330':(i===3||L[1]<10?'#6b7280':'#374151');
-        return `<text x="${x}" y="${yy.toFixed(1)}" text-anchor="${anchor}" font-size="${L[1]}" font-weight="${L[2]>=700?700:500}" fill="white" stroke="white" stroke-width="3" paint-order="stroke">${L[0]}</text>`+
-               `<text x="${x}" y="${yy.toFixed(1)}" text-anchor="${anchor}" font-size="${L[1]}" font-weight="${L[2]>=700?700:500}" fill="${fillc}">${L[0]}</text>`;
-      }).join('');
+      lab.innerHTML=lines.map((L,i)=>txt(L,i,x,(y0+i*14.2).toFixed(1),anchor)).join('');
     }
     g.setAttribute('aria-label', name+' '+(pct!=null?Math.round(pct)+' percent full':'no data'));
   }
@@ -696,71 +856,77 @@ function teacupMap(d){
  }
  const abLine=document.getElementById('tie-ab-line'), abLab=document.getElementById('tie-ab-label'), abSub=document.getElementById('tie-ab-sub');
  if(abLine&&ab!=null){
-   if(ab>=0){abLine.setAttribute('x1','687.4');abLine.setAttribute('x2','722.8');abLab.textContent=`BC → AB  ${Math.round(ab)} MW`;abSub.textContent='export, latest hour';}
-   else{abLine.setAttribute('x1','722.8');abLine.setAttribute('x2','687.4');abLab.textContent=`AB → BC  ${Math.round(Math.abs(ab))} MW`;abSub.textContent='BC importing, latest hour';}
+   if(ab>=0){abLine.setAttribute('x1','1036');abLine.setAttribute('x2','1110');abLab.textContent=`BC → AB  ${Math.round(ab)} MW`;abSub.textContent='export, latest hour';}
+   else{abLine.setAttribute('x1','1110');abLine.setAttribute('x2','1036');abLab.textContent=`AB → BC  ${Math.round(Math.abs(ab))} MW`;abSub.textContent='BC importing, latest hour';}
  }
  const cap=document.getElementById('map-note');
  if(cap){
   const w=proj.williston||{};
-  const wup=w.pct_wup!=null?` A tighter Water Use Plan floor of 654.41 m would read ${w.pct_wup}% instead of ${w.pct}%.`:'';
+  const wup=w.pct_wup!=null?` A tighter Water Use Plan floor of 654.41 m would read ${pctW(w.pct_wup)} instead of ${pctW(w.pct)}.`:'';
   const k=proj.kootenay||{};
   const koot=k.ijc_max_ft!=null?` Kootenay Lake percent is of the 6-ft IJC band (1739.32–1745.32 ft at Queens Bay); the dashed line is today’s IJC maximum (${k.ijc_max_ft} ft), not a historical median.`:'';
-  cap.textContent=`Williston percent uses the licensed live range (642.04–672.08 m, 32 MAF).${wup}${koot} Williston’s “typical for this date” is the median of 45 years of Water Survey of Canada daily levels at Schooler Creek, converted from the gauge datum (offset calibrated on 20 Nov 2026). Energy is an engineering estimate (η = 0.88, mid-slice head), not a dispatch model. Coastal and Island reservoirs are omitted to keep the map readable.`;
+  cap.textContent=`Williston percent uses the licensed live range (642.04–672.08 m, 32 MAF).${wup}${koot} Williston’s “typical for this date” is the median of 45 years of Water Survey of Canada daily levels at Schooler Creek, converted from the gauge datum (offset calibrated on 20 Nov 2026). Grey squares are generating plants with nameplate capacity, not live teacups. Libby is drawn as a static cup (live CWMS level is not wired). Seven Mile and Waneta are shown without a published capacity on this map. Energy is an engineering estimate (η = 0.88, mid-slice head), not a dispatch model. Coastal and Island reservoirs are omitted to keep the map readable.`;
  }
 }
+let wTyp=null,wTypWait=false;
 let resChart;
 function resSec(d){
  const res=d.reservoirs||{}, proj=res.projects||{};
- const tb=document.getElementById('restable');
- if(tb){
-  const order=['williston','dinosaur','sitec','mica','arrow','duncan','kootenay'];
-  const srcShort=p=>{
-    const s=(p.source||'').toString();
-    if(s.includes('wsc:08NH064')||s.includes('08NH064')||s.includes('wateroffice')||s.includes('weather.gc.ca')){
-      const u=p.elev_ft!=null?` · ${Number(p.elev_ft).toFixed(2)} ft`: (p.elev_m!=null?` · ${p.elev_m} m`:'');
-      return 'WSC 08NH064'+u;
-    }
-    if(s.includes('hydromet:wsc')||s.includes('wsc'))return 'BC Hydro wsc.txt'+(p.elev_m!=null?` · ${p.elev_m} m`:'');
-    if(s.includes('hydromet:dir'))return 'BC Hydro dir.txt'+(p.elev_m!=null?` · ${p.elev_m} m`:'');
-    if(s.includes('hydromet:cwy')||s.includes('hydromet:cfc'))return 'BC Hydro cwy.txt'+(p.elev_m!=null?` · ${p.elev_m} m`:'');
-    if(s.includes('cwms')||s.includes('hydromet:grt')){
-      const u=p.elev_ft!=null?` · ${Number(p.elev_ft).toLocaleString(undefined,{maximumFractionDigits:0})} ft`: (p.elev_m!=null?` · ${p.elev_m} m`:'');
-      return (s.includes('hydromet:grt')?'CWMS + grt.txt':'CWMS')+u;
-    }
-    return p.source|| (p.ok?'':'no data');
-  };
-  const rows=order.map(id=>{
-    const p=proj[id]||{name:id,ok:false};
-    const name=(p.name||id)+(id==='sitec'?' (Naache Mege)':'');
-    return `<tr><td><b>${name}</b></td><td>${p.pct!=null?p.pct+'%':'n/a'}</td><td>${p.d7&&p.d7.pct_pt!=null?fmtD7(p.d7):'n/a'}</td><td>${p.gwh!=null?fmtGwh(p.gwh):'n/a'}</td><td>${srcShort(p)}</td></tr>`;
-  }).join('');
-  const html=`<tr><th>Reservoir</th><th>% full</th><th>7-day change</th><th>Est. stored energy</th><th>Source</th></tr>`+rows;
-  tb.innerHTML=html;
-  const mini=document.getElementById('restable-mini');if(mini)mini.innerHTML=html;
- }
+ const order=['williston','dinosaur','sitec','mica','arrow','duncan','kootenay'];
+ const srcShort=p=>{
+  const s=(p.source||'').toString();
+  if(s.includes('wsc:08NH064')||s.includes('08NH064')||s.includes('wateroffice')||s.includes('weather.gc.ca')){
+   const u=p.elev_ft!=null?` · ${Number(p.elev_ft).toFixed(2)} ft`: (p.elev_m!=null?` · ${p.elev_m} m`:'');
+   return 'WSC 08NH064'+u;
+  }
+  if(s.includes('hydromet:wsc')||s.includes('wsc'))return 'BC Hydro wsc.txt'+(p.elev_m!=null?` · ${p.elev_m} m`:'');
+  if(s.includes('hydromet:dir'))return 'BC Hydro dir.txt'+(p.elev_m!=null?` · ${p.elev_m} m`:'');
+  if(s.includes('hydromet:cwy')||s.includes('hydromet:cfc'))return 'BC Hydro cwy.txt'+(p.elev_m!=null?` · ${p.elev_m} m`:'');
+  if(s.includes('cwms')||s.includes('hydromet:grt')){
+   const u=p.elev_ft!=null?` · ${Number(p.elev_ft).toLocaleString(undefined,{maximumFractionDigits:0})} ft`: (p.elev_m!=null?` · ${p.elev_m} m`:'');
+   return (s.includes('hydromet:grt')?'CWMS + grt.txt':'CWMS')+u;
+  }
+  return p.source|| (p.ok?'':'no data');
+ };
+ const rows=order.map(id=>{
+  const p=proj[id]||{name:id,ok:false};
+  const name=(p.name||id)+(id==='sitec'?' (Naache Mege)':'');
+  return `<tr><td><b>${name}</b></td><td>${p.pct!=null?pctW(p.pct):'n/a'}</td><td>${p.d7&&p.d7.pct_pt!=null?fmtD7(p.d7):'n/a'}</td><td>${p.gwh!=null?fmtGwh(p.gwh):'n/a'}</td><td>${srcShort(p)}</td></tr>`;
+ }).join('');
+ const html=`<tr><th>Reservoir</th><th>% full</th><th>7-day change</th><th>Est. stored energy</th><th>Source</th></tr>`+rows;
+ const mini=document.getElementById('restable-mini');if(mini)mini.innerHTML=html;
  const series=res.series_daily||res.series||{};
  const cvs=document.getElementById('reschart');
  if(cvs&&window.Chart){
-  const colors={williston:'#0e7490',mica:'#334155',arrow:'#d97706',duncan:'#2563eb',sitec:'#7c3aed',dinosaur:'#64748b',kootenay:'#0f766e'};
+  const colors={williston:'#0e7490',mica:'#155e75',arrow:'#0891b2',duncan:'#64748b',kootenay:'#0f766e',sitec:'#7c3aed',dinosaur:'#94a3b8'};
   const keys=['williston','mica','arrow','duncan','kootenay'].filter(k=>(series[k]||[]).length>=2);
   const ds=keys.map(k=>({label:{williston:'Williston',mica:'Mica',arrow:'Arrow',duncan:'Duncan',kootenay:'Kootenay Lake'}[k],
     data:(series[k]||[]).map(x=>({x:x.t,y:x.pct})),borderColor:colors[k],backgroundColor:colors[k],tension:.25,pointRadius:2,spanGaps:true}));
   if(!ds.length){if(resChart){resChart.destroy();resChart=null;} return;}
   const labels=[], idx={};
-  ds.forEach(s=>s.data.forEach(p=>{const k=p.x.slice(0,10);if(!(k in idx)){idx[k]=labels.length;labels.push(k);}}));
+  ds.forEach(s=>s.data.forEach(pt=>{const k=pt.x.slice(0,10);if(!(k in idx)){idx[k]=labels.length;labels.push(k);}}));
   labels.sort();
   const relabel=labels.map(k=>{const dt=new Date(k+'T12:00:00Z');return dt.toLocaleDateString('en-CA',{timeZone:'UTC',month:'short',day:'numeric'});});
   const aligned=ds.map(s=>{
-    const m={};s.data.forEach(p=>m[p.x.slice(0,10)]=p.y);
+    const m={};s.data.forEach(pt=>m[pt.x.slice(0,10)]=pt.y);
     return {label:s.label,data:labels.map(k=>m[k]??null),borderColor:s.borderColor,backgroundColor:s.backgroundColor,tension:.25,pointRadius:2,spanGaps:true};
   });
-  if(resChart){resChart.data.labels=relabel;resChart.data.datasets=aligned;resChart.update();return;}
-  resChart=new Chart(cvs,{type:'line',data:{labels:relabel,datasets:aligned},options:{maintainAspectRatio:false,
+  if(wTyp){
+   const w=proj.williston||{}, lo=w.min_m??642.04, hi=w.max_m??672.08;
+   aligned.push({label:'Williston typical for date',data:labels.map(k=>{
+     const md=k.slice(5,10);const elev=wTyp[md];return elev==null?null:Math.max(0,Math.min(100,(elev-lo)/(hi-lo)*100));
+   }),borderColor:'#b45309',backgroundColor:'#b45309',borderDash:[5,4],pointRadius:0,borderWidth:1.6,tension:.2,spanGaps:true});
+  }else if(!wTypWait){
+   wTypWait=true;
+   fetch('williston_doy_median.json').then(r=>r.json()).then(j=>{wTyp=j.median_geodetic_m||{};wTypWait=false;resSec(d);}).catch(()=>{wTypWait=false;});
+  }
+  const opts={maintainAspectRatio:false,
     scales:{y:{title:{display:true,text:'% of usable'},suggestedMin:0,suggestedMax:100}},
-    plugins:{legend:{labels:{boxWidth:12}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.raw==null?'n/a':c.raw.toFixed(1)+'%')}}}}});
+    plugins:{legend:{labels:{boxWidth:12}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.raw==null?'n/a':Math.round(c.raw)+'%')}}}};
+  if(resChart){resChart.data.labels=relabel;resChart.data.datasets=aligned;resChart.update();return;}
+  resChart=new Chart(cvs,{type:'line',data:{labels:relabel,datasets:aligned},options:opts});
  }
 }
-
 
 let staticDone=false;
 const _r=render;render=function(){_r();kpiSec(data);teacupMap(data);resSec(data);if(!staticDone){staticDone=true;document.getElementById('ctx').innerHTML=ctx(data);document.getElementById('thrut').innerHTML=thru(data);document.getElementById('notes').innerHTML=notes(data);document.getElementById('lg').innerHTML=loadSec(data);peakSec(data);
