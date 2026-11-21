@@ -110,9 +110,9 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
 
 <section id="map" class="sec">
   <h2>Where the water and the ties are</h2>
-  <p class="caption"><b>Each teacup is one reservoir.</b> The size of the cup is its usable storage, the fill is how full that range is today, the dashed line is the typical level for this date (shown for Williston), and the label is today’s percent, the change over seven days, and estimated stored energy.</p>
+  <p class="caption"><b>Each teacup is one reservoir.</b> The size of the cup is its usable storage, the fill is how full that range is today, the dashed line is the typical level for this date (Williston) or the IJC maximum for this date (Kootenay Lake), and the label is today’s percent, the change over seven days, and estimated stored energy.</p>
   <div class="mapwrap">
-    <svg class="map" viewBox="0 0 1000 700" role="img" aria-label="Teacup map of Peace and Columbia reservoirs in British Columbia">
+    <svg class="map" viewBox="0 0 1000 700" role="img" aria-label="Teacup map of Peace, Columbia and Kootenay Lake reservoirs in British Columbia">
 <rect x="0" y="0" width="1000" height="700" fill="#f4f7fb"/>
 <rect x="0" y="551.3" width="1000" height="148.7" fill="#eef2f6"/>
 <text x="970" y="28" text-anchor="end" font-size="12" fill="#6b7280">Alberta</text>
@@ -198,6 +198,15 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
     <g class="cup-lab"></g>
   </g>
 
+  <g class="cup" id="cup-kootenay" transform="translate(778,542)" aria-label="Kootenay Lake">
+    <ellipse cx="0" cy="3.2" rx="12.6" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+    <polygon class="cup-shell" points="-16.8,-40.0 16.8,-40.0 7.4,0 -7.4,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <polygon class="cup-fill" points="-7.4,0 7.4,0 7.4,0 -7.4,0" fill="#0f766e" opacity="0.92"/>
+    <polygon points="-16.8,-40.0 16.8,-40.0 7.4,0 -7.4,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
+    <g class="cup-lab"></g>
+  </g>
+
   <defs>
     <marker id="ah_us" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
@@ -228,7 +237,7 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
       <line x1="-14" y1="-36" x2="14" y2="-36" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3 2"/>
     </g>
     <text x="66" y="46" font-size="11" fill="#374151">Blue fill = how full the usable range is today.</text>
-    <text x="66" y="62" font-size="11" fill="#374151">Dashed line = typical level for this date (Williston: 45-year median).</text>
+    <text x="66" y="62" font-size="11" fill="#374151">Dashed line = typical for this date (Williston) or IJC maximum (Kootenay Lake).</text>
     <text x="66" y="78" font-size="11" fill="#374151">Cup size ≈ usable storage (square-root scaled so small ponds stay visible).</text>
     <text x="66" y="94" font-size="11" fill="#374151">Label = % full · change over 7 days · estimated stored energy.</text>
   </g>
@@ -428,7 +437,8 @@ function notes(d){
  `<b>Reservoirs</b>: Peace levels (Williston, Dinosaur, Site C / Naache Mege) come from BC Hydro hydromet text files; Columbia Treaty projects (Mica, Arrow, Duncan) from the Corps CWMS Data API (office NWDP). Hydromet files only keep about eight days, so the scheduled job appends hourly points to <a href="reservoirs_history.csv">reservoirs_history.csv</a>.`,
  `<b>Percent full</b> is live storage as a share of the official usable range. Peace projects are linear in elevation (no public Williston storage curve). Mica uses official USACE elevation–storage points. Linear-in-elevation % is slightly conservative when a reservoir is high.`,
  `<b>Stored energy</b> is an engineering estimate, E ≈ ρ g h V η / 3.6e12 GWh, η = 0.88 — not a dispatch model. Williston and Mica use mid-slice head (constant assumed tailwater). Site C uses an assumed 52 m rated head; Arrow an assumed 22 m. Duncan is storage-only. Site C is run-of-river-ish (1.8 m range, 0.4% of Williston’s 32 MAF).`,
- `Williston’s dashed “typical for this date” is the median of historical WSC 07EF003 daily means plus a documented 630.065 m geodetic offset (the ECCC LEVEL is an assumed gauge datum, not pool elevation; see <a href="williston_doy_median.json">williston_doy_median.json</a>). Coastal and Island plants are omitted.`
+ `Williston’s dashed “typical for this date” is the median of historical WSC 07EF003 daily means plus a documented 630.065 m geodetic offset (the ECCC LEVEL is an assumed gauge datum, not pool elevation; see <a href="williston_doy_median.json">williston_doy_median.json</a>).`,
+ `<b>Kootenay Lake</b> is a natural lake regulated by Corra Linn (FortisBC) under the IJC 1938 Order of Approval. Level is WSC 08NH064 at Queens Bay (geodetic, GSC 1928 datum — the IJC reference gauge), via the ECCC / wateroffice APIs. Percent is of the 6-ft IJC band (1739.32–1745.32 ft). The dashed mark is today’s IJC <i>maximum</i>, not a historical median. After 31 March the default max is 1739.32 ft (a calculated freshet limit is not modelled); once the peak recedes the control is 1743.32 ft at Nelson until 1 September. No stored-energy figure is shown. Coastal and Island plants are omitted.`
  ].map(x=>`<li>${x}</li>`).join('');
 }
 function completeness(d){
@@ -591,7 +601,8 @@ const CUP={
  sitec:{top:14.0,bot:6.2,H:38,color:'#7c3aed',lab:'callout'},
  mica:{top:28.4,bot:12.5,H:65.4,color:'#0e7490',lab:'end',lx:-38.4,ly:-59.4},
  arrow:{top:24.1,bot:10.6,H:56.1,color:'#d97706',lab:'end',lx:-34.1,ly:-50.1},
- duncan:{top:16.3,bot:7.2,H:39.4,color:'#2563eb',lab:'start',lx:26.3,ly:-33.4}
+ duncan:{top:16.3,bot:7.2,H:39.4,color:'#2563eb',lab:'start',lx:26.3,ly:-33.4},
+ kootenay:{top:16.8,bot:7.4,H:40,color:'#0f766e',lab:'start',lx:20,ly:-36}
 };
 function fmtGwh(n){if(n==null)return 'n/a';const x=Number(n);return (x>=100?Math.round(x).toLocaleString():x.toFixed(1))+' GWh';}
 function fmtD7(d){if(!d||d.pct_pt==null)return '';const s=d.pct_pt>0?'up':d.pct_pt<0?'down':'unchanged';const a=Math.abs(d.pct_pt);
@@ -635,7 +646,7 @@ function teacupMap(d){
  const asof=document.getElementById('map-asof');
  if(asof){
   const times=Object.values(proj).map(p=>p&&p.as_of).filter(Boolean).sort();
-  asof.textContent=times.length?('Peace and Columbia storage · '+D(times[times.length-1])):'Peace and Columbia storage';
+  asof.textContent=times.length?('Peace, Columbia and Kootenay storage · '+D(times[times.length-1])):'Peace, Columbia and Kootenay storage';
  }
  Object.keys(CUP).forEach(id=>{
   const g=document.getElementById('cup-'+id);if(!g)return;
@@ -654,13 +665,14 @@ function teacupMap(d){
   }
   const lab=g.querySelector('.cup-lab');
   if(lab){
-    const name={williston:'Williston',dinosaur:'Dinosaur',sitec:'Site C',mica:'Mica / Kinbasket',arrow:'Arrow',duncan:'Duncan'}[id];
+    const name={williston:'Williston',dinosaur:'Dinosaur',sitec:'Site C',mica:'Mica / Kinbasket',arrow:'Arrow',duncan:'Duncan',kootenay:'Kootenay Lake'}[id];
     const l1=pct==null?'no public level in this run':(pct+'%'+(p.d7&&p.d7.pct_pt!=null?`  ·  ${fmtD7(p.d7)}`:''));
-    const l2=p.gwh!=null?('est. '+fmtGwh(p.gwh)):(id==='duncan'?'no local generation':'');
+    const l2=p.gwh!=null?('est. '+fmtGwh(p.gwh)):(id==='duncan'?'no local generation':id==='kootenay'?(p.ft_below_ijc_max!=null?(p.ft_below_ijc_max>=0?p.ft_below_ijc_max.toFixed(2)+' ft below IJC max':Math.abs(p.ft_below_ijc_max).toFixed(2)+' ft above IJC max'):'IJC 6-ft band'):'');
     const l3=id==='williston'&&typ!=null?(`typical ${new Date((p.as_of||d.generated)).toLocaleDateString('en-CA',{timeZone:'Etc/GMT+7',month:'short',day:'numeric'})}: ${Math.round(typ)}%`)
             :id==='sitec'?'1.8 m operating range · Naache Mege'
             :id==='dinosaur'?'re-regulating pond'
-            :id==='duncan'?'storage only':'';
+            :id==='duncan'?'storage only'
+            :id==='kootenay'?'Corra Linn · FortisBC':'';
     const lines=[[name,12.8,700], [l1,10.7,500], l2?[l2,10.7,500]:null, l3?[l3,9.5,400]:null].filter(Boolean);
     if(cfg.lab==='callout'){
       lab.innerHTML=lines.map((L,i)=>`<text x="0" y="${i*15}" font-size="${L[1]}" font-weight="${L[2]>=700?700:500}" fill="${i===0?'#1d2330':i===3?'#6b7280':'#374151'}">${L[0]}</text>`).join('');
@@ -691,7 +703,9 @@ function teacupMap(d){
  if(cap){
   const w=proj.williston||{};
   const wup=w.pct_wup!=null?` A tighter Water Use Plan floor of 654.41 m would read ${w.pct_wup}% instead of ${w.pct}%.`:'';
-  cap.textContent=`Williston percent uses the licensed live range (642.04–672.08 m, 32 MAF).${wup} Williston’s “typical for this date” is the median of 45 years of Water Survey of Canada daily levels at Schooler Creek, converted from the gauge datum (offset calibrated on 20 Nov 2026). Energy is an engineering estimate (η = 0.88, mid-slice head), not a dispatch model. Coastal and Island reservoirs are omitted to keep the map readable.`;
+  const k=proj.kootenay||{};
+  const koot=k.ijc_max_ft!=null?` Kootenay Lake percent is of the 6-ft IJC band (1739.32–1745.32 ft at Queens Bay); the dashed line is today’s IJC maximum (${k.ijc_max_ft} ft), not a historical median.`:'';
+  cap.textContent=`Williston percent uses the licensed live range (642.04–672.08 m, 32 MAF).${wup}${koot} Williston’s “typical for this date” is the median of 45 years of Water Survey of Canada daily levels at Schooler Creek, converted from the gauge datum (offset calibrated on 20 Nov 2026). Energy is an engineering estimate (η = 0.88, mid-slice head), not a dispatch model. Coastal and Island reservoirs are omitted to keep the map readable.`;
  }
 }
 let resChart;
@@ -699,9 +713,13 @@ function resSec(d){
  const res=d.reservoirs||{}, proj=res.projects||{};
  const tb=document.getElementById('restable');
  if(tb){
-  const order=['williston','dinosaur','sitec','mica','arrow','duncan'];
+  const order=['williston','dinosaur','sitec','mica','arrow','duncan','kootenay'];
   const srcShort=p=>{
     const s=(p.source||'').toString();
+    if(s.includes('wsc:08NH064')||s.includes('08NH064')||s.includes('wateroffice')||s.includes('weather.gc.ca')){
+      const u=p.elev_ft!=null?` · ${Number(p.elev_ft).toFixed(2)} ft`: (p.elev_m!=null?` · ${p.elev_m} m`:'');
+      return 'WSC 08NH064'+u;
+    }
     if(s.includes('hydromet:wsc')||s.includes('wsc'))return 'BC Hydro wsc.txt'+(p.elev_m!=null?` · ${p.elev_m} m`:'');
     if(s.includes('hydromet:dir'))return 'BC Hydro dir.txt'+(p.elev_m!=null?` · ${p.elev_m} m`:'');
     if(s.includes('hydromet:cwy')||s.includes('hydromet:cfc'))return 'BC Hydro cwy.txt'+(p.elev_m!=null?` · ${p.elev_m} m`:'');
@@ -723,9 +741,9 @@ function resSec(d){
  const series=res.series_daily||res.series||{};
  const cvs=document.getElementById('reschart');
  if(cvs&&window.Chart){
-  const colors={williston:'#0e7490',mica:'#334155',arrow:'#d97706',duncan:'#2563eb',sitec:'#7c3aed',dinosaur:'#64748b'};
-  const keys=['williston','mica','arrow','duncan'].filter(k=>(series[k]||[]).length>=2);
-  const ds=keys.map(k=>({label:{williston:'Williston',mica:'Mica',arrow:'Arrow',duncan:'Duncan'}[k],
+  const colors={williston:'#0e7490',mica:'#334155',arrow:'#d97706',duncan:'#2563eb',sitec:'#7c3aed',dinosaur:'#64748b',kootenay:'#0f766e'};
+  const keys=['williston','mica','arrow','duncan','kootenay'].filter(k=>(series[k]||[]).length>=2);
+  const ds=keys.map(k=>({label:{williston:'Williston',mica:'Mica',arrow:'Arrow',duncan:'Duncan',kootenay:'Kootenay Lake'}[k],
     data:(series[k]||[]).map(x=>({x:x.t,y:x.pct})),borderColor:colors[k],backgroundColor:colors[k],tension:.25,pointRadius:2,spanGaps:true}));
   if(!ds.length){if(resChart){resChart.destroy();resChart=null;} return;}
   const labels=[], idx={};

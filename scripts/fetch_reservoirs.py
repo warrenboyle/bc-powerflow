@@ -12,6 +12,10 @@ Sources (all public, no API key):
     https://cwms-data.usace.army.mil/cwms-data
       Mica (MCDB) elevation and outflow, Arrow (ARDB) elevation/storage/outflow,
       Duncan (DCDB) elevation and outflow.
+  * Water Survey of Canada / ECCC (no key) for Kootenay Lake at Queens Bay,
+    station 08NH064 (geodetic, GSC 1928 datum — the IJC reference gauge):
+      realtime: https://api.weather.gc.ca/collections/hydrometric-realtime/items
+      history:  https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline
 
 A failing source is logged and skipped. This script exits 0 unless there is a
 local bug, so it never blocks the 15-minute dashboard update.
@@ -57,6 +61,16 @@ BCH_REF = "https://www.bchydro.com/energy-in-bc/operations/transmission-reservoi
 BCH_TXT = "https://www.bchydro.com/info/res_hydromet/data/{code}.txt"
 CWMS = "https://cwms-data.usace.army.mil/cwms-data/timeseries"
 ECCC_DAILY = "https://api.weather.gc.ca/collections/hydrometric-daily-mean/items"
+ECCC_RT = "https://api.weather.gc.ca/collections/hydrometric-realtime/items"
+WO_RT = "https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline"
+KOOTENAY_STN = "08NH064"
+# IJC 1938 Order of Approval: 6 ft of licensed storage at Queens Bay (geodetic).
+# 1739.32 ft is the post-31 Mar *maximum* target, also the floor of that band;
+# 1745.32 ft is the 1 Sep–7 Jan maximum. The lake can (and does) go slightly
+# below 1739.32 in late winter and well above it in freshet.
+IJC_BAND_MIN_FT = 1739.32
+IJC_BAND_MAX_FT = 1745.32
+FORTIS_LAKE = "https://secure.fortisbc.com/lakelevel/lakes.jsp"
 
 # Official operating ranges and live storage. Linear-in-elevation % is used
 # unless a storage curve is given (Mica). See assumptions in SNAP["assumptions"].
@@ -113,6 +127,14 @@ PROJECTS = {
         "lat": 50.25, "lon": -116.94,
         "note": "Storage only: no generators. Energy is realized downstream on the Kootenay.",
     },
+    "kootenay": {
+        "name": "Kootenay Lake", "plant": "Corra Linn (FortisBC)",
+        "river": "Kootenay", "id": "kootenay",
+        "min_ft": IJC_BAND_MIN_FT, "max_ft": IJC_BAND_MAX_FT,
+        "head_m": None,  # natural lake; energy is realized at Corra Linn and the downstream plants
+        "lat": 49.654, "lon": -116.930,
+        "note": "Natural lake regulated by Corra Linn (FortisBC) under the IJC 1938 Order of Approval. Percent is of the 6-ft IJC band (1739.32–1745.32 ft at Queens Bay). The dashed mark is the Order maximum for this date, not a historical median. No stored-energy figure: the lake is not a simple plant head-pond.",
+    },
 }
 
 # History file: one hourly row per project, long format.
@@ -157,13 +179,17 @@ def short_source(source):
         return f"cwms:{name}"
     if s.startswith("cwms:"):
         return s.split(";")[0].strip()
+    if "08NH064" in s or "STATION_NUMBER=08NH064" in s or "stations[]=08NH064" in urllib.parse.unquote(s):
+        return "wsc:08NH064"
+    if s.startswith("wsc:"):
+        return s.split(";")[0].strip()
     # already short, or a joined list
     parts = []
     for part in s.split(";"):
         part = part.strip()
         if not part:
             continue
-        if part.startswith("hydromet:") or part.startswith("cwms:"):
+        if part.startswith("hydromet:") or part.startswith("cwms:") or part.startswith("wsc:"):
             parts.append(part)
         else:
             parts.append(short_source(part) or part[:40])
@@ -419,7 +445,42 @@ def change_7d(hist, project, now_elev, now_t, col="elev_m"):
     return {"from": float(prev), "at": prev_t.isoformat(), "delta": float(now_elev) - float(prev)}
 
 
+def ijc_max_ft(t_bc):
+    """IJC 1938 Order of Approval maximum at Queens Bay, in feet, for a BC-local timestamp.
+
+    Returns (max_ft, note). After 31 March the Order's default maximum is 1739.32 ft;
+    a calculated higher freshet limit may apply, and after the peak recedes the
+    control is 1743.32 ft at Nelson until 1 September. Those calculated/Nelson
+    limits are not modelled here.
+    """
+    t = pd.Timestamp(t_bc)
+    if t.tzinfo is not None:
+        t = t.tz_convert(TZ)
+    day = pd.Timestamp(year=t.year, month=t.month, day=t.day)
+    y, md = day.year, (day.month, day.day)
+    def at(m, d):
+        return pd.Timestamp(year=y, month=m, day=d)
+    if md >= (9, 1) or md <= (1, 7):
+        return IJC_BAND_MAX_FT, "IJC maximum 1 Sep–7 Jan (1745.32 ft)"
+    if md <= (1, 31):
+        span = (at(1, 31) - at(1, 7)).days
+        frac = (day - at(1, 7)).days / span if span else 0
+        return 1745.32 + (1744.00 - 1745.32) * frac, "IJC maximum, 7–31 Jan drawdown"
+    last_feb = at(3, 1) - pd.Timedelta(days=1)
+    if day.month == 2:
+        span = (last_feb - at(1, 31)).days
+        frac = (day - at(1, 31)).days / span if span else 0
+        return 1744.00 + (1742.40 - 1744.00) * frac, "IJC maximum, 31 Jan–end Feb drawdown"
+    if day.month == 3:
+        span = (at(3, 31) - last_feb).days
+        frac = (day - last_feb).days / span if span else 0
+        return 1742.40 + (1739.32 - 1742.40) * frac, "IJC maximum, end Feb–31 Mar drawdown"
+    return IJC_BAND_MIN_FT, ("IJC default maximum after 31 Mar (1739.32 ft); a calculated "
+                             "higher freshet limit may apply, then 1743.32 ft at Nelson until 1 Sep")
+
+
 def williston_typical(t_bc):
+
     if not MEDIAN.exists() or t_bc is None:
         return None
     try:
@@ -497,6 +558,22 @@ def describe_project(hist, key):
         if p.get("head_m"):
             gwh = energy_gwh(live_m3, p["head_m"])
             out["head_m"] = p["head_m"]
+    elif key == "kootenay":
+        min_ft, max_ft = p["min_ft"], p["max_ft"]
+        pct = None if elev_ft is None or max_ft == min_ft else 100.0 * (elev_ft - min_ft) / (max_ft - min_ft)
+        out["pct"] = _r(pct, 1)
+        out["min_ft"], out["max_ft"] = min_ft, max_ft
+        t_bc = t.tz_convert(TZ)
+        mx, note = ijc_max_ft(t_bc)
+        typ_pct = 100.0 * (mx - min_ft) / (max_ft - min_ft)
+        out["typical"] = {
+            "elev_ft": _r(mx, 2), "elev_m": _r(ft_to_m(mx), 3),
+            "pct": _r(typ_pct, 1),
+            "source": "IJC 1938 Order of Approval rule curve",
+            "note": note,
+        }
+        out["ijc_max_ft"] = _r(mx, 2)
+        out["ft_below_ijc_max"] = _r(None if elev_ft is None else mx - elev_ft, 2)
     else:
         # metre-based Peace projects: linear in elevation
         live_m3, cap, pct = linear_live(elev_m, p["min_m"], p["max_m"], p["live_m3"])
@@ -538,6 +615,8 @@ def describe_project(hist, key):
                     prev_pct = 100.0 * (stor - p["min_acft"]) / cap
                 else:
                     prev_pct = 100.0 * (m_to_ft(d7e["from"]) - p["min_ft"]) / (p["max_ft"] - p["min_ft"])
+            elif key == "kootenay":
+                prev_pct = 100.0 * (m_to_ft(d7e["from"]) - p["min_ft"]) / (p["max_ft"] - p["min_ft"])
             else:
                 prev_pct = 100.0 * (d7e["from"] - p["min_m"]) / (p["max_m"] - p["min_m"])
         out["d7"] = {
@@ -613,7 +692,7 @@ def describe_one_row(key, r, t):
         elev_ft = m_to_ft(elev_m)
     if key == "mica":
         _, _, pct = mica_live(elev_ft)
-    elif key in ("arrow", "duncan"):
+    elif key in ("arrow", "duncan", "kootenay"):
         pct = None if elev_ft is None else 100.0 * (elev_ft - p["min_ft"]) / (p["max_ft"] - p["min_ft"])
     else:
         pct = None if elev_m is None else 100.0 * (elev_m - p["min_m"]) / (p["max_m"] - p["min_m"])
@@ -781,6 +860,133 @@ def combine_duplicate_hours(hist):
     return pd.DataFrame(rows, columns=HIST_COLS)
 
 
+
+def collect_kootenay(hist):
+    """Kootenay Lake at Queens Bay (WSC 08NH064), geodetic GSC 1928 datum.
+
+    Prefers the Water Survey of Canada wateroffice unit-value CSV (hours of
+    history). Falls back to the ECCC hydrometric-realtime API (~30 days).
+    A failing source is logged and skipped. Optionally scrapes the FortisBC
+    lake-level page for the Nelson reading and forecast (never required).
+    """
+    sources = {}
+    end = pd.Timestamp.now(tz="UTC")
+    have = hist["project"].eq("kootenay").any() if len(hist) else False
+    begin = end - pd.Timedelta(days=14 if have else 400)
+
+    def rows_from_series(times, levels_m, source):
+        out = []
+        for ts, lvl in zip(times, levels_m):
+            if lvl is None or (isinstance(lvl, float) and pd.isna(lvl)):
+                continue
+            out.append(point(as_utc(ts), "kootenay", elev_m=float(lvl), source=source))
+        return out
+
+    # 1) wateroffice unit values (parameter 46 = water level), chunked
+    try:
+        chunks = []
+        cursor = begin
+        while cursor < end:
+            chunk_end = min(cursor + pd.Timedelta(days=120), end)
+            q = {
+                "stations[]": KOOTENAY_STN,
+                "parameters[]": "46",
+                "start_date": cursor.strftime("%Y-%m-%d %H:%M:%S"),
+                "end_date": chunk_end.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            url = WO_RT + "?" + urllib.parse.urlencode(q)
+            raw = get(url, timeout=90)
+            text = raw.decode("utf-8-sig", errors="replace")
+            import io
+            df = pd.read_csv(io.StringIO(text))
+            # columns: ID, Date, Parameter, Value, ...
+            cols = {c.lower().split("/")[0].strip(): c for c in df.columns}
+            date_col = cols.get("date") or df.columns[1]
+            val_col = cols.get("value") or df.columns[3]
+            df["t_utc"] = pd.to_datetime(df[date_col], utc=True, errors="coerce")
+            df["elev_m"] = pd.to_numeric(df[val_col], errors="coerce")
+            df = df.dropna(subset=["t_utc", "elev_m"])
+            chunks.append(df[["t_utc", "elev_m"]])
+            cursor = chunk_end
+        if chunks:
+            allp = pd.concat(chunks, ignore_index=True)
+            allp["t_utc"] = allp["t_utc"].dt.floor("h")
+            h = allp.groupby("t_utc", as_index=False)["elev_m"].last()
+            hist = append_points(hist, rows_from_series(h["t_utc"], h["elev_m"], "wsc:08NH064"))
+            last = h.iloc[-1]
+            log(f"Kootenay WSC 08NH064 wateroffice: {len(allp)} pts, hourly {len(h)} "
+                f"{h['t_utc'].min()} – {h['t_utc'].max()} last {float(last['elev_m']):.3f} m")
+            sources["kootenay_wsc"] = {
+                "ok": True, "url": WO_RT, "station": KOOTENAY_STN,
+                "n": int(len(allp)), "hourly": int(len(h)),
+                "from": h["t_utc"].min().isoformat(), "to": h["t_utc"].max().isoformat(),
+                "last_elev_m": _r(float(last["elev_m"]), 3),
+            }
+        else:
+            raise ValueError("wateroffice returned no level rows")
+    except Exception as ex:
+        log("Kootenay wateroffice failed:", ex)
+        sources["kootenay_wsc"] = {"ok": False, "error": str(ex)}
+        # 2) ECCC realtime fallback (~30 days of 5-min)
+        try:
+            url = (f"{ECCC_RT}?STATION_NUMBER={KOOTENAY_STN}"
+                   f"&datetime={begin.strftime('%Y-%m-%dT%H:%M:%SZ')}/{end.strftime('%Y-%m-%dT%H:%M:%SZ')}"
+                   f"&limit=10000&f=json&sortby=DATETIME")
+            raw = get(url, timeout=60)
+            j = json.loads(raw.decode())
+            feats = j.get("features") or []
+            times, levels = [], []
+            for f in feats:
+                pr = f.get("properties") or {}
+                if pr.get("LEVEL") is None or not pr.get("DATETIME"):
+                    continue
+                times.append(pr["DATETIME"])
+                levels.append(float(pr["LEVEL"]))
+            if not times:
+                raise ValueError(f"ECCC realtime matched {j.get('numberMatched')} but no LEVEL values")
+            tmp = pd.DataFrame({"t_utc": pd.to_datetime(times, utc=True), "elev_m": levels})
+            tmp["t_utc"] = tmp["t_utc"].dt.floor("h")
+            h = tmp.groupby("t_utc", as_index=False)["elev_m"].last()
+            hist = append_points(hist, rows_from_series(h["t_utc"], h["elev_m"], "wsc:08NH064"))
+            last = h.iloc[-1]
+            log(f"Kootenay WSC 08NH064 ECCC realtime fallback: hourly {len(h)} "
+                f"{h['t_utc'].min()} – {h['t_utc'].max()} last {float(last['elev_m']):.3f} m")
+            sources["kootenay_eccc"] = {
+                "ok": True, "url": ECCC_RT, "station": KOOTENAY_STN,
+                "hourly": int(len(h)), "last_elev_m": _r(float(last["elev_m"]), 3),
+                "to": h["t_utc"].max().isoformat(),
+            }
+        except Exception as ex2:
+            log("Kootenay ECCC realtime failed:", ex2)
+            sources["kootenay_eccc"] = {"ok": False, "error": str(ex2)}
+
+    # 3) FortisBC page: Nelson reading + forecast, not used for the official level
+    try:
+        raw = get(FORTIS_LAKE, headers={"Referer": "https://www.fortisbc.com/in-your-community/kootenay-lake-level-monitoring/kootenay-lake-levels"}, timeout=45)
+        text = raw.decode("utf-8", errors="replace")
+        plain = re.sub(r"<[^>]+>", " ", text)
+        plain = re.sub(r"&nbsp;|&#39;", lambda m: "'" if "39" in m.group() else " ", plain)
+        plain = re.sub(r"\s+", " ", plain)
+        qb = re.search(r"Queen'?s Bay\s*:\s*([0-9.]+)\s*feet\s*\(([0-9.]+)\s*meters\)\s*as of\s*([^N]+?)(?=Nelson|View|$)", plain, re.I)
+        nelson = re.search(r"Nelson\s*:\s*([0-9.]+)\s*feet\s*\(([0-9.]+)\s*meters\)\s*as of\s*([^.]+?)(?=View|Lake level|$)", plain, re.I)
+        forecast = re.search(r"Lake level forecast\s*-\s*(.+?)(?:Average Daily|Lake level chart|$)", plain, re.I)
+        extra = {"ok": True, "url": FORTIS_LAKE}
+        if qb:
+            extra["queens_bay_ft"] = float(qb.group(1)); extra["queens_bay_m"] = float(qb.group(2))
+            extra["as_of"] = qb.group(3).strip()
+        if nelson:
+            extra["nelson_ft"] = float(nelson.group(1)); extra["nelson_m"] = float(nelson.group(2))
+            extra["nelson_as_of"] = nelson.group(3).strip()
+        if forecast:
+            extra["forecast"] = re.sub(r"\s+", " ", forecast.group(1)).strip()
+        sources["kootenay_fortis"] = extra
+        log("Kootenay FortisBC scrape:", {k: extra[k] for k in extra if k in ("queens_bay_ft","nelson_ft","forecast","as_of")})
+    except Exception as ex:
+        log("Kootenay FortisBC scrape failed:", ex)
+        sources["kootenay_fortis"] = {"ok": False, "error": str(ex)}
+    return hist, sources
+
+
 # ------------------------------------------------------------------ median file
 def refresh_median():
     """Rebuild docs/williston_doy_median.json from ECCC HYDAT daily means."""
@@ -837,7 +1043,7 @@ def refresh_median():
 # ------------------------------------------------------------------ snapshot
 def build_snapshot(hist, source_meta):
     projects = {}
-    for key in ("williston", "dinosaur", "sitec", "mica", "arrow", "duncan"):
+    for key in ("williston", "dinosaur", "sitec", "mica", "arrow", "duncan", "kootenay"):
         projects[key] = describe_project(hist, key)
     total_gwh = 0.0
     n_energy = 0
@@ -847,9 +1053,9 @@ def build_snapshot(hist, source_meta):
             n_energy += 1
     # traces for the chart: weekly for the long Corps record, daily (last 120 d)
     # so the shorter Peace hydromet history still has something to plot.
-    series = {k: weekly_series(hist, k) for k in ("williston", "mica", "arrow", "duncan")}
+    series = {k: weekly_series(hist, k) for k in ("williston", "mica", "arrow", "duncan", "kootenay")}
     series_daily = {k: daily_series(hist, k, days=120) for k in
-                    ("williston", "dinosaur", "sitec", "mica", "arrow", "duncan")}
+                    ("williston", "dinosaur", "sitec", "mica", "arrow", "duncan", "kootenay")}
     data_through = {}
     labels = {
         "williston": "Williston (BC Hydro hydromet, Schooler Creek)",
@@ -858,17 +1064,19 @@ def build_snapshot(hist, source_meta):
         "mica": "Mica / Kinbasket (Corps CWMS, confirmed by BC Hydro grt.txt)",
         "arrow": "Arrow / Keenleyside (Corps CWMS)",
         "duncan": "Duncan (Corps CWMS)",
+        "kootenay": "Kootenay Lake at Queens Bay (WSC 08NH064)",
     }
     for k, lab in labels.items():
         p = projects[k]
         if p.get("as_of"):
             data_through[f"res_{k}"] = {"label": lab, "t": p["as_of"]}
     assumptions = {
-        "energy": "E ≈ ρ g h V η / 3.6e12 GWh, η = 0.88. Williston and Mica use the mid-elevation of the water now in live storage (constant assumed tailwater). Site C uses an assumed 52 m rated head; Arrow uses an assumed 22 m head. Duncan has no generators. These are engineering estimates, not a dispatch model.",
-        "percent": "Percent full is live storage as a share of the official usable range. Peace projects are linear in elevation (no public Williston storage curve). Mica uses official USACE elevation–storage points (2,320 / 2,434 / 2,475 ft). Linear-in-elevation % is slightly conservative when a reservoir is high (real area is larger at the top).",
+        "energy": "E ≈ ρ g h V η / 3.6e12 GWh, η = 0.88. Williston and Mica use the mid-elevation of the water now in live storage (constant assumed tailwater). Site C uses an assumed 52 m rated head; Arrow uses an assumed 22 m head. Duncan has no generators. Kootenay Lake has no stored-energy figure (a natural lake; generation is at Corra Linn and the downstream plants). These are engineering estimates, not a dispatch model.",
+        "percent": "Percent full is live storage as a share of the official usable range. Peace projects are linear in elevation (no public Williston storage curve). Mica uses official USACE elevation–storage points (2,320 / 2,434 / 2,475 ft). Linear-in-elevation % is slightly conservative when a reservoir is high (real area is larger at the top). Kootenay Lake percent is of the 6-ft IJC 1938 Order band (1739.32–1745.32 ft at Queens Bay); 1739.32 is a seasonal *maximum* target after 31 March, not a physical empty, so the lake can read slightly below 0% in late winter and well above 100% in freshet.",
         "williston_range": "Licensed live range 642.04–672.08 m, 32 MAF (Final Water Licence). pct_wup is the same elevation against the tighter Water Use Plan normal floor of 654.41 m.",
-        "typical": "The dashed 'typical for this date' mark on Williston is the median of historical 07EF003 daily means for that month-day, plus the documented 630.065 m geodetic offset in docs/williston_doy_median.json. Other reservoirs have no public day-of-year median in this file yet.",
-        "coverage": "This is the Peace cascade (Williston, Dinosaur, Site C) plus the Columbia River Treaty projects in BC (Mica, Arrow, Duncan). It is not the whole BC Hydro system: Bridge-Coastal, Campbell River, Stave and other Lower Mainland and Island plants are omitted.",
+        "typical": "The dashed 'typical for this date' mark on Williston is the median of historical 07EF003 daily means for that month-day, plus the documented 630.065 m geodetic offset in docs/williston_doy_median.json. On Kootenay Lake the dashed mark is the IJC 1938 Order maximum for that date (1745.32 ft from 1 Sep–7 Jan, drawing down to 1739.32 ft by 31 Mar; after 31 Mar the default max is 1739.32 ft and a calculated freshet limit is not modelled). Other reservoirs have no dashed mark yet.",
+        "coverage": "This is the Peace cascade (Williston, Dinosaur, Site C), the Columbia River Treaty projects in BC (Mica, Arrow, Duncan), and IJC-regulated Kootenay Lake (Corra Linn, FortisBC). It is not the whole BC Hydro system: Bridge-Coastal, Campbell River, Stave and other Lower Mainland and Island plants are omitted.",
+        "kootenay": "Level is WSC 08NH064 Kootenay Lake at Queens Bay, geodetic (GSC Datum 1928 Adjustment), via the ECCC / wateroffice APIs. This is the IJC reference gauge and matches FortisBC's Queen's Bay reading. 08NJ158 is 'Kootenay Lake Outflow near Corra Linn' (assumed datum, not realtime) and is not used. FortisBC also publishes a Nelson reading on secure.fortisbc.com/lakelevel/lakes.jsp (scraped as a supplement only). CWMS CORB is Corra Linn forebay, which is not the same as Queens Bay lake level and returned no points in a test pull. No stored-energy estimate is published for the lake.",
         "eta": ETA,
     }
     return {
@@ -917,6 +1125,12 @@ def main():
         except Exception as ex:
             log("CWMS block failed:", ex)
             source_meta["cwms"] = {"ok": False, "error": str(ex)}
+        try:
+            hist, s = collect_kootenay(hist)
+            source_meta.update(s)
+        except Exception as ex:
+            log("Kootenay block failed:", ex)
+            source_meta["kootenay"] = {"ok": False, "error": str(ex)}
         hist = combine_duplicate_hours(hist)
         if len(hist):
             save_history(hist)
