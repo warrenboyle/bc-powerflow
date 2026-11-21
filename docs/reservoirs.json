@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-20T19:00-07:00",
+ "generated": "2026-11-20T19:11-07:00",
  "projects": {
   "williston": {
    "id": "williston",
@@ -2545,7 +2545,7 @@
   },
   "mica elev": {
    "ok": true,
-   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A00%3A07Z&end=2026-11-21T02%3A00%3A07Z&page-size=20000&units=ft",
+   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A11%3A02Z&end=2026-11-21T02%3A11%3A02Z&page-size=20000&units=ft",
    "n": 333,
    "from": "2026-11-07T03:00:00+00:00",
    "to": "2026-11-21T00:00:00+00:00",
@@ -2553,7 +2553,7 @@
   },
   "mica outflow": {
    "ok": true,
-   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=MCDB.Flow-Out.Ave.1Hour.1Hour.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A00%3A07Z&end=2026-11-21T02%3A00%3A07Z&page-size=20000&units=cfs",
+   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=MCDB.Flow-Out.Ave.1Hour.1Hour.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A11%3A02Z&end=2026-11-21T02%3A11%3A02Z&page-size=20000&units=cfs",
    "n": 334,
    "from": "2026-11-07T03:00:00+00:00",
    "to": "2026-11-21T00:00:00+00:00",
@@ -2561,7 +2561,7 @@
   },
   "arrow elev": {
    "ok": true,
-   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A00%3A07Z&end=2026-11-21T02%3A00%3A07Z&page-size=20000&units=ft",
+   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A11%3A02Z&end=2026-11-21T02%3A11%3A02Z&page-size=20000&units=ft",
    "n": 334,
    "from": "2026-11-07T03:00:00+00:00",
    "to": "2026-11-21T00:00:00+00:00",
@@ -2569,7 +2569,7 @@
   },
   "arrow stor": {
    "ok": true,
-   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Stor.Inst.0.0.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A00%3A07Z&end=2026-11-21T02%3A00%3A07Z&page-size=20000&units=ac-ft",
+   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Stor.Inst.0.0.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A11%3A02Z&end=2026-11-21T02%3A11%3A02Z&page-size=20000&units=ac-ft",
    "n": 333,
    "from": "2026-11-07T03:00:00+00:00",
    "to": "2026-11-20T23:00:00+00:00",
@@ -2577,7 +2577,7 @@
   },
   "arrow outflow": {
    "ok": true,
-   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Flow-Out.Ave.~1Day.1Day.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A00%3A07Z&end=2026-11-21T02%3A00%3A07Z&page-size=20000&units=cfs",
+   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Flow-Out.Ave.~1Day.1Day.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A11%3A02Z&end=2026-11-21T02%3A11%3A02Z&page-size=20000&units=cfs",
    "n": 14,
    "from": "2026-11-07T07:00:00+00:00",
    "to": "2026-11-20T07:00:00+00:00",
@@ -2585,7 +2585,7 @@
   },
   "duncan elev": {
    "ok": true,
-   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A00%3A07Z&end=2026-11-21T02%3A00%3A07Z&page-size=20000&units=ft",
+   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A11%3A02Z&end=2026-11-21T02%3A11%3A02Z&page-size=20000&units=ft",
    "n": 334,
    "from": "2026-11-07T03:00:00+00:00",
    "to": "2026-11-21T00:00:00+00:00",
@@ -2593,7 +2593,7 @@
   },
   "duncan outflow": {
    "ok": true,
-   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=DCDB.Flow-Out.Ave.~1Day.1Day.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A00%3A07Z&end=2026-11-21T02%3A00%3A07Z&page-size=20000&units=cfs",
+   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=DCDB.Flow-Out.Ave.~1Day.1Day.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A11%3A02Z&end=2026-11-21T02%3A11%3A02Z&page-size=20000&units=cfs",
    "n": 14,
    "from": "2026-11-07T07:00:00+00:00",
    "to": "2026-11-20T07:00:00+00:00",
