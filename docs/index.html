@@ -44,8 +44,23 @@ a{color:var(--us)}
 .guide{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:.84rem;color:#374151;margin-bottom:10px}
 .caption{font-size:.9rem;color:#374151;margin:0 0 10px;max-width:62rem}
 .two{display:grid;grid-template-columns:1.1fr .9fr;gap:12px;min-width:0}
-.mapwrap{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 8px 4px;overflow:auto;max-width:100%}
-svg.map{width:100%;height:auto;display:block;min-width:640px}
+.mapwrap{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 8px 4px;overflow:hidden;max-width:100%}
+svg.map{width:100%;height:auto;display:block;min-width:0}
+svg.map-desktop{display:block}
+svg.map-mobile{display:none}
+.map-legend{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;margin-top:12px}
+.teacup-how{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:.88rem;color:#374151}
+.teacup-how h3{margin:0 0 6px;font-size:.92rem;color:var(--ink)}
+.how-row{display:flex;gap:12px;align-items:flex-start}
+.how-row p{margin:0}
+.plant-key ul{margin:0;padding:0;list-style:none;font-size:.86rem}
+.plant-key li{padding:2px 0;display:grid;grid-template-columns:3.2em 1fr;gap:8px}
+.rescards{display:none}
+.rescard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 8px}
+.rescard-h,.rescard-b{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.rescard-h{font-size:1rem}
+.rescard-h span{font-weight:700}
+.rescard-b{font-size:.88rem;color:#374151;margin-top:3px}
 #headline{font-size:.95rem;margin:2px 0 12px;max-width:62rem;color:var(--ink);line-height:1.45}
 #headline b{font-weight:700}
 .flip{font-size:.8rem;color:#374151;margin:4px 0 8px}
@@ -85,11 +100,15 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
   .markets .card h3,.card h3{white-space:normal}
   .fl{white-space:normal;grid-template-columns:1fr 1fr;font-size:.75rem}
   .arb .row b{white-space:normal;padding-left:0}
-  .ctx th,.ctx td{white-space:normal}
-  .wrap,.mapwrap{overflow-x:auto;max-width:100%}
+  .wrap{overflow-x:auto;max-width:100%}
   main{overflow-x:hidden;padding:12px}
+  svg.map-desktop{display:none}
+  svg.map-mobile{display:block}
   svg.map{min-width:0}
   svg.map .cup-lab-sec{display:none}
+  .map-legend{grid-template-columns:1fr}
+  .restable-desk{display:none}
+  .rescards{display:block}
 }
 </style></head>
 <body>
@@ -133,101 +152,129 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
 
 <section id="map" class="sec">
   <h2>Where the water and the ties are</h2>
-  <p class="caption"><b>Each teacup is one reservoir.</b> The size of the cup is its usable storage, the fill is how full that range is today, the dashed line is the typical level for this date (Williston) or the IJC maximum for this date (Kootenay Lake), and the label is today’s percent, the change over seven days, and estimated stored energy.</p>
+  <p class="caption"><b>This is a schematic of the Peace, Columbia and Kootenay systems</b> — not a map of the province. Each teacup is one reservoir. The size of the cup is its usable storage, the fill is how full that range is today, the dashed line is the typical level for this date (Williston) or the IJC maximum for this date (Kootenay Lake), and the label is today’s percent, the change over seven days, and estimated stored energy.</p>
+  <p class="k" id="map-asof" style="margin:0 0 8px"></p>
   <div class="mapwrap">
-    <svg class="map" viewBox="0 0 1120 820" role="img" aria-label="Teacup map of Peace, Columbia and West Kootenay reservoirs in British Columbia">
-<rect x="0" y="0" width="1120" height="820" fill="#f4f7fb"/>
-<rect x="0" y="551.3" width="1120" height="268.7" fill="#eef2f6"/>
-<text x="1090" y="28" text-anchor="end" font-size="12" fill="#6b7280">Alberta</text>
-<text x="1090" y="58" text-anchor="end" font-size="10.5" fill="#4b5563">Williston is 32 MAF live storage.</text>
-<text x="1090" y="72" text-anchor="end" font-size="10.5" fill="#4b5563">Site C is 0.4% of that; Dinosaur is 0.06%.</text>
-<text x="790" y="780" font-size="12" fill="#6b7280">United States</text>
-<text x="36" y="28" font-size="16" font-weight="700" fill="#1d2330">British Columbia</text>
-<text id="map-asof" x="36" y="46" font-size="11" fill="#6b7280">Peace, Columbia and Kootenay storage</text>
-<path d="M56.1,56.3 L574.6,56.3 L574.6,335.3 L593.6,357.8 L612.6,389.2 L634.4,425.3 L700,448 L820,480 L940,515 L1070,551.3 L645.3,551.3 L547.4,551.3 L498.4,551.3 L488.9,550.3 L486.2,535.5 L488.9,519.8 L468.5,513.0 L444.0,504.0 L427.7,490.5 L405.9,486.0 L370.6,468.0 L348.8,447.8 L352.9,420.8 L337.9,393.8 L321.6,364.5 L305.3,333.0 L291.7,303.8 L297.1,279.0 L302.6,254.2 L299.8,229.5 L280.8,204.7 L248.2,184.5 L218.2,155.3 L188.3,126.0 L153.0,99.0 L112.2,78.8 L76.8,65.3 L56.1,56.3 Z" fill="#e7edf2" stroke="#94a3b8" stroke-width="1.4" stroke-linejoin="round"/>
-<path d="M486.2,581.9 L476.6,571.5 L452.2,570.2 L427.7,558.0 L400.5,535.5 L367.8,513.0 L344.7,486.0 L347.4,473.9 L373.3,481.5 L411.4,508.5 L442.6,531.0 L473.9,544.5 L486.2,558.0 L489.7,576.0 L486.2,581.9 Z" fill="#e7edf2" stroke="#94a3b8" stroke-width="1.2"/>
-<path d="M272.6,414.0 L259.0,407.2 L242.7,384.7 L223.7,353.3 L221.0,319.5 L237.3,315.0 L259.0,348.8 L275.4,384.7 L272.6,414.0 Z" fill="#e7edf2" stroke="#94a3b8" stroke-width="1"/>
-<path d="M414.1,177.8 L427.7,204.7 L446.7,227.2 L471.2,234.0" fill="none" stroke="#7dd3fc" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M454.9,274.5 L463.0,256.5 L473.9,240.8 L479.4,234.0" fill="none" stroke="#7dd3fc" stroke-width="5.0" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M416.8,198.0 L433.1,220.5 L457.6,234.0 L484.8,235.3 L514.7,235.3 L533.8,231.8 L549.8,227.2 L574.6,229.5 L609.9,229.5" fill="none" stroke="#38bdf8" stroke-width="4.0" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M687.4,495.0 L686.1,474.7 L679.3,447.8 L669.8,425.3 L650.7,414.0 L629.0,409.5 L614.0,411.8 L620.8,438.8 L623.5,459.0 L627.6,483.8 L633.0,510.8 L634.4,535.9 L638.5,546.8 L639.8,558.0 L630,620 L620,720" fill="none" stroke="#38bdf8" stroke-width="4.0" stroke-linecap="round" stroke-linejoin="round"/>
+    <svg class="map map-desktop" viewBox="0 0 1100 730" role="img" aria-label="Schematic of Peace, Columbia and Kootenay reservoirs and interties">
+<rect x="0" y="0" width="1100" height="730" fill="#f7f8fa"/>
+<defs>
+  <marker id="d-us" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+    <path d="M0,0.4 L8,4 L0,7.6 Z" fill="#2563eb"/>
+  </marker>
+  <marker id="d-ab" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+    <path d="M0,0.4 L8,4 L0,7.6 Z" fill="#d97706"/>
+  </marker>
+  <marker id="d-rv" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+    <path d="M0,0.5 L7,3.5 L0,6.5 Z" fill="#0284c7"/>
+  </marker>
+</defs>
 
+<rect x="0" y="630" width="1100" height="100" fill="#eef1f5"/>
+<line x1="32" y1="630" x2="1068" y2="630" stroke="#94a3b8" stroke-width="1.6"/>
+<text x="520" y="654" text-anchor="start" font-size="13" font-weight="500" fill="white" stroke="white" stroke-width="3" paint-order="stroke">United States</text>
+<text x="520" y="654" text-anchor="start" font-size="13" font-weight="500" fill="#6b7280">United States</text>
 
-<!-- West Kootenay waters -->
-<path d="M1000,448 L990,460 L940,470 L915,474" fill="none" stroke="#38bdf8" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="kootenay-lake" d="M892,468 C892,456 922,456 924,468 L928,522 C930,542 910,550 896,546 C884,544 878,538 868,528 C880,516 892,514 898,516 L900,476 C898,470 892,470 892,468 Z" fill="#7dd3fc" fill-opacity="0.55" stroke="#0284c7" stroke-width="1.3"/>
-<path d="M868,524 C840,512 820,508 790,508 C760,508 740,508 716,508 C690,510 675,516 668,522 L655,548 L640,555" fill="none" stroke="#38bdf8" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M790,508 C780,498 774,492 764,490 C754,488 748,498 744,508" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round"/>
-<path d="M790,508 C780,518 774,524 764,524 C754,524 748,516 744,508" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round"/>
-<path d="M786,532 C760,534 740,534 720,530" fill="none" stroke="#0e7490" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="6 3"/>
-<ellipse cx="732" cy="458" rx="10" ry="14" fill="#7dd3fc" fill-opacity="0.45" stroke="#0284c7" stroke-width="1"/>
-<path d="M732,472 L724,492 L716,508" fill="none" stroke="#7dd3fc" stroke-width="2.2" stroke-linecap="round"/>
-<path d="M910,670 L908,620 L906,560 L910,548" fill="none" stroke="#38bdf8" stroke-width="3.0" stroke-linecap="round"/>
-<path d="M780,800 L774,700 L768,600 L760,560 L748,548 L720,620 L690,632 L650,650 L630,670 L620,720" fill="none" stroke="#7dd3fc" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="744" y="450" font-size="9" font-style="italic" fill="#0284c7" text-anchor="middle" stroke="white" stroke-width="3" paint-order="stroke">Slocan Lake</text>
-<text x="744" y="450" font-size="9" font-style="italic" fill="#0284c7" text-anchor="middle">Slocan Lake</text>
-<text x="948" y="618" font-size="9.5" font-style="italic" fill="#0284c7" stroke="white" stroke-width="3" paint-order="stroke">Kootenay R.</text>
-<text x="948" y="618" font-size="9.5" font-style="italic" fill="#0284c7">Kootenay R.</text>
-<text x="948" y="632" font-size="8.5" font-style="italic" fill="#6b7280">flow north</text>
-<text x="700" y="700" font-size="9.5" font-style="italic" fill="#0284c7" stroke="white" stroke-width="3" paint-order="stroke">Pend d&apos;Oreille R.</text>
-<text x="700" y="700" font-size="9.5" font-style="italic" fill="#0284c7">Pend d&apos;Oreille R.</text>
-<text x="788" y="760" font-size="8.5" font-style="italic" fill="#6b7280">flow north</text>
+<text x="32" y="36" text-anchor="start" font-size="16" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Peace</text>
+<text x="32" y="36" text-anchor="start" font-size="16" font-weight="700" fill="#1d2330">Peace</text>
 
-  
-<text x="672.4" y="415.0" font-size="10.5" font-style="italic" fill="#0284c7" text-anchor="start" stroke="white" stroke-width="3" paint-order="stroke">Columbia R.</text><text x="672.4" y="415.0" font-size="10.5" font-style="italic" fill="#0284c7" text-anchor="start">Columbia R.</text>
-<circle cx="489.7" cy="538.6" r="2.2" fill="#64748b"/>
-<text x="481.7" y="530.6" font-size="10" fill="#6b7280" text-anchor="end" stroke="white" stroke-width="3" paint-order="stroke">Vancouver</text>
-<text x="481.7" y="530.6" font-size="10" fill="#6b7280" text-anchor="end">Vancouver</text>
-<circle cx="499.8" cy="329.8" r="2.2" fill="#64748b"/>
+<text x="32" y="318" text-anchor="start" font-size="16" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Columbia</text>
+<text x="32" y="318" text-anchor="start" font-size="16" font-weight="700" fill="#1d2330">Columbia</text>
 
+<text x="1080" y="318" text-anchor="end" font-size="16" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Kootenay</text>
+<text x="1080" y="318" text-anchor="end" font-size="16" font-weight="700" fill="#1d2330">Kootenay</text>
 
-<circle cx="551.4" cy="225.0" r="2.2" fill="#64748b"/>
+<text x="1080" y="36" text-anchor="end" font-size="13" font-weight="500" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Alberta</text>
+<text x="1080" y="36" text-anchor="end" font-size="13" font-weight="500" fill="#6b7280">Alberta</text>
 
+<path d="M70,200 L830,200" fill="none" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+<path d="M770,200 L830,200" fill="none" stroke="#38bdf8" stroke-width="6" stroke-linecap="round" marker-end="url(#d-rv)"/>
+<text x="360" y="186" text-anchor="middle" font-size="12" font-weight="500" font-style="italic" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Peace R.</text>
+<text x="360" y="186" text-anchor="middle" font-size="12" font-weight="500" font-style="italic" fill="#0284c7">Peace R.</text>
 
-  
-  <g class="cup" id="cup-williston" transform="translate(461.7,244.9)" aria-label="Williston">
-    <ellipse cx="0" cy="3.2" rx="29.9" ry="4.4" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
-    <polygon class="cup-shell" points="-40.0,-90.0 40.0,-90.0 17.6,0 -17.6,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+<g class="cup" id="cup-williston" data-cup="williston" data-lab="end" data-lx="-56" data-ly="-76" transform="translate(220,200)" aria-label="williston">
+    <ellipse cx="0" cy="3.2" rx="30.0" ry="4.4" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+    <polygon class="cup-shell" points="-40,-90 40,-90 17.6,0 -17.6,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
     <polygon class="cup-fill" points="-17.6,0 17.6,0 17.6,0 -17.6,0" fill="#0e7490" opacity="0.92"/>
-    <polygon points="-40.0,-90.0 40.0,-90.0 17.6,0 -17.6,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
-    <line class="cup-typical" x1="-38.9" y1="-77.5" x2="38.9" y2="-77.5" stroke="#b45309" stroke-width="1.7" stroke-dasharray="3.5 2.5"/>
-    <g class="cup-lab"></g>
-  </g>
-  <g class="cup" id="cup-dinosaur" transform="translate(520.7,263.3)" aria-label="Dinosaur">
-    <ellipse cx="0" cy="3.2" rx="10.1" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
-    <polygon class="cup-shell" points="-13.6,-36.0 13.6,-36.0 6.0,0 -6.0,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
-    <polygon class="cup-fill" points="-6,0 6,0 6,0 -6,0" fill="#0e7490" opacity="0.92"/>
-    <polygon points="-13.6,-36.0 13.6,-36.0 6.0,0 -6.0,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <polygon points="-40,-90 40,-90 17.6,0 -17.6,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
     <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
     <g class="cup-lab"></g>
   </g>
-  <g class="cup" id="cup-sitec" transform="translate(571.8,221.2)" aria-label="Site C">
-    <ellipse cx="0" cy="3.2" rx="9.7" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
-    <polygon class="cup-shell" points="-14.0,-38.0 14.0,-38.0 6.2,0 -6.2,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+
+<g class="cup" id="cup-dinosaur" data-cup="dinosaur" data-lab="middle" data-lx="0" data-ly="20" transform="translate(510,200)" aria-label="dinosaur">
+    <ellipse cx="0" cy="3.2" rx="10.2" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+    <polygon class="cup-shell" points="-13.6,-36 13.6,-36 6.0,0 -6.0,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <polygon class="cup-fill" points="-6.0,0 6.0,0 6.0,0 -6.0,0" fill="#0e7490" opacity="0.92"/>
+    <polygon points="-13.6,-36 13.6,-36 6.0,0 -6.0,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
+    <g class="cup-lab"></g>
+  </g>
+
+<g class="cup" id="cup-sitec" data-cup="sitec" data-lab="middle" data-lx="0" data-ly="20" transform="translate(710,200)" aria-label="sitec">
+    <ellipse cx="0" cy="3.2" rx="10.5" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+    <polygon class="cup-shell" points="-14.0,-38 14.0,-38 6.2,0 -6.2,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
     <polygon class="cup-fill" points="-6.2,0 6.2,0 6.2,0 -6.2,0" fill="#0e7490" opacity="0.92"/>
-    <polygon points="-14.0,-38.0 14.0,-38.0 6.2,0 -6.2,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <polygon points="-14.0,-38 14.0,-38 6.2,0 -6.2,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
     <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
-    <line x1="22" y1="-20" x2="44" y2="-48" stroke="#64748b" stroke-width="1"/>
-    <g class="cup-lab" transform="translate(48,-78)"></g>
+    <g class="cup-lab"></g>
   </g>
-  <g class="cup" id="cup-mica" transform="translate(591.5,420.7)" aria-label="Mica / Kinbasket">
-    <ellipse cx="0" cy="3.2" rx="21.3" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+
+<line data-tie="ab" data-ex-x1="900" data-ex-y1="100" data-ex-x2="1068" data-ex-y2="100" data-im-x1="1068" data-im-y1="100" data-im-x2="900" data-im-y2="100" x1="1068" y1="100" x2="900" y2="100" stroke="#d97706" stroke-width="3.6" stroke-linecap="round" marker-end="url(#d-ab)"/>
+  <text data-tie-lab="ab" x="900" y="78" text-anchor="start" font-size="13" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke"></text>
+<text data-tie-lab="ab" x="900" y="78" text-anchor="start" font-size="13" font-weight="700" fill="#d97706"></text>
+
+  <text data-tie-sub="ab" x="900" y="92" text-anchor="start" font-size="10" font-weight="500" fill="white" stroke="white" stroke-width="3" paint-order="stroke"></text>
+<text data-tie-sub="ab" x="900" y="92" text-anchor="start" font-size="10" font-weight="500" fill="#6b7280"></text>
+
+
+<path d="M250,340 L250,700" fill="none" stroke="#38bdf8" stroke-width="5.5" stroke-linecap="round"/>
+<path d="M250,670 L250,708" fill="none" stroke="#38bdf8" stroke-width="5.5" stroke-linecap="round" marker-end="url(#d-rv)"/>
+<text x="264" y="356" text-anchor="start" font-size="12" font-weight="500" font-style="italic" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Columbia R.</text>
+<text x="264" y="356" text-anchor="start" font-size="12" font-weight="500" font-style="italic" fill="#0284c7">Columbia R.</text>
+
+<g class="cup" id="cup-mica" data-cup="mica" data-lab="end" data-lx="-44" data-ly="-58" transform="translate(250,420)" aria-label="mica">
+    <ellipse cx="0" cy="3.2" rx="21.3" ry="3.6" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
     <polygon class="cup-shell" points="-28.4,-65.4 28.4,-65.4 12.5,0 -12.5,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
     <polygon class="cup-fill" points="-12.5,0 12.5,0 12.5,0 -12.5,0" fill="#0e7490" opacity="0.92"/>
     <polygon points="-28.4,-65.4 28.4,-65.4 12.5,0 -12.5,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
     <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
     <g class="cup-lab"></g>
   </g>
-  <g class="cup" id="cup-arrow" transform="translate(612.4,522.5)" aria-label="Arrow">
-    <ellipse cx="0" cy="3.2" rx="18.2" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+
+<g class="plant" transform="translate(250,490)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="14" y="4" text-anchor="start" font-size="11" font-weight="600" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Revelstoke</text>
+<text x="14" y="4" text-anchor="start" font-size="11" font-weight="600" fill="#4b5563">Revelstoke</text>
+
+  </g>
+
+<g class="cup" id="cup-arrow" data-cup="arrow" data-lab="end" data-lx="-40" data-ly="-50" transform="translate(250,570)" aria-label="arrow">
+    <ellipse cx="0" cy="3.2" rx="18.1" ry="3.6" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
     <polygon class="cup-shell" points="-24.1,-56.1 24.1,-56.1 10.6,0 -10.6,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
     <polygon class="cup-fill" points="-10.6,0 10.6,0 10.6,0 -10.6,0" fill="#0e7490" opacity="0.92"/>
     <polygon points="-24.1,-56.1 24.1,-56.1 10.6,0 -10.6,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
     <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
     <g class="cup-lab"></g>
   </g>
-  <g class="cup" id="cup-duncan" transform="translate(1000,448)" aria-label="Duncan">
-    <ellipse cx="0" cy="3.2" rx="12.4" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+
+<path d="M900,370 L900,510" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/>
+<path d="M900,700 L900,510" fill="none" stroke="#38bdf8" stroke-width="4.5" stroke-linecap="round"/>
+<path d="M900,510 L720,510 L540,545 L380,590 L250,605" fill="none" stroke="#38bdf8" stroke-width="4.5" stroke-linecap="round"/>
+<path d="M800,532 L580,565" fill="none" stroke="#7dd3fc" stroke-width="2.8" stroke-linecap="round"/>
+
+<text x="888" y="600" text-anchor="end" font-size="11" font-weight="500" font-style="italic" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Kootenay R.</text>
+<text x="888" y="600" text-anchor="end" font-size="11" font-weight="500" font-style="italic" fill="#0284c7">Kootenay R.</text>
+
+<text x="888" y="616" text-anchor="end" font-size="10" font-weight="500" font-style="italic" fill="white" stroke="white" stroke-width="3" paint-order="stroke">flow north</text>
+<text x="888" y="616" text-anchor="end" font-size="10" font-weight="500" font-style="italic" fill="#6b7280">flow north</text>
+
+<text x="540" y="496" text-anchor="middle" font-size="11" font-weight="500" font-style="italic" fill="white" stroke="white" stroke-width="3" paint-order="stroke">West Arm</text>
+<text x="540" y="496" text-anchor="middle" font-size="11" font-weight="500" font-style="italic" fill="#0284c7">West Arm</text>
+
+<text x="690" y="580" text-anchor="middle" font-size="10" font-weight="500" font-style="italic" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Canal</text>
+<text x="690" y="580" text-anchor="middle" font-size="10" font-weight="500" font-style="italic" fill="#0284c7">Canal</text>
+
+<g class="cup" id="cup-duncan" data-cup="duncan" data-lab="start" data-lx="24" data-ly="-36" transform="translate(900,380)" aria-label="duncan">
+    <ellipse cx="0" cy="3.2" rx="12.2" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
     <polygon class="cup-shell" points="-16.3,-39.4 16.3,-39.4 7.2,0 -7.2,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
     <polygon class="cup-fill" points="-7.2,0 7.2,0 7.2,0 -7.2,0" fill="#0e7490" opacity="0.92"/>
     <polygon points="-16.3,-39.4 16.3,-39.4 7.2,0 -7.2,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
@@ -235,135 +282,336 @@ footer{margin:18px 0 8px;font-size:.78rem;color:var(--mute)}
     <g class="cup-lab"></g>
   </g>
 
-  <g class="cup" id="cup-kootenay" transform="translate(905,528)" aria-label="Kootenay Lake">
+<g class="cup" id="cup-kootenay" data-cup="kootenay" data-lab="start" data-lx="24" data-ly="-78" transform="translate(900,510)" aria-label="kootenay">
     <ellipse cx="0" cy="3.2" rx="12.6" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
-    <polygon class="cup-shell" points="-16.8,-40.0 16.8,-40.0 7.4,0 -7.4,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <polygon class="cup-shell" points="-16.8,-40 16.8,-40 7.4,0 -7.4,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
     <polygon class="cup-fill" points="-7.4,0 7.4,0 7.4,0 -7.4,0" fill="#0e7490" opacity="0.92"/>
-    <polygon points="-16.8,-40.0 16.8,-40.0 7.4,0 -7.4,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <polygon points="-16.8,-40 16.8,-40 7.4,0 -7.4,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
     <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
     <g class="cup-lab"></g>
   </g>
 
-<g transform="translate(910,670)" aria-label="Libby Dam">
+<g class="cup static" transform="translate(900,700)" aria-label="Libby Dam">
     <ellipse cx="0" cy="3.2" rx="11" ry="3.0" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
     <polygon points="-14.5,-34 14.5,-34 6.6,0 -6.6,0" fill="#f8fafc" stroke="#334155" stroke-width="1.4" stroke-linejoin="round"/>
-    <text x="20" y="-20" font-size="11" font-weight="600" fill="#1d2330" stroke="white" stroke-width="3" paint-order="stroke">Libby Dam</text>
-    <text x="20" y="-20" font-size="11" font-weight="600" fill="#1d2330">Libby Dam</text>
-    <text x="20" y="-6" font-size="9.5" fill="#6b7280" stroke="white" stroke-width="3" paint-order="stroke">600 MW · 1975</text>
-    <text x="20" y="-6" font-size="9.5" fill="#6b7280">600 MW · 1975</text>
-    <text x="20" y="8" font-size="9" fill="#6b7280" stroke="white" stroke-width="3" paint-order="stroke">USACE · no live fill</text>
-    <text x="20" y="8" font-size="9" fill="#6b7280">USACE · no live fill</text>
-  </g>
-  <g class="plant" transform="translate(800,508)">
-    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
-    <text x="0" y="-11" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155" stroke="white" stroke-width="3" paint-order="stroke">COR</text>
-    <text x="0" y="-11" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155">COR</text>
-  </g>
-  <g class="plant" transform="translate(768,470)">
-    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
-    <text x="0" y="-11" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155" stroke="white" stroke-width="3" paint-order="stroke">NEL</text>
-    <text x="0" y="-11" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155">NEL</text>
-  </g>
-  <g class="plant" transform="translate(768,528)">
-    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
-    <text x="10" y="14" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155" stroke="white" stroke-width="3" paint-order="stroke">UBO</text>
-    <text x="10" y="14" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155">UBO</text>
-  </g>
-  <g class="plant" transform="translate(744,508)">
-    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
-    <text x="0" y="-11" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155" stroke="white" stroke-width="3" paint-order="stroke">LBO</text>
-    <text x="0" y="-11" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155">LBO</text>
-  </g>
-  <g class="plant" transform="translate(716,508)">
-    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
-    <text x="0" y="14" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155" stroke="white" stroke-width="3" paint-order="stroke">SLC</text>
-    <text x="0" y="14" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155">SLC</text>
-  </g>
-  <g class="plant" transform="translate(736,540)">
-    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
-    <text x="0" y="14" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155" stroke="white" stroke-width="3" paint-order="stroke">KCL</text>
-    <text x="0" y="14" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155">KCL</text>
-  </g>
-  <g class="plant" transform="translate(650,522)">
-    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
-    <text x="0" y="-11" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155" stroke="white" stroke-width="3" paint-order="stroke">BRD</text>
-    <text x="0" y="-11" text-anchor="middle" font-size="8.5" font-weight="700" fill="#334155">BRD</text>
-  </g>
-  <g class="plant" transform="translate(690,632)">
-    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
-    <text x="0" y="-12" text-anchor="middle" font-size="10" font-weight="600" fill="#4b5563" stroke="white" stroke-width="3" paint-order="stroke">Seven Mile</text>
-    <text x="0" y="-12" text-anchor="middle" font-size="10" font-weight="600" fill="#4b5563">Seven Mile</text>
-  </g>
-  <g class="plant" transform="translate(650,650)">
-    <rect x="-4" y="-4" width="8" height="8" rx="1" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
-    <text x="-10" y="16" text-anchor="end" font-size="10" font-weight="600" fill="#4b5563" stroke="white" stroke-width="3" paint-order="stroke">Waneta</text>
-    <text x="-10" y="16" text-anchor="end" font-size="10" font-weight="600" fill="#4b5563">Waneta</text>
-  </g>
-  <g transform="translate(888,688)">
-    <rect x="0" y="0" width="220" height="122" rx="7" fill="#ffffff" fill-opacity="0.96" stroke="#e5e7eb"/>
-    <text x="10" y="15" font-size="11" font-weight="700" fill="#1d2330">West Kootenay plants</text>
-    <text x="10" y="28" font-size="9" fill="#6b7280">Nameplate capacity, not live output</text>
-    <text x="10" y="44" font-size="10" fill="#374151">COR  Corra Linn · 51 MW · 1932</text>
-    <text x="10" y="56" font-size="10" fill="#374151">NEL  City of Nelson · 16 MW</text>
-    <text x="10" y="68" font-size="10" fill="#374151">UBO  Upper Bonnington · 66 MW · 1907</text>
-    <text x="10" y="80" font-size="10" fill="#374151">LBO  Lower Bonnington · 54 MW · 1954</text>
-    <text x="10" y="92" font-size="10" fill="#374151">SLC  South Slocan · 54 MW · 1954</text>
-    <text x="10" y="104" font-size="10" fill="#374151">KCL  Kootenay Canal · 580 MW · 1976</text>
-    <text x="10" y="116" font-size="10" fill="#374151">BRD  Brilliant Dam · 265 MW · 1944</text>
-  </g>
-  <g transform="translate(872,512)">
-    <circle r="2.4" fill="#0f766e" stroke="#134e4a" stroke-width="0.7"/>
-    <text x="-8" y="-7" text-anchor="end" font-size="8.5" fill="#6b7280" stroke="white" stroke-width="3" paint-order="stroke">Nelson</text>
-    <text x="-8" y="-7" text-anchor="end" font-size="8.5" fill="#6b7280">Nelson</text>
-  </g>
-  <g transform="translate(888,540)">
-    <circle r="2.4" fill="#0f766e" stroke="#134e4a" stroke-width="0.7"/>
-    <text x="-8" y="14" text-anchor="end" font-size="8.5" fill="#6b7280" stroke="white" stroke-width="3" paint-order="stroke">Queens Bay</text>
-    <text x="-8" y="14" text-anchor="end" font-size="8.5" fill="#6b7280">Queens Bay</text>
-  </g>
-  <text x="822" y="484" text-anchor="middle" font-size="8.5" font-style="italic" fill="#6b7280" stroke="white" stroke-width="3" paint-order="stroke">Grohman Narrows</text>
-  <text x="822" y="484" text-anchor="middle" font-size="8.5" font-style="italic" fill="#6b7280">Grohman Narrows</text>
+    <text x="22" y="-18" text-anchor="start" font-size="12" font-weight="600" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Libby Dam</text>
+<text x="22" y="-18" text-anchor="start" font-size="12" font-weight="600" fill="#1d2330">Libby Dam</text>
 
-  <defs>
-    <marker id="ah_us" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
-    </marker>
-    <marker id="ah_ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#d97706"/>
-    </marker>
-  </defs>
-  <g class="tie">
-    <line id="tie-us-line" x1="478.0" y1="544.5" x2="478.0" y2="576.0" stroke="#2563eb" stroke-width="3.2" marker-end="url(#ah_us)"/>
-    <text id="tie-us-label" x="488.0" y="578.0" font-size="12" font-weight="700" fill="#2563eb" stroke="white" stroke-width="3" paint-order="stroke">BC → US</text>
-    <text id="tie-us-sub" x="488.0" y="592.0" font-size="10.5" fill="#4b5563" stroke="white" stroke-width="3" paint-order="stroke">latest hour</text>
+    <text x="22" y="-3" text-anchor="start" font-size="10" font-weight="500" fill="white" stroke="white" stroke-width="3" paint-order="stroke">600 MW · 1975</text>
+<text x="22" y="-3" text-anchor="start" font-size="10" font-weight="500" fill="#6b7280">600 MW · 1975</text>
+
+    <text x="22" y="12" text-anchor="start" font-size="9.5" font-weight="500" fill="white" stroke="white" stroke-width="3" paint-order="stroke">USACE · no live fill</text>
+<text x="22" y="12" text-anchor="start" font-size="9.5" font-weight="500" fill="#6b7280">USACE · no live fill</text>
+
   </g>
 
-  <g class="tie">
-    <line id="tie-ab-line" x1="1110" y1="528" x2="1036" y2="528" stroke="#d97706" stroke-width="3.2" marker-end="url(#ah_ab)"/>
-    <text id="tie-ab-label" x="1058" y="502" text-anchor="middle" font-size="12" font-weight="700" fill="#d97706" stroke="white" stroke-width="3" paint-order="stroke">BC ⇄ Alberta</text>
-    <text id="tie-ab-sub" x="1058" y="516" text-anchor="middle" font-size="10.5" fill="#4b5563" stroke="white" stroke-width="3" paint-order="stroke">latest hour</text>
+<g class="plant" transform="translate(820,510)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="-15" text-anchor="middle" font-size="11" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">COR</text>
+<text x="0" y="-15" text-anchor="middle" font-size="11" font-weight="700" fill="#334155">COR</text>
+
   </g>
 
-  <g transform="translate(24,548)">
-    <rect x="0" y="0" width="418" height="108" rx="8" fill="#ffffff" fill-opacity="0.96" stroke="#e5e7eb"/>
-    <text x="14" y="20" font-size="12" font-weight="700" fill="#1d2330">How to read a teacup</text>
-    <g transform="translate(40,90)">
-      <polygon points="-16,-50 16,-50 8,0 -8,0" fill="#f8fafc" stroke="#334155" stroke-width="1.3"/>
-      <polygon points="-10.7,-25 10.7,-25 8,0 -8,0" fill="#0e7490" opacity="0.92"/>
-      <polygon points="-16,-50 16,-50 8,0 -8,0" fill="none" stroke="#334155" stroke-width="1.3"/>
-      <line x1="-14" y1="-36" x2="14" y2="-36" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3 2"/>
-    </g>
-    <text x="66" y="46" font-size="11" fill="#374151">Teal fill = how full the usable range is today.</text>
-    <text x="66" y="62" font-size="11" fill="#374151">Dashed line = typical for this date (Williston) or IJC maximum (Kootenay Lake).</text>
-    <text x="66" y="78" font-size="11" fill="#374151">Cup size ≈ usable storage (square-root scaled so small ponds stay visible).</text>
-    <text x="66" y="94" font-size="11" fill="#374151">Label = % full · change over 7 days · estimated stored energy.</text>
+<g class="plant" transform="translate(750,510)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">NEL</text>
+<text x="0" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#334155">NEL</text>
+
   </g>
 
-  </svg>
+<g class="plant" transform="translate(680,518)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="-15" text-anchor="middle" font-size="11" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">UBO</text>
+<text x="0" y="-15" text-anchor="middle" font-size="11" font-weight="700" fill="#334155">UBO</text>
+
+  </g>
+
+<g class="plant" transform="translate(600,538)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">LBO</text>
+<text x="0" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#334155">LBO</text>
+
+  </g>
+
+<g class="plant" transform="translate(530,550)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="-15" text-anchor="middle" font-size="11" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">SLC</text>
+<text x="0" y="-15" text-anchor="middle" font-size="11" font-weight="700" fill="#334155">SLC</text>
+
+  </g>
+
+<g class="plant" transform="translate(600,568)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="16" text-anchor="middle" font-size="11" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">KCL</text>
+<text x="0" y="16" text-anchor="middle" font-size="11" font-weight="700" fill="#334155">KCL</text>
+
+  </g>
+
+<g class="plant" transform="translate(400,585)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="-15" text-anchor="middle" font-size="11" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">BRD</text>
+<text x="0" y="-15" text-anchor="middle" font-size="11" font-weight="700" fill="#334155">BRD</text>
+
+  </g>
+
+
+<path d="M430,710 L350,672 L290,652 L250,640" fill="none" stroke="#7dd3fc" stroke-width="3.2" stroke-linecap="round"/>
+<text x="430" y="704" text-anchor="end" font-size="11" font-weight="500" font-style="italic" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Pend d’Oreille R.</text>
+<text x="430" y="704" text-anchor="end" font-size="11" font-weight="500" font-style="italic" fill="#0284c7">Pend d’Oreille R.</text>
+
+<g class="plant" transform="translate(350,672)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="-14" text-anchor="middle" font-size="10" font-weight="600" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Seven Mile</text>
+<text x="0" y="-14" text-anchor="middle" font-size="10" font-weight="600" fill="#4b5563">Seven Mile</text>
+
+  </g>
+
+<g class="plant" transform="translate(290,652)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="-12" y="16" text-anchor="end" font-size="10" font-weight="600" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Waneta</text>
+<text x="-12" y="16" text-anchor="end" font-size="10" font-weight="600" fill="#4b5563">Waneta</text>
+
+  </g>
+
+<line data-tie="us" data-ex-x1="80" data-ex-y1="590" data-ex-x2="80" data-ex-y2="700" data-im-x1="80" data-im-y1="700" data-im-x2="80" data-im-y2="590" x1="80" y1="700" x2="80" y2="590" stroke="#2563eb" stroke-width="3.6" stroke-linecap="round" marker-end="url(#d-us)"/>
+  <text data-tie-lab="us" x="96" y="612" text-anchor="start" font-size="13" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke"></text>
+<text data-tie-lab="us" x="96" y="612" text-anchor="start" font-size="13" font-weight="700" fill="#2563eb"></text>
+
+  <text data-tie-sub="us" x="96" y="628" text-anchor="start" font-size="10" font-weight="500" fill="white" stroke="white" stroke-width="3" paint-order="stroke"></text>
+<text data-tie-sub="us" x="96" y="628" text-anchor="start" font-size="10" font-weight="500" fill="#6b7280"></text>
+
+
+</svg>
+    <svg class="map map-mobile" viewBox="0 0 400 1540" role="img" aria-label="Schematic of Peace, Columbia and Kootenay reservoirs, stacked for a narrow screen">
+<rect x="0" y="0" width="400" height="1540" fill="#f7f8fa"/>
+<defs>
+  <marker id="m-us" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+    <path d="M0,0.4 L8,4 L0,7.6 Z" fill="#2563eb"/>
+  </marker>
+  <marker id="m-ab" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+    <path d="M0,0.4 L8,4 L0,7.6 Z" fill="#d97706"/>
+  </marker>
+  <marker id="m-rv" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+    <path d="M0,0.5 L7,3.5 L0,6.5 Z" fill="#0284c7"/>
+  </marker>
+</defs>
+
+<text x="20" y="32" text-anchor="start" font-size="18" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Peace</text>
+<text x="20" y="32" text-anchor="start" font-size="18" font-weight="700" fill="#1d2330">Peace</text>
+
+<path d="M80,70 L80,430" fill="none" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+<text x="96" y="248" text-anchor="start" font-size="13" font-weight="500" font-style="italic" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Peace R.</text>
+<text x="96" y="248" text-anchor="start" font-size="13" font-weight="500" font-style="italic" fill="#0284c7">Peace R.</text>
+
+<g class="cup" id="cup-williston-m" data-cup="williston" data-lab="start" data-lx="56" data-ly="-80" transform="translate(80,170)" aria-label="williston">
+    <ellipse cx="0" cy="3.2" rx="30.0" ry="4.4" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+    <polygon class="cup-shell" points="-40,-90 40,-90 17.6,0 -17.6,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <polygon class="cup-fill" points="-17.6,0 17.6,0 17.6,0 -17.6,0" fill="#0e7490" opacity="0.92"/>
+    <polygon points="-40,-90 40,-90 17.6,0 -17.6,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
+    <g class="cup-lab"></g>
+  </g>
+
+<g class="cup" id="cup-dinosaur-m" data-cup="dinosaur" data-lab="start" data-lx="28" data-ly="-32" transform="translate(80,310)" aria-label="dinosaur">
+    <ellipse cx="0" cy="3.2" rx="10.2" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+    <polygon class="cup-shell" points="-13.6,-36 13.6,-36 6.0,0 -6.0,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <polygon class="cup-fill" points="-6.0,0 6.0,0 6.0,0 -6.0,0" fill="#0e7490" opacity="0.92"/>
+    <polygon points="-13.6,-36 13.6,-36 6.0,0 -6.0,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
+    <g class="cup-lab"></g>
+  </g>
+
+<g class="cup" id="cup-sitec-m" data-cup="sitec" data-lab="start" data-lx="28" data-ly="-34" transform="translate(80,420)" aria-label="sitec">
+    <ellipse cx="0" cy="3.2" rx="10.5" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+    <polygon class="cup-shell" points="-14.0,-38 14.0,-38 6.2,0 -6.2,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <polygon class="cup-fill" points="-6.2,0 6.2,0 6.2,0 -6.2,0" fill="#0e7490" opacity="0.92"/>
+    <polygon points="-14.0,-38 14.0,-38 6.2,0 -6.2,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
+    <g class="cup-lab"></g>
+  </g>
+
+<text x="20" y="480" text-anchor="start" font-size="14" font-weight="500" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Alberta</text>
+<text x="20" y="480" text-anchor="start" font-size="14" font-weight="500" fill="#6b7280">Alberta</text>
+
+<line data-tie="ab" data-ex-x1="30" data-ex-y1="520" data-ex-x2="370" data-ex-y2="520" data-im-x1="370" data-im-y1="520" data-im-x2="30" data-im-y2="520" x1="370" y1="520" x2="30" y2="520" stroke="#d97706" stroke-width="3.6" stroke-linecap="round" marker-end="url(#m-ab)"/>
+  <text data-tie-lab="ab" x="30" y="504" text-anchor="start" font-size="15" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke"></text>
+<text data-tie-lab="ab" x="30" y="504" text-anchor="start" font-size="15" font-weight="700" fill="#d97706"></text>
+
+  <text data-tie-sub="ab" x="30" y="542" text-anchor="start" font-size="12" font-weight="500" fill="white" stroke="white" stroke-width="3" paint-order="stroke"></text>
+<text data-tie-sub="ab" x="30" y="542" text-anchor="start" font-size="12" font-weight="500" fill="#6b7280"></text>
+
+
+<text x="20" y="600" text-anchor="start" font-size="18" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Columbia</text>
+<text x="20" y="600" text-anchor="start" font-size="18" font-weight="700" fill="#1d2330">Columbia</text>
+
+<path d="M80,630 L80,980" fill="none" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+<text x="96" y="648" text-anchor="start" font-size="13" font-weight="500" font-style="italic" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Columbia R.</text>
+<text x="96" y="648" text-anchor="start" font-size="13" font-weight="500" font-style="italic" fill="#0284c7">Columbia R.</text>
+
+<g class="cup" id="cup-mica-m" data-cup="mica" data-lab="start" data-lx="42" data-ly="-58" transform="translate(80,730)" aria-label="mica">
+    <ellipse cx="0" cy="3.2" rx="21.3" ry="3.6" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+    <polygon class="cup-shell" points="-28.4,-65.4 28.4,-65.4 12.5,0 -12.5,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <polygon class="cup-fill" points="-12.5,0 12.5,0 12.5,0 -12.5,0" fill="#0e7490" opacity="0.92"/>
+    <polygon points="-28.4,-65.4 28.4,-65.4 12.5,0 -12.5,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
+    <g class="cup-lab"></g>
+  </g>
+
+<g class="plant" transform="translate(80,830)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="16" y="5" text-anchor="start" font-size="14" font-weight="600" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Revelstoke</text>
+<text x="16" y="5" text-anchor="start" font-size="14" font-weight="600" fill="#4b5563">Revelstoke</text>
+
+  </g>
+
+<g class="cup" id="cup-arrow-m" data-cup="arrow" data-lab="start" data-lx="36" data-ly="-50" transform="translate(80,920)" aria-label="arrow">
+    <ellipse cx="0" cy="3.2" rx="18.1" ry="3.6" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+    <polygon class="cup-shell" points="-24.1,-56.1 24.1,-56.1 10.6,0 -10.6,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <polygon class="cup-fill" points="-10.6,0 10.6,0 10.6,0 -10.6,0" fill="#0e7490" opacity="0.92"/>
+    <polygon points="-24.1,-56.1 24.1,-56.1 10.6,0 -10.6,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
+    <g class="cup-lab"></g>
+  </g>
+
+<text x="20" y="1025" text-anchor="start" font-size="18" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Kootenay</text>
+<text x="20" y="1025" text-anchor="start" font-size="18" font-weight="700" fill="#1d2330">Kootenay</text>
+
+<path d="M80,1050 L80,1220 L80,1290 L350,1290 L350,1360" fill="none" stroke="#38bdf8" stroke-width="5.5" stroke-linecap="round"/>
+<g class="cup" id="cup-duncan-m" data-cup="duncan" data-lab="start" data-lx="28" data-ly="-36" transform="translate(80,1090)" aria-label="duncan">
+    <ellipse cx="0" cy="3.2" rx="12.2" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+    <polygon class="cup-shell" points="-16.3,-39.4 16.3,-39.4 7.2,0 -7.2,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <polygon class="cup-fill" points="-7.2,0 7.2,0 7.2,0 -7.2,0" fill="#0e7490" opacity="0.92"/>
+    <polygon points="-16.3,-39.4 16.3,-39.4 7.2,0 -7.2,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
+    <g class="cup-lab"></g>
+  </g>
+
+<g class="cup" id="cup-kootenay-m" data-cup="kootenay" data-lab="start" data-lx="28" data-ly="-78" transform="translate(80,1220)" aria-label="kootenay">
+    <ellipse cx="0" cy="3.2" rx="12.6" ry="3.2" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+    <polygon class="cup-shell" points="-16.8,-40 16.8,-40 7.4,0 -7.4,0" fill="#f8fafc" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <polygon class="cup-fill" points="-7.4,0 7.4,0 7.4,0 -7.4,0" fill="#0e7490" opacity="0.92"/>
+    <polygon points="-16.8,-40 16.8,-40 7.4,0 -7.4,0" fill="none" stroke="#334155" stroke-width="1.6" stroke-linejoin="round"/>
+    <line class="cup-typical" x1="0" y1="0" x2="0" y2="0" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" style="display:none"/>
+    <g class="cup-lab"></g>
+  </g>
+
+
+<g class="plant" transform="translate(150,1290)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="-16" text-anchor="middle" font-size="13" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">COR</text>
+<text x="0" y="-16" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">COR</text>
+
+  </g>
+
+<g class="plant" transform="translate(195,1290)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">NEL</text>
+<text x="0" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">NEL</text>
+
+  </g>
+
+<g class="plant" transform="translate(240,1290)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="-16" text-anchor="middle" font-size="13" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">UBO</text>
+<text x="0" y="-16" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">UBO</text>
+
+  </g>
+
+<g class="plant" transform="translate(285,1290)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">LBO</text>
+<text x="0" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">LBO</text>
+
+  </g>
+
+<g class="plant" transform="translate(330,1290)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="0" y="-16" text-anchor="middle" font-size="13" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">SLC</text>
+<text x="0" y="-16" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">SLC</text>
+
+  </g>
+
+<g class="plant" transform="translate(350,1330)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="-18" y="5" text-anchor="end" font-size="13" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">KCL</text>
+<text x="-18" y="5" text-anchor="end" font-size="13" font-weight="700" fill="#334155">KCL</text>
+
+  </g>
+
+<g class="plant" transform="translate(350,1360)">
+    <rect x="-4.5" y="-4.5" width="9" height="9" rx="1.2" fill="#94a3b8" stroke="#334155" stroke-width="0.8"/>
+    <text x="-18" y="5" text-anchor="end" font-size="13" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke">BRD</text>
+<text x="-18" y="5" text-anchor="end" font-size="13" font-weight="700" fill="#334155">BRD</text>
+
+  </g>
+
+<text x="364" y="1380" text-anchor="end" font-size="12" font-weight="500" font-style="italic" fill="white" stroke="white" stroke-width="3" paint-order="stroke">to Columbia</text>
+<text x="364" y="1380" text-anchor="end" font-size="12" font-weight="500" font-style="italic" fill="#6b7280">to Columbia</text>
+
+<rect x="0" y="1410" width="400" height="130" fill="#eef1f5"/>
+<line x1="16" y1="1410" x2="384" y2="1410" stroke="#94a3b8" stroke-width="1.8"/>
+<text x="16" y="1430" text-anchor="start" font-size="14" font-weight="500" fill="white" stroke="white" stroke-width="3" paint-order="stroke">United States</text>
+<text x="16" y="1430" text-anchor="start" font-size="14" font-weight="500" fill="#6b7280">United States</text>
+
+<path d="M80,1495 L80,1220" fill="none" stroke="#38bdf8" stroke-width="4.5" stroke-linecap="round"/>
+<g class="cup static" transform="translate(80,1495)" aria-label="Libby Dam">
+    <ellipse cx="0" cy="3.2" rx="11" ry="3.0" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+    <polygon points="-14.5,-34 14.5,-34 6.6,0 -6.6,0" fill="#f8fafc" stroke="#334155" stroke-width="1.4" stroke-linejoin="round"/>
+    <text x="22" y="-22" text-anchor="start" font-size="15" font-weight="600" fill="white" stroke="white" stroke-width="3" paint-order="stroke">Libby Dam</text>
+<text x="22" y="-22" text-anchor="start" font-size="15" font-weight="600" fill="#1d2330">Libby Dam</text>
+
+    <text x="22" y="-4" text-anchor="start" font-size="12" font-weight="500" fill="white" stroke="white" stroke-width="3" paint-order="stroke">600 MW · 1975</text>
+<text x="22" y="-4" text-anchor="start" font-size="12" font-weight="500" fill="#6b7280">600 MW · 1975</text>
+
+    <text x="22" y="14" text-anchor="start" font-size="11.5" font-weight="500" fill="white" stroke="white" stroke-width="3" paint-order="stroke">USACE · no live fill</text>
+<text x="22" y="14" text-anchor="start" font-size="11.5" font-weight="500" fill="#6b7280">USACE · no live fill</text>
+
+  </g>
+
+<line data-tie="us" data-ex-x1="300" data-ex-y1="1380" data-ex-x2="300" data-ex-y2="1510" data-im-x1="300" data-im-y1="1510" data-im-x2="300" data-im-y2="1380" x1="300" y1="1510" x2="300" y2="1380" stroke="#2563eb" stroke-width="3.6" stroke-linecap="round" marker-end="url(#m-us)"/>
+  <text data-tie-lab="us" x="250" y="1384" text-anchor="end" font-size="15" font-weight="700" fill="white" stroke="white" stroke-width="3" paint-order="stroke"></text>
+<text data-tie-lab="us" x="250" y="1384" text-anchor="end" font-size="15" font-weight="700" fill="#2563eb"></text>
+
+  <text data-tie-sub="us" x="250" y="1400" text-anchor="end" font-size="12" font-weight="500" fill="white" stroke="white" stroke-width="3" paint-order="stroke"></text>
+<text data-tie-sub="us" x="250" y="1400" text-anchor="end" font-size="12" font-weight="500" fill="#6b7280"></text>
+
+
+</svg>
   </div>
-  <div class="wrap" style="margin-top:10px">
+  
+  <div class="map-legend">
+    <div class="teacup-how">
+      <h3>How to read a teacup</h3>
+      <div class="how-row">
+        <svg width="52" height="70" viewBox="-22 -48 44 62" aria-hidden="true">
+          <ellipse cx="0" cy="3" rx="12" ry="3" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+          <polygon points="-18,-42 18,-42 8,0 -8,0" fill="#f8fafc" stroke="#334155" stroke-width="1.4" stroke-linejoin="round"/>
+          <polygon points="-13,-28 13,-28 8,0 -8,0" fill="#0e7490" opacity="0.92"/>
+          <polygon points="-18,-42 18,-42 8,0 -8,0" fill="none" stroke="#334155" stroke-width="1.4" stroke-linejoin="round"/>
+          <line x1="-16" y1="-34" x2="16" y2="-34" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3 2"/>
+        </svg>
+        <p>Teal fill is how full the usable range is today. The dashed line is typical for this date (Williston) or the IJC maximum (Kootenay Lake). Cup size is usable storage (square-root scaled so small ponds stay visible). The label is percent full, the change over seven days, and estimated stored energy. Williston is 32 MAF of live storage; Site C is 0.4% of that, Dinosaur 0.06%.</p>
+      </div>
+    </div>
+    <div class="teacup-how plant-key">
+      <h3>West Kootenay plants</h3>
+      <p class="k" style="margin:0 0 8px">Nameplate capacity, not live output. Grey squares on the diagram are plants, not teacups.</p>
+      <ul>
+        <li><b>COR</b> Corra Linn · 51 MW · 1932</li>
+        <li><b>NEL</b> City of Nelson · 16 MW</li>
+        <li><b>UBO</b> Upper Bonnington · 66 MW · 1907</li>
+        <li><b>LBO</b> Lower Bonnington · 54 MW · 1954</li>
+        <li><b>SLC</b> South Slocan · 54 MW · 1954</li>
+        <li><b>KCL</b> Kootenay Canal · 580 MW · 1976</li>
+        <li><b>BRD</b> Brilliant Dam · 265 MW · 1944</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="wrap restable-desk" style="margin-top:10px">
     <table class="ctx" id="restable-mini"></table>
   </div>
+  <div class="rescards" id="restable-cards"></div>
   <div class="k" id="map-note" style="margin-top:8px"></div>
 </section>
 
@@ -579,7 +827,7 @@ function notes(d){
  `<b>Percent full</b> is live storage as a share of the official usable range. Peace projects are linear in elevation (no public Williston storage curve). Mica uses official USACE elevation–storage points. Linear-in-elevation % is slightly conservative when a reservoir is high.`,
  `<b>Stored energy</b> is an engineering estimate, E ≈ ρ g h V η / 3.6e12 GWh, η = 0.88 — not a dispatch model. Williston and Mica use mid-slice head (constant assumed tailwater). Site C uses an assumed 52 m rated head; Arrow an assumed 22 m. Duncan is storage-only. Site C is run-of-river-ish (1.8 m range, 0.4% of Williston’s 32 MAF).`,
  `Williston’s dashed “typical for this date” is the median of historical WSC 07EF003 daily means plus a documented 630.065 m geodetic offset (the ECCC LEVEL is an assumed gauge datum, not pool elevation; see <a href="williston_doy_median.json">williston_doy_median.json</a>).`,
- `<b>Kootenay Lake</b> is a natural lake regulated by Corra Linn (FortisBC) under the IJC 1938 Order of Approval. Level is WSC 08NH064 at Queens Bay (geodetic, GSC 1928 datum — the IJC reference gauge), via the ECCC / wateroffice APIs. Percent is of the 6-ft IJC band (1739.32–1745.32 ft). The dashed mark is today’s IJC <i>maximum</i>, not a historical median. After 31 March the default max is 1739.32 ft (a calculated freshet limit is not modelled); once the peak recedes the control is 1743.32 ft at Nelson until 1 September. No stored-energy figure is shown. Coastal and Island plants are omitted.`
+ `<b>Kootenay Lake</b> is a natural lake regulated by Corra Linn (FortisBC) under the IJC 1938 Order of Approval. Level is WSC 08NH064 at Queens Bay (geodetic, GSC 1928 datum — the IJC reference gauge), via the ECCC / wateroffice APIs. Percent is of the 6-ft IJC band (1739.32–1745.32 ft). The dashed mark is today’s IJC <i>maximum</i>, not a historical median. After 31 March the default max is 1739.32 ft (a calculated freshet limit is not modelled); once the peak recedes the control is 1743.32 ft at Nelson until 1 September. No stored-energy figure is shown. The storage diagram is a schematic of the Peace, Columbia and Kootenay systems, not a geographic outline of the province. Coastal and Island plants are omitted.`
  ].map(x=>`<li>${x}</li>`).join('');
 }
 function completeness(d){
@@ -747,16 +995,17 @@ function evHourly(e){
 }
 // ----- At a glance, teacup map, reservoirs (driven by dashboard.json) -----
 const CUP={
- williston:{top:40,bot:17.6,H:90,color:'#0e7490',lab:'end',lx:-50,ly:-84},
- dinosaur:{top:13.6,bot:6.0,H:36,color:'#0e7490',lab:'middle',lx:0,ly:18},
- sitec:{top:14.0,bot:6.2,H:38,color:'#0e7490',lab:'callout'},
- mica:{top:28.4,bot:12.5,H:65.4,color:'#0e7490',lab:'end',lx:-38.4,ly:-59.4},
- arrow:{top:24.1,bot:10.6,H:56.1,color:'#0e7490',lab:'end',lx:-34.1,ly:-50.1},
- duncan:{top:16.3,bot:7.2,H:39.4,color:'#0e7490',lab:'end',lx:-22,ly:-34},
- kootenay:{top:16.8,bot:7.4,H:40,color:'#0e7490',lab:'start',lx:24,ly:18}
+ williston:{top:40,bot:17.6,H:90,color:'#0e7490'},
+ dinosaur:{top:13.6,bot:6.0,H:36,color:'#0e7490'},
+ sitec:{top:14.0,bot:6.2,H:38,color:'#0e7490'},
+ mica:{top:28.4,bot:12.5,H:65.4,color:'#0e7490'},
+ arrow:{top:24.1,bot:10.6,H:56.1,color:'#0e7490'},
+ duncan:{top:16.3,bot:7.2,H:39.4,color:'#0e7490'},
+ kootenay:{top:16.8,bot:7.4,H:40,color:'#0e7490'}
 };
 function fmtGwh(n){if(n==null)return 'n/a';const x=Number(n);return (x>=100?Math.round(x).toLocaleString():x.toFixed(1))+' GWh';}
 function fmtD7(d){if(!d||d.pct_pt==null)return '';const a=Math.round(Math.abs(d.pct_pt));if(!a)return 'unchanged this week';return (d.pct_pt>0?'up':'down')+' '+a+' pt this week';}
+function fmtD7short(d){if(!d||d.pct_pt==null)return '';const a=Math.round(Math.abs(d.pct_pt));if(!a)return '0 pt';return (d.pct_pt>0?'+':'−')+a+' pt';}
 function kpiSec(d){
  const el=document.getElementById('kpis');if(!el)return;
  const p=d.periods&&d.periods.mtd, tot=p&&p.total||{};
@@ -805,8 +1054,9 @@ function teacupMap(d){
   const times=Object.values(proj).map(p=>p&&p.as_of).filter(Boolean).sort();
   asof.textContent=times.length?('Peace, Columbia and Kootenay storage · '+D(times[times.length-1])):'Peace, Columbia and Kootenay storage';
  }
+
  Object.keys(CUP).forEach(id=>{
-  const g=document.getElementById('cup-'+id);if(!g)return;
+  document.querySelectorAll('[data-cup="'+id+'"]').forEach(g=>{
   const cfg=CUP[id], p=proj[id]||{}, pct=p.ok?p.pct:null;
   const f=pct==null?0:Math.max(0,Math.min(1.15,pct/100));
   const y=-f*cfg.H, half=cfg.bot+(cfg.top-cfg.bot)*Math.min(f,1);
@@ -824,50 +1074,57 @@ function teacupMap(d){
   if(lab){
     const name={williston:'Williston',dinosaur:'Dinosaur',sitec:'Site C',mica:'Mica / Kinbasket',arrow:'Arrow',duncan:'Duncan (DDM)',kootenay:'Kootenay Lake'}[id];
     const l1=pct==null?'no public level in this run':(pctW(pct)+(p.d7&&p.d7.pct_pt!=null?`  ·  ${fmtD7(p.d7)}`:''));
-    const l2=p.gwh!=null?('est. '+fmtGwh(p.gwh)):(id==='duncan'?'0 MW · 1967 · no local generation':id==='kootenay'?(p.ft_below_ijc_max!=null?(p.ft_below_ijc_max>=0?p.ft_below_ijc_max.toFixed(2)+' ft below IJC max':Math.abs(p.ft_below_ijc_max).toFixed(2)+' ft above IJC max'):'IJC 6-ft band'):'');
+    const l2=p.gwh!=null?('est. '+fmtGwh(p.gwh)):(id==='duncan'?'0 MW · 1967':id==='kootenay'?(p.ft_below_ijc_max!=null?(p.ft_below_ijc_max>=0?p.ft_below_ijc_max.toFixed(2)+' ft below IJC max':Math.abs(p.ft_below_ijc_max).toFixed(2)+' ft above IJC max'):'IJC 6-ft band'):'');
     const l3=id==='williston'&&typ!=null?(`typical ${new Date((p.as_of||d.generated)).toLocaleDateString('en-CA',{timeZone:'Etc/GMT+7',month:'short',day:'numeric'})}: ${pctW(typ)}`)
             :id==='sitec'?'1.8 m operating range · Naache Mege'
             :id==='dinosaur'?'re-regulating pond'
             :id==='duncan'?'storage only'
             :id==='kootenay'?'Corra Linn · FortisBC':'';
     const l4=(id!=='williston'&&id!=='kootenay')?'no typical line yet':'';
-    const lines=[[name,12.8,700,false], [l1,10.7,500,false], l2?[l2,10.7,500,true]:null, l3?[l3,9.5,400,true]:null, l4?[l4,9.5,400,true]:null].filter(Boolean);
-    const txt=(L,i,x,y,anchor)=>{
+    const mobile=!!g.closest('.map-mobile');
+    const fs=mobile?[16,13.5,13,12,12]:[13,11,11,10,10];
+    const lh=mobile?18.5:14.6;
+    const lines=[[name,fs[0],700,false], [l1,fs[1],500,false], l2?[l2,fs[2],500,false]:null, l3?[l3,fs[3],400,true]:null, l4?[l4,fs[4],400,true]:null].filter(Boolean);
+    const anchor=g.getAttribute('data-lab')||'end', x=+(g.getAttribute('data-lx')||0), y0=+(g.getAttribute('data-ly')||0);
+    const txt=(L,i,xx,yy,anc)=>{
       const fillc=i===0?'#1d2330':(L[2]<500?'#6b7280':'#374151');
       const cls=L[3]?' class="cup-lab-sec"':'';
-      const common=`${cls} x="${x}" y="${y}" text-anchor="${anchor}" font-size="${L[1]}" font-weight="${L[2]>=700?700:500}"`;
+      const common=`${cls} x="${xx}" y="${yy}" text-anchor="${anc}" font-size="${L[1]}" font-weight="${L[2]>=700?700:500}"`;
       return `<text${common} fill="white" stroke="white" stroke-width="3" paint-order="stroke">${L[0]}</text>`+
              `<text${common} fill="${fillc}">${L[0]}</text>`;
     };
-    if(cfg.lab==='callout'){
-      lab.innerHTML=lines.map((L,i)=>txt(L,i,0,i*15,'start')).join('');
-    }else{
-      const anchor=cfg.lab, x=cfg.lx, y0=cfg.ly;
-      lab.innerHTML=lines.map((L,i)=>txt(L,i,x,(y0+i*14.2).toFixed(1),anchor)).join('');
-    }
+    lab.innerHTML=lines.map((L,i)=>txt(L,i,x,(y0+i*lh).toFixed(1),anchor)).join('');
     g.setAttribute('aria-label', name+' '+(pct!=null?Math.round(pct)+' percent full':'no data'));
   }
+  });
  });
  const L=d.live||{}, us=L.bch&&L.bch.us_mw, ab=L.bch&&L.bch.ab_mw;
- const usLine=document.getElementById('tie-us-line'), usLab=document.getElementById('tie-us-label'), usSub=document.getElementById('tie-us-sub');
- if(usLine&&us!=null){
-   if(us>=0){usLine.setAttribute('y1','544.5');usLine.setAttribute('y2','576');usLab.textContent=`BC → US  ${Math.round(us)} MW`;usSub.textContent='export, latest hour';}
-   else{usLine.setAttribute('y1','576');usLine.setAttribute('y2','544.5');usLab.textContent=`US → BC  ${Math.round(Math.abs(us))} MW`;usSub.textContent='BC importing, latest hour';}
- }
- const abLine=document.getElementById('tie-ab-line'), abLab=document.getElementById('tie-ab-label'), abSub=document.getElementById('tie-ab-sub');
- if(abLine&&ab!=null){
-   if(ab>=0){abLine.setAttribute('x1','1036');abLine.setAttribute('x2','1110');abLab.textContent=`BC → AB  ${Math.round(ab)} MW`;abSub.textContent='export, latest hour';}
-   else{abLine.setAttribute('x1','1110');abLine.setAttribute('x2','1036');abLab.textContent=`AB → BC  ${Math.round(Math.abs(ab))} MW`;abSub.textContent='BC importing, latest hour';}
- }
+ const applyTie=(kind,mw)=>{
+  document.querySelectorAll(`[data-tie="${kind}"]`).forEach(line=>{
+    if(mw==null)return;
+    const exp=mw>=0, p=exp?'data-ex-':'data-im-';
+    line.setAttribute('x1',line.getAttribute(p+'x1'));
+    line.setAttribute('y1',line.getAttribute(p+'y1'));
+    line.setAttribute('x2',line.getAttribute(p+'x2'));
+    line.setAttribute('y2',line.getAttribute(p+'y2'));
+  });
+  const a=kind==='us'?'US':'AB';
+  const lab=mw==null?'':(mw>=0?`BC → ${a}  ${Math.round(mw)} MW`:`${a} → BC  ${Math.round(Math.abs(mw))} MW`);
+  const sub=mw==null?'':(mw>=0?'export, latest hour':'BC importing, latest hour');
+  document.querySelectorAll(`[data-tie-lab="${kind}"]`).forEach(el=>el.textContent=lab);
+  document.querySelectorAll(`[data-tie-sub="${kind}"]`).forEach(el=>el.textContent=sub);
+ };
+ applyTie('us',us);applyTie('ab',ab);
  const cap=document.getElementById('map-note');
  if(cap){
   const w=proj.williston||{};
   const wup=w.pct_wup!=null?` A tighter Water Use Plan floor of 654.41 m would read ${pctW(w.pct_wup)} instead of ${pctW(w.pct)}.`:'';
   const k=proj.kootenay||{};
   const koot=k.ijc_max_ft!=null?` Kootenay Lake percent is of the 6-ft IJC band (1739.32–1745.32 ft at Queens Bay); the dashed line is today’s IJC maximum (${k.ijc_max_ft} ft), not a historical median.`:'';
-  cap.textContent=`Williston percent uses the licensed live range (642.04–672.08 m, 32 MAF).${wup}${koot} Williston’s “typical for this date” is the median of 45 years of Water Survey of Canada daily levels at Schooler Creek, converted from the gauge datum (offset calibrated on 20 Nov 2026). Grey squares are generating plants with nameplate capacity, not live teacups. Libby is drawn as a static cup (live CWMS level is not wired). Seven Mile and Waneta are shown without a published capacity on this map. Energy is an engineering estimate (η = 0.88, mid-slice head), not a dispatch model. Coastal and Island reservoirs are omitted to keep the map readable.`;
+  cap.textContent=`This diagram is a schematic of the Peace, Columbia and Kootenay systems, not a geographic map of the province. Williston percent uses the licensed live range (642.04–672.08 m, 32 MAF).${wup}${koot} Williston’s “typical for this date” is the median of 45 years of Water Survey of Canada daily levels at Schooler Creek, converted from the gauge datum (offset calibrated on 20 Nov 2026). Grey squares are generating plants with nameplate capacity, not live teacups. Libby is drawn as a static cup (live CWMS level is not wired). Seven Mile and Waneta are shown without a published capacity on this diagram. Energy is an engineering estimate (η = 0.88, mid-slice head), not a dispatch model. Coastal and Island reservoirs are omitted.`;
  }
 }
+
 let wTyp=null,wTypWait=false;
 let resChart;
 function resSec(d){
@@ -895,6 +1152,17 @@ function resSec(d){
  }).join('');
  const html=`<tr><th>Reservoir</th><th>% full</th><th>7-day change</th><th>Est. stored energy</th><th>Source</th></tr>`+rows;
  const mini=document.getElementById('restable-mini');if(mini)mini.innerHTML=html;
+ const cards=document.getElementById('restable-cards');
+ if(cards){
+  cards.innerHTML=order.map(id=>{
+    const p=proj[id]||{name:id,ok:false};
+    const name=(p.name||id)+(id==='sitec'?' (Naache Mege)':'');
+    const pct=p.pct!=null?pctW(p.pct):'n/a';
+    const ch=p.d7&&p.d7.pct_pt!=null?fmtD7short(p.d7):'';
+    const en=p.gwh!=null?fmtGwh(p.gwh):'';
+    return `<div class="rescard"><div class="rescard-h"><b>${name}</b><span>${pct}</span></div><div class="rescard-b"><span>${ch||'—'}</span><span>${en||''}</span></div></div>`;
+  }).join('');
+ }
  const series=res.series_daily||res.series||{};
  const cvs=document.getElementById('reschart');
  if(cvs&&window.Chart){
