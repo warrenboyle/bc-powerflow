@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-20T19:57-07:00",
+ "generated": "2026-11-20T20:19-07:00",
  "projects": {
   "williston": {
    "id": "williston",
@@ -140,8 +140,8 @@
    "elev_m": 435.108,
    "elev_ft": 1427.52,
    "pct": 71.0,
-   "live_m3": 6218574618.0,
-   "live_acft": 5041488.0,
+   "live_m3": 6221520168.0,
+   "live_acft": 5043876.0,
    "live_capacity_m3": 8757708000.0,
    "gwh": 328.0,
    "d7": {
@@ -3305,39 +3305,39 @@
   },
   "mica elev": {
    "ok": true,
-   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A56%3A47Z&end=2026-11-21T02%3A56%3A47Z&page-size=20000&units=ft",
-   "n": 334,
-   "from": "2026-11-07T03:00:00+00:00",
+   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV&office=NWDP&begin=2026-11-07T03%3A18%3A45Z&end=2026-11-21T03%3A18%3A45Z&page-size=20000&units=ft",
+   "n": 333,
+   "from": "2026-11-07T04:00:00+00:00",
    "to": "2026-11-21T01:00:00+00:00",
    "last": 2450.96
   },
   "mica outflow": {
    "ok": true,
-   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=MCDB.Flow-Out.Ave.1Hour.1Hour.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A56%3A47Z&end=2026-11-21T02%3A56%3A47Z&page-size=20000&units=cfs",
-   "n": 335,
-   "from": "2026-11-07T03:00:00+00:00",
+   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=MCDB.Flow-Out.Ave.1Hour.1Hour.BCHYDRO-REV&office=NWDP&begin=2026-11-07T03%3A18%3A45Z&end=2026-11-21T03%3A18%3A45Z&page-size=20000&units=cfs",
+   "n": 334,
+   "from": "2026-11-07T04:00:00+00:00",
    "to": "2026-11-21T01:00:00+00:00",
    "last": 18150.0
   },
   "arrow elev": {
    "ok": true,
-   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A56%3A47Z&end=2026-11-21T02%3A56%3A47Z&page-size=20000&units=ft",
-   "n": 335,
-   "from": "2026-11-07T03:00:00+00:00",
+   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV&office=NWDP&begin=2026-11-07T03%3A18%3A45Z&end=2026-11-21T03%3A18%3A45Z&page-size=20000&units=ft",
+   "n": 334,
+   "from": "2026-11-07T04:00:00+00:00",
    "to": "2026-11-21T01:00:00+00:00",
    "last": 1427.52
   },
   "arrow stor": {
    "ok": true,
-   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Stor.Inst.0.0.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A56%3A47Z&end=2026-11-21T02%3A56%3A47Z&page-size=20000&units=ac-ft",
+   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Stor.Inst.0.0.BCHYDRO-REV&office=NWDP&begin=2026-11-07T03%3A18%3A45Z&end=2026-11-21T03%3A18%3A45Z&page-size=20000&units=ac-ft",
    "n": 334,
-   "from": "2026-11-07T03:00:00+00:00",
-   "to": "2026-11-21T00:00:00+00:00",
-   "last": 5268787.5
+   "from": "2026-11-07T04:00:00+00:00",
+   "to": "2026-11-21T01:00:00+00:00",
+   "last": 5271176.392
   },
   "arrow outflow": {
    "ok": true,
-   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Flow-Out.Ave.~1Day.1Day.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A56%3A47Z&end=2026-11-21T02%3A56%3A47Z&page-size=20000&units=cfs",
+   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Flow-Out.Ave.~1Day.1Day.BCHYDRO-REV&office=NWDP&begin=2026-11-07T03%3A18%3A45Z&end=2026-11-21T03%3A18%3A45Z&page-size=20000&units=cfs",
    "n": 14,
    "from": "2026-11-07T07:00:00+00:00",
    "to": "2026-11-20T07:00:00+00:00",
@@ -3345,15 +3345,15 @@
   },
   "duncan elev": {
    "ok": true,
-   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A56%3A47Z&end=2026-11-21T02%3A56%3A47Z&page-size=20000&units=ft",
-   "n": 335,
-   "from": "2026-11-07T03:00:00+00:00",
+   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV&office=NWDP&begin=2026-11-07T03%3A18%3A45Z&end=2026-11-21T03%3A18%3A45Z&page-size=20000&units=ft",
+   "n": 334,
+   "from": "2026-11-07T04:00:00+00:00",
    "to": "2026-11-21T01:00:00+00:00",
    "last": 1870.19
   },
   "duncan outflow": {
    "ok": true,
-   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=DCDB.Flow-Out.Ave.~1Day.1Day.BCHYDRO-REV&office=NWDP&begin=2026-11-07T02%3A56%3A47Z&end=2026-11-21T02%3A56%3A47Z&page-size=20000&units=cfs",
+   "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=DCDB.Flow-Out.Ave.~1Day.1Day.BCHYDRO-REV&office=NWDP&begin=2026-11-07T03%3A18%3A45Z&end=2026-11-21T03%3A18%3A45Z&page-size=20000&units=cfs",
    "n": 14,
    "from": "2026-11-07T07:00:00+00:00",
    "to": "2026-11-20T07:00:00+00:00",
@@ -3363,18 +3363,18 @@
    "ok": true,
    "url": "https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline",
    "station": "08NH064",
-   "n": 115183,
-   "hourly": 9600,
-   "from": "2025-10-17T03:00:00+00:00",
+   "n": 4026,
+   "hourly": 336,
+   "from": "2026-11-07T03:00:00+00:00",
    "to": "2026-11-21T02:00:00+00:00",
-   "last_elev_m": 531.533
+   "last_elev_m": 531.531
   },
   "kootenay_fortis": {
    "ok": true,
    "url": "https://secure.fortisbc.com/lakelevel/lakes.jsp",
-   "nelson_ft": 1743.68,
+   "nelson_ft": 1743.66,
    "nelson_m": 531.47,
-   "nelson_as_of": "Nov 20 2026 19:51:02",
+   "nelson_as_of": "Nov 20 2026 20:10:00",
    "forecast": "Nov 20, 2026: Kootenay Lake is forecast to increase to 1744.40 at Queens Bay by November 29, 2026."
   }
  },

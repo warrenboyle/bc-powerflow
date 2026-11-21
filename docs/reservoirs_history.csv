@@ -9454,7 +9454,7 @@ t_utc,project,elev_m,elev_ft,storage_acft,outflow_cfs,source
 2026-11-20T22:00Z,arrow,435.1325,1427.6000,5280732.0000,,cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV
 2026-11-20T23:00Z,arrow,435.1172,1427.5500,5274759.7000,,cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV
 2026-11-21T00:00Z,arrow,435.1020,1427.5000,5268787.5000,,cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV
-2026-11-21T01:00Z,arrow,435.1081,1427.5200,,,cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV
+2026-11-21T01:00Z,arrow,435.1081,1427.5200,5271176.4000,,cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV
 2026-11-13T08:00Z,dinosaur,502.1320,1647.4150,,,hydromet:dir
 2026-11-13T09:00Z,dinosaur,502.1390,1647.4380,,,hydromet:dir
 2026-11-13T10:00Z,dinosaur,502.1840,1647.5850,,,hydromet:dir
