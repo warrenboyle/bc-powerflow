@@ -425,6 +425,20 @@ def load_context(df, statcan):
                     "diff_pct": round(float(gen.sum() / s["gen_mwh"] * 100 - 100), 1),
                     "statcan_hydro_pct": round(float(s["hydro_mwh"] / s["gen_mwh"] * 100), 1) if not pd.isna(s["hydro_mwh"]) else None})
     d = [c["diff_pct"] for c in chk]
+    latest_day = None
+    if len(L):
+        last_t = L.index.max()
+        day = last_t.tz_convert(TZ).normalize()
+        dayL = L[L.index.tz_convert(TZ).normalize() == day]
+        p365 = L[L.index >= last_t - pd.Timedelta(days=365)]
+        latest_day = {
+            "date": str(last_t.tz_convert(TZ).date()),
+            "peak_mw": int(dayL.max()),
+            "peak_t": _t(dayL.idxmax()),
+            "peak_pct_of_365d": round(float(dayL.max() / p365.max() * 100), 1) if len(p365) else None,
+            "peak_365d_mw": int(p365.max()) if len(p365) else None,
+            "through": _t(last_t + pd.Timedelta(hours=1)),
+        }
     return {"definition": "BC Hydro Balancing Authority (BCHA) gross telemetered Control Area Load: hourly average MW for "
                           "the BC Hydro balancing authority area, which covers British Columbia's interconnected grid. "
                           "Generation is derived as load + net exports on the BC-US and BC-AB tie lines (the BA's interchange), "
@@ -438,7 +452,8 @@ def load_context(df, statcan):
                                       "BA load (e.g. off-grid and some industrial self-generation), so derived is expected to be a few % lower.",
                               "source": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=2510001501"},
             "instantaneous": "Not published: BC Hydro has no public 5-minute or instantaneous load/generation feed (the 5-minute "
-                             "real-time page has tie-line flows only), so peaks here are highest hourly averages."}
+                             "real-time page has tie-line flows only), so peaks here are highest hourly averages.",
+            "latest_day": latest_day}
 
 
 # ---------------------------------------------------------------- EIA
@@ -1254,6 +1269,19 @@ def main():
     df["load_mw"] = lo[~lo.index.duplicated(keep="last")].reindex(df.index)
     dash = build_dashboard(df, last_midc, live, source_qa(aud), statcan)
     dash["data_through"] = data_through(h, prices, live, lo)
+    try:
+        rpath = f"{D}/reservoirs.json"
+        if os.path.exists(rpath):
+            res = json.load(open(rpath))
+            dash["reservoirs"] = res
+            for k, v in (res.get("data_through") or {}).items():
+                if isinstance(v, dict) and k not in dash["data_through"]:
+                    dash["data_through"][k] = v
+        else:
+            dash["reservoirs"] = {"ok": False, "reason": "docs/reservoirs.json not present"}
+    except Exception as ex:
+        log("reservoirs attach failed:", ex)
+        dash["reservoirs"] = {"ok": False, "error": str(ex)}
     try:
         dash["peak_events"] = event_block(df, update_temps(meta, now_utc))
     except Exception as ex:  # never let a bad events.json block the data update

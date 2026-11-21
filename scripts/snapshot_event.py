@@ -292,6 +292,51 @@ def temps(date, hb, noticed, retro):
 
 
 # ------------------------------------------------------------------ this repo's data
+
+def reservoir_context(noticed, retro):
+    """Pool / % full / outflow / est. GWh at or before notice time, from the persistent history file."""
+    src = "docs/reservoirs_history.csv (BC Hydro hydromet text files + USACE CWMS NWDP; hourly)"
+    try:
+        import importlib.util
+        path = os.path.join(ROOT, "scripts", "fetch_reservoirs.py")
+        spec = importlib.util.spec_from_file_location("fetch_reservoirs", path)
+        R = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(R)
+        if not R.HIST.exists():
+            return fld(None, src, None, "no reservoir history file yet")
+        hist = R.load_history()
+        if hist is None or hist.empty:
+            return fld(None, src, None, "reservoir history is empty")
+        cut = noticed.tz_convert("UTC")
+        # Use history at or before the notice so a later capture doesn't leak future levels.
+        hist = hist[hist["t_utc"] <= cut].copy()
+        if hist.empty:
+            return fld(None, src, None, "no reservoir history at or before the notice time")
+        as_of = hist["t_utc"].max()
+        lag_h = (cut - as_of).total_seconds() / 3600.0
+        projects = []
+        for key in R.PROJECTS:
+            d = R.describe_project(hist, key)
+            if not d.get("ok"):
+                projects.append({"id": key, "name": d.get("name"), "ok": False, "reason": d.get("reason")})
+                continue
+            projects.append({
+                "id": key, "name": d.get("name"), "plant": d.get("plant"), "river": d.get("river"),
+                "elev_m": d.get("elev_m"), "pct": d.get("pct"),
+                "outflow_cfs": d.get("outflow_cfs"), "gwh": d.get("gwh"),
+                "as_of": d.get("as_of"), "source": d.get("source"), "ok": True,
+            })
+        gs = [p["gwh"] for p in projects if p.get("gwh") is not None]
+        value = {"projects": projects, "total_gwh": (round(sum(gs), 0) if gs else None)}
+        extra = {}
+        if lag_h > 36:
+            extra["note"] = (f"Latest history hour is {lag_h:.0f} h before the notice. "
+                             "Peace hydromet files only retain about eight days, so older events may lack Peace levels.")
+        return fld(value, src, as_of.isoformat(), **extra)
+    except Exception as ex:
+        return fld(None, src, None, err(ex))
+
+
 def bc_context(noticed, retro):
     out = {}
     lo = F.load_series().dropna()
@@ -323,7 +368,7 @@ def bc_context(noticed, retro):
                                        "so it may not have been out at notice time." if retro else "Latest delivery day published at capture time."))
     except Exception as ex:
         out["midc_latest"] = fld(None, "docs/daily_prices.csv", None, err(ex))
-    out["bc_reservoirs"] = fld(None, None, None, "BC Hydro publishes no reliably fetchable system storage/reservoir series; not captured")
+    out["bc_reservoirs"] = reservoir_context(noticed, retro)
     return out
 
 
