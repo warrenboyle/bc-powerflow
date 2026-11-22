@@ -1,59 +1,59 @@
 {
- "generated": "2026-11-22T01:08-07:00",
+ "generated": "2026-11-22T09:25-07:00",
  "midc_last_delivery": "2026-11-12",
- "us5_bias": 37.7,
+ "us5_bias": 43.0,
  "periods": {
   "mtd": {
    "us": {
-    "exp_mwh": 117072,
-    "imp_mwh": 93499,
-    "net_mwh": 23574,
-    "exp_cad": 7528490,
-    "imp_cad": 5274781,
-    "net_cad": 2253709,
-    "hours": 505,
-    "est_hours": 216,
-    "prov_hours": 48,
-    "avg_exp_price": 64.31,
-    "avg_imp_price": 56.42,
-    "through": "2026-11-22T00:00:00-07:00"
+    "exp_mwh": 120015,
+    "imp_mwh": 93799,
+    "net_mwh": 26216,
+    "exp_cad": 7676573,
+    "imp_cad": 5292795,
+    "net_cad": 2383778,
+    "hours": 513,
+    "est_hours": 224,
+    "prov_hours": 32,
+    "avg_exp_price": 63.96,
+    "avg_imp_price": 56.43,
+    "through": "2026-11-22T08:00:00-07:00"
    },
    "ab": {
     "exp_mwh": 7582,
-    "imp_mwh": 159237,
-    "net_mwh": -151655,
+    "imp_mwh": 160488,
+    "net_mwh": -152906,
     "exp_cad": 908748,
-    "imp_cad": 2557625,
-    "net_cad": -1648877,
-    "hours": 505,
+    "imp_cad": 2600857,
+    "net_cad": -1692109,
+    "hours": 513,
     "est_hours": 0,
-    "prov_hours": 505,
+    "prov_hours": 513,
     "avg_exp_price": 119.85,
-    "avg_imp_price": 16.06,
-    "through": "2026-11-22T00:00:00-07:00"
+    "avg_imp_price": 16.21,
+    "through": "2026-11-22T08:00:00-07:00"
    },
    "total": {
-    "exp_mwh": 124655,
-    "imp_mwh": 252736,
-    "net_mwh": -128081,
-    "exp_cad": 8437238,
-    "imp_cad": 7832406,
-    "net_cad": 604832,
-    "avg_exp_price": 67.68,
-    "avg_imp_price": 30.99
+    "exp_mwh": 127598,
+    "imp_mwh": 254287,
+    "net_mwh": -126689,
+    "exp_cad": 8585321,
+    "imp_cad": 7893652,
+    "net_cad": 691669,
+    "avg_exp_price": 67.28,
+    "avg_imp_price": 31.04
    },
    "label": "November 2026 to date",
    "start": "2026-11-01T00:00:00-07:00",
-   "end": "2026-11-22T01:08:58.172970-07:00",
+   "end": "2026-11-22T09:25:06.463591-07:00",
    "completeness": {
-    "calendar_hours": 506,
+    "calendar_hours": 514,
     "us": {
-     "valued_hours": 505,
+     "valued_hours": 513,
      "missing_to_through": 0,
      "lag_hours": 1
     },
     "ab": {
-     "valued_hours": 505,
+     "valued_hours": 513,
      "missing_to_through": 0,
      "lag_hours": 1
     }
@@ -64,7 +64,7 @@
     "peak_net_import_t": "2026-11-11T11:00:00-07:00",
     "peak_net_export_mw": 1609,
     "peak_net_export_t": "2026-11-03T15:00:00-07:00",
-    "net_import_hours_pct": 68.9,
+    "net_import_hours_pct": 68.0,
     "load_from": "2026-11-01T00:00:00-07:00",
     "load_through": "2026-11-20T00:00:00-07:00",
     "load_mwh": 3544005,
@@ -171,55 +171,55 @@
   },
   "ytd": {
    "us": {
-    "exp_mwh": 8379786,
-    "imp_mwh": 1037071,
-    "net_mwh": 7342716,
-    "exp_cad": 415865658,
-    "imp_cad": 21380494,
-    "net_cad": 394485164,
-    "hours": 7800,
-    "est_hours": 216,
-    "prov_hours": 48,
+    "exp_mwh": 8382729,
+    "imp_mwh": 1037371,
+    "net_mwh": 7345358,
+    "exp_cad": 416013741,
+    "imp_cad": 21398508,
+    "net_cad": 394615233,
+    "hours": 7808,
+    "est_hours": 224,
+    "prov_hours": 32,
     "avg_exp_price": 49.63,
-    "avg_imp_price": 20.62,
-    "through": "2026-11-22T00:00:00-07:00"
+    "avg_imp_price": 20.63,
+    "through": "2026-11-22T08:00:00-07:00"
    },
    "ab": {
     "exp_mwh": 657904,
-    "imp_mwh": 1148665,
-    "net_mwh": -490761,
+    "imp_mwh": 1149916,
+    "net_mwh": -492012,
     "exp_cad": 39441951,
-    "imp_cad": 17282649,
-    "net_cad": 22159302,
-    "hours": 7800,
+    "imp_cad": 17325881,
+    "net_cad": 22116070,
+    "hours": 7808,
     "est_hours": 0,
-    "prov_hours": 505,
+    "prov_hours": 513,
     "avg_exp_price": 59.95,
-    "avg_imp_price": 15.05,
-    "through": "2026-11-22T00:00:00-07:00"
+    "avg_imp_price": 15.07,
+    "through": "2026-11-22T08:00:00-07:00"
    },
    "total": {
-    "exp_mwh": 9037691,
-    "imp_mwh": 2185736,
-    "net_mwh": 6851955,
-    "exp_cad": 455307608,
-    "imp_cad": 38663142,
-    "net_cad": 416644466,
+    "exp_mwh": 9040634,
+    "imp_mwh": 2187287,
+    "net_mwh": 6853347,
+    "exp_cad": 455455691,
+    "imp_cad": 38724388,
+    "net_cad": 416731303,
     "avg_exp_price": 50.38,
-    "avg_imp_price": 17.69
+    "avg_imp_price": 17.7
    },
    "label": "2026 to date",
    "start": "2026-01-01T00:00:00-08:00",
-   "end": "2026-11-22T01:08:58.172970-07:00",
+   "end": "2026-11-22T09:25:06.463591-07:00",
    "completeness": {
-    "calendar_hours": 7801,
+    "calendar_hours": 7809,
     "us": {
-     "valued_hours": 7800,
+     "valued_hours": 7808,
      "missing_to_through": 0,
      "lag_hours": 1
     },
     "ab": {
-     "valued_hours": 7800,
+     "valued_hours": 7808,
      "missing_to_through": 0,
      "lag_hours": 1
     }
@@ -252,13 +252,13 @@
     "gen_to_load_pct": 111.8
    },
    "same_period_last_year": {
-    "exp_mwh": 2047686,
-    "imp_mwh": 6989982,
-    "net_mwh": -4942296,
-    "exp_cad": 170309740,
-    "imp_cad": 244609764,
-    "net_cad": -74300025,
-    "avg_exp_price": 83.17,
+    "exp_mwh": 2048506,
+    "imp_mwh": 6996865,
+    "net_mwh": -4948359,
+    "exp_cad": 170356640,
+    "imp_cad": 244822620,
+    "net_cad": -74465980,
+    "avg_exp_price": 83.16,
     "avg_imp_price": 34.99
    }
   },
@@ -701,18 +701,18 @@
   },
   {
    "month": "2026-11",
-   "us_net_cad": 2253709,
-   "ab_net_cad": -1648877,
+   "us_net_cad": 2383778,
+   "ab_net_cad": -1692109,
    "load_mwh": 3544005,
    "gen_mwh": 3437590,
    "peak_load_mw": 9351,
    "avg_load_mw": 7772,
    "load_hours": 456,
    "load_partial": true,
-   "us_net_mwh": 23574,
-   "ab_net_mwh": -151655,
-   "exp_mwh": 124655,
-   "imp_mwh": 252736,
+   "us_net_mwh": 26216,
+   "ab_net_mwh": -152906,
+   "exp_mwh": 127598,
+   "imp_mwh": 254287,
    "est": true
   }
  ],
@@ -1241,30 +1241,30 @@
   },
   {
    "date": "2026-11-20",
-   "us_net_mwh": 1282,
+   "us_net_mwh": 1331,
    "ab_net_mwh": -12451,
-   "us_net_cad": 58753,
+   "us_net_cad": 58961,
    "ab_net_cad": -325670,
    "midc_cad": 62.07,
    "pool_cad": 26.95
   },
   {
    "date": "2026-11-21",
-   "us_net_mwh": -2090,
+   "us_net_mwh": -1918,
    "ab_net_mwh": -8438,
-   "us_net_cad": -156743,
+   "us_net_cad": -147151,
    "ab_net_cad": -122214,
    "midc_cad": 62.07,
    "pool_cad": 30.56
   },
   {
    "date": "2026-11-22",
-   "us_net_mwh": 188,
-   "ab_net_mwh": -158,
-   "us_net_cad": 9346,
-   "ab_net_cad": -5288,
+   "us_net_mwh": 2610,
+   "ab_net_mwh": -1408,
+   "us_net_cad": 129615,
+   "ab_net_cad": -48521,
    "midc_cad": 62.07,
-   "pool_cad": 33.56
+   "pool_cad": 35.97
   }
  ],
  "sources": {
@@ -1274,14 +1274,14 @@
    "hours": 16055
   },
   "us_bch5": {
-   "from": "2026-11-20T01:00:00-07:00",
-   "to": "2026-11-22T00:00:00-07:00",
-   "hours": 48
+   "from": "2026-11-21T01:00:00-07:00",
+   "to": "2026-11-22T08:00:00-07:00",
+   "hours": 32
   },
   "us_eia": {
    "from": "2026-11-01T00:00:00-07:00",
-   "to": "2026-11-20T00:00:00-07:00",
-   "hours": 457
+   "to": "2026-11-21T00:00:00-07:00",
+   "hours": 481
   },
   "ab_bch": {
    "from": "2025-01-01T00:00:00-08:00",
@@ -1290,27 +1290,27 @@
   },
   "ab_bch5": {
    "from": "2026-11-01T00:00:00-07:00",
-   "to": "2026-11-22T00:00:00-07:00",
-   "hours": 505
+   "to": "2026-11-22T08:00:00-07:00",
+   "hours": 513
   }
  },
  "live": {
   "bch": {
-   "t_utc": "2026-11-22T08:05:00+00:00",
-   "us_mw": 62.0,
-   "ab_mw": -273.0
+   "t_utc": "2026-11-22T16:20:00+00:00",
+   "us_mw": -82.0,
+   "ab_mw": -143.0
   },
   "pool_price": {
-   "t_utc": "2026-11-22T07:00:00+00:00",
-   "cad_mwh": 33.56
+   "t_utc": "2026-11-22T15:00:00+00:00",
+   "cad_mwh": 50.08
   },
   "aeso": {
-   "as_of_mpt": "2026-11-22 02:08",
-   "bc_to_ab_mw": -257,
+   "as_of_mpt": "2026-11-22 10:24",
+   "bc_to_ab_mw": -110,
    "ties_into_ab_mw": {
-    "British Columbia": -257,
-    "Montana": -26,
-    "Saskatchewan": 72
+    "British Columbia": -110,
+    "Montana": -53,
+    "Saskatchewan": 73
    }
   }
  },
@@ -1335,13 +1335,13 @@
    "corr": 0.8811
   },
   "us_bch5_raw_vs_eia": {
-   "hours": 604,
+   "hours": 628,
    "from": "2026-10-25T21:00:00-07:00",
-   "to": "2026-11-20T00:00:00-07:00",
-   "mean_bias_mw": -75.9,
-   "median_bias_mw": -67.6,
-   "mae_mw": 191.6,
-   "corr": 0.9382
+   "to": "2026-11-21T00:00:00-07:00",
+   "mean_bias_mw": -74.6,
+   "median_bias_mw": -65.5,
+   "mae_mw": 186.7,
+   "corr": 0.9384
   },
   "ab_bch5_vs_bch": {
    "hours": 147,
@@ -1387,28 +1387,28 @@
    "mtd": {
     "label": "November 2026 to date",
     "base": {
-     "timing_cad": 3088441,
-     "timing_us_cad": 877250,
-     "timing_ab_cad": 2211191,
-     "spread_cad": 4574132,
-     "matched_mwh": 124655,
-     "avg_exp_price": 67.68,
-     "avg_imp_price": 30.99,
-     "net_cad": 604832,
-     "imp_cad": 7832406,
-     "exp_cad": 8437238
+     "timing_cad": 3082162,
+     "timing_us_cad": 856575,
+     "timing_ab_cad": 2225587,
+     "spread_cad": 4624400,
+     "matched_mwh": 127598,
+     "avg_exp_price": 67.28,
+     "avg_imp_price": 31.04,
+     "net_cad": 691669,
+     "imp_cad": 7893652,
+     "exp_cad": 8585321
     },
     "peak_only": {
-     "timing_cad": 3477119,
-     "timing_us_cad": 1265929,
-     "timing_ab_cad": 2211191,
-     "spread_cad": 5288791,
-     "matched_mwh": 124655,
-     "avg_exp_price": 74.92,
-     "avg_imp_price": 32.49,
-     "net_cad": 1127381,
-     "imp_cad": 8211486,
-     "exp_cad": 9338867
+     "timing_cad": 3487051,
+     "timing_us_cad": 1261464,
+     "timing_ab_cad": 2225587,
+     "spread_cad": 5370083,
+     "matched_mwh": 127598,
+     "avg_exp_price": 74.62,
+     "avg_imp_price": 32.54,
+     "net_cad": 1248190,
+     "imp_cad": 8273335,
+     "exp_cad": 9521524
     }
    },
    "prev_month": {
@@ -1441,28 +1441,28 @@
    "ytd": {
     "label": "2026 to date",
     "base": {
-     "timing_cad": 58798489,
-     "timing_us_cad": 18078875,
-     "timing_ab_cad": 40719614,
-     "spread_cad": 55119879,
-     "matched_mwh": 1599080,
+     "timing_cad": 58792210,
+     "timing_us_cad": 18058200,
+     "timing_ab_cad": 40734010,
+     "spread_cad": 55170147,
+     "matched_mwh": 1602023,
      "avg_exp_price": 50.38,
-     "avg_imp_price": 17.69,
-     "net_cad": 416644466,
-     "imp_cad": 38663142,
-     "exp_cad": 455307608
+     "avg_imp_price": 17.7,
+     "net_cad": 416731303,
+     "imp_cad": 38724388,
+     "exp_cad": 455455691
     },
     "peak_only": {
-     "timing_cad": 62210052,
-     "timing_us_cad": 21490438,
-     "timing_ab_cad": 40719614,
-     "spread_cad": 61367275,
-     "matched_mwh": 1599080,
-     "avg_exp_price": 54.72,
-     "avg_imp_price": 18.42,
-     "net_cad": 454303901,
-     "imp_cad": 40271800,
-     "exp_cad": 494575701
+     "timing_cad": 62219984,
+     "timing_us_cad": 21485973,
+     "timing_ab_cad": 40734010,
+     "spread_cad": 61448567,
+     "matched_mwh": 1602023,
+     "avg_exp_price": 54.73,
+     "avg_imp_price": 18.44,
+     "net_cad": 454424710,
+     "imp_cad": 40333649,
+     "exp_cad": 494758358
     }
    },
    "prev_year": {
@@ -1672,11 +1672,11 @@
    },
    {
     "month": "2026-11",
-    "timing_cad": 3088441,
-    "spread_cad": 4574132,
-    "timing_cad_peak_only": 3477119,
-    "spread_cad_peak_only": 5288791,
-    "net_cad_peak_only": 1127381
+    "timing_cad": 3082162,
+    "spread_cad": 4624400,
+    "timing_cad_peak_only": 3487051,
+    "spread_cad_peak_only": 5370083,
+    "net_cad_peak_only": 1248190
    }
   ]
  },
@@ -2169,7 +2169,7 @@
  "data_through": {
   "us_eia": {
    "label": "BC\u2013US flows (EIA hourly)",
-   "t": "2026-11-20T08:00:00+00:00"
+   "t": "2026-11-21T08:00:00+00:00"
   },
   "us_bch": {
    "label": "BC\u2013US flows (BC Hydro official)",
@@ -2185,11 +2185,11 @@
   },
   "bch5": {
    "label": "BC Hydro 5-min real-time page",
-   "t": "2026-11-22T08:05:00+00:00"
+   "t": "2026-11-22T16:20:00+00:00"
   },
   "pool": {
    "label": "AESO pool price",
-   "t": "2026-11-22T08:00:00+00:00"
+   "t": "2026-11-22T16:00:00+00:00"
   },
   "load": {
    "label": "BC load (BC Hydro balancing authority, hourly)",
@@ -2208,35 +2208,35 @@
   },
   "res_williston": {
    "label": "Williston (BC Hydro hydromet, Schooler Creek)",
-   "t": "2026-11-22T07:00:00+00:00"
+   "t": "2026-11-22T15:00:00+00:00"
   },
   "res_dinosaur": {
    "label": "Dinosaur / Peace Canyon (BC Hydro hydromet)",
-   "t": "2026-11-22T08:00:00+00:00"
+   "t": "2026-11-22T16:00:00+00:00"
   },
   "res_sitec": {
    "label": "Site C / Naache Mege (BC Hydro hydromet)",
-   "t": "2026-11-22T08:00:00+00:00"
+   "t": "2026-11-22T16:00:00+00:00"
   },
   "res_mica": {
    "label": "Mica / Kinbasket (Corps CWMS, confirmed by BC Hydro grt.txt)",
-   "t": "2026-11-22T07:00:00+00:00"
+   "t": "2026-11-22T15:00:00+00:00"
   },
   "res_arrow": {
    "label": "Arrow / Keenleyside (Corps CWMS)",
-   "t": "2026-11-22T06:00:00+00:00"
+   "t": "2026-11-22T14:00:00+00:00"
   },
   "res_duncan": {
    "label": "Duncan (Corps CWMS)",
-   "t": "2026-11-22T06:00:00+00:00"
+   "t": "2026-11-22T14:00:00+00:00"
   },
   "res_kootenay": {
    "label": "Kootenay Lake at Queens Bay (WSC 08NH064)",
-   "t": "2026-11-22T07:00:00+00:00"
+   "t": "2026-11-22T16:00:00+00:00"
   }
  },
  "reservoirs": {
-  "generated": "2026-11-22T01:08-07:00",
+  "generated": "2026-11-22T09:25-07:00",
   "projects": {
    "williston": {
     "id": "williston",
@@ -2246,18 +2246,18 @@
     "lat": 56.02,
     "lon": -122.2,
     "note": "Licence live range 642.04\u2013672.08 m (32 MAF). The Peace Water Use Plan often uses a higher normal minimum of 654.41 m.",
-    "as_of": "2026-11-22T07:00:00+00:00",
-    "elev_m": 668.8,
-    "elev_ft": 2194.23,
+    "as_of": "2026-11-22T15:00:00+00:00",
+    "elev_m": 668.796,
+    "elev_ft": 2194.21,
     "pct": 89.1,
-    "live_m3": 35161827579.0,
-    "live_acft": 28506200.0,
+    "live_m3": 35156571701.0,
+    "live_acft": 28501939.0,
     "live_capacity_m3": 39471648000.0,
-    "gwh": 12936.0,
+    "gwh": 12934.0,
     "d7": {
-     "elev_m": -0.2,
-     "pct_pt": -0.6,
-     "from_as_of": "2026-11-15T19:00:00+00:00"
+     "elev_m": -0.23,
+     "pct_pt": -0.7,
+     "from_as_of": "2026-11-16T03:00:00+00:00"
     },
     "outflow_cfs": null,
     "source": "hydromet:wsc",
@@ -2283,18 +2283,18 @@
     "lat": 56.0,
     "lon": -122.08,
     "note": "Re-regulating pond under Williston. Live storage is about 25 million m\u00b3 (0.02 MAF).",
-    "as_of": "2026-11-22T08:00:00+00:00",
-    "elev_m": 501.861,
-    "elev_ft": 1646.53,
-    "pct": 63.7,
-    "live_m3": 15735647.0,
-    "live_acft": 12757.0,
+    "as_of": "2026-11-22T16:00:00+00:00",
+    "elev_m": 502.235,
+    "elev_ft": 1647.75,
+    "pct": 76.5,
+    "live_m3": 18897997.0,
+    "live_acft": 15321.0,
     "live_capacity_m3": 24690000.0,
-    "gwh": 1.5,
+    "gwh": 1.8,
     "d7": {
-     "elev_m": 0.201,
-     "pct_pt": 6.9,
-     "from_as_of": "2026-11-15T20:00:00+00:00"
+     "elev_m": 0.298,
+     "pct_pt": 10.2,
+     "from_as_of": "2026-11-16T04:00:00+00:00"
     },
     "outflow_cfs": null,
     "source": "hydromet:dir",
@@ -2303,7 +2303,7 @@
     "live_capacity_acft": 20017.0,
     "min_m": 500.0,
     "max_m": 502.92,
-    "head_m_mid_slice": 39.3
+    "head_m_mid_slice": 39.5
    },
    "sitec": {
     "id": "sitec",
@@ -2313,18 +2313,18 @@
     "lat": 56.19,
     "lon": -120.91,
     "note": "Run-of-river-ish: 1.8 m operating range, 165 million m\u00b3 (0.13 MAF, 0.4% of Williston). Head is an assumed 52 m.",
-    "as_of": "2026-11-22T08:00:00+00:00",
-    "elev_m": 461.557,
-    "elev_ft": 1514.3,
-    "pct": 86.5,
-    "live_m3": 142725000.0,
-    "live_acft": 115709.0,
+    "as_of": "2026-11-22T16:00:00+00:00",
+    "elev_m": 461.533,
+    "elev_ft": 1514.22,
+    "pct": 85.2,
+    "live_m3": 140525000.0,
+    "live_acft": 113926.0,
     "live_capacity_m3": 165000000.0,
-    "gwh": 17.8,
+    "gwh": 17.5,
     "d7": {
-     "elev_m": -0.044,
-     "pct_pt": -2.4,
-     "from_as_of": "2026-11-15T20:00:00+00:00"
+     "elev_m": -0.069,
+     "pct_pt": -3.8,
+     "from_as_of": "2026-11-16T04:00:00+00:00"
     },
     "outflow_cfs": null,
     "source": "hydromet:cwy",
@@ -2343,20 +2343,20 @@
     "lat": 52.08,
     "lon": -118.3,
     "note": "Storage is interpolated from official USACE elevation\u2013storage points because the hourly storage timeseries is often empty.",
-    "as_of": "2026-11-22T07:00:00+00:00",
-    "elev_m": 746.925,
-    "elev_ft": 2450.54,
-    "pct": 79.6,
-    "live_m3": 11840013154.0,
-    "live_acft": 9598869.0,
+    "as_of": "2026-11-22T15:00:00+00:00",
+    "elev_m": 746.881,
+    "elev_ft": 2450.4,
+    "pct": 79.5,
+    "live_m3": 11822189091.0,
+    "live_acft": 9584419.0,
     "live_capacity_m3": 14867504484.0,
-    "gwh": 4070.0,
+    "gwh": 4063.0,
     "d7": {
-     "elev_m": -0.618,
-     "pct_pt": -1.7,
-     "from_as_of": "2026-11-15T19:00:00+00:00"
+     "elev_m": -0.684,
+     "pct_pt": -1.9,
+     "from_as_of": "2026-11-16T03:00:00+00:00"
     },
-    "outflow_cfs": 18150.0,
+    "outflow_cfs": 26800.0,
     "source": "hydromet:grt (Kinbasket gauge, used as Mica pool)",
     "typical": null,
     "ok": true,
@@ -2373,18 +2373,18 @@
     "lat": 49.342,
     "lon": -117.774,
     "note": "Local energy uses an assumed 22 m head. Most of this water's energy is realized below the border.",
-    "as_of": "2026-11-22T06:00:00+00:00",
-    "elev_m": 435.001,
-    "elev_ft": 1427.17,
+    "as_of": "2026-11-22T14:00:00+00:00",
+    "elev_m": 434.989,
+    "elev_ft": 1427.13,
     "pct": 70.4,
-    "live_m3": 6168480528.0,
-    "live_acft": 5000876.0,
+    "live_m3": 6164060970.0,
+    "live_acft": 4997293.0,
     "live_capacity_m3": 8757708000.0,
     "gwh": 325.0,
     "d7": {
-     "elev_m": -0.503,
-     "pct_pt": -2.8,
-     "from_as_of": "2026-11-15T18:00:00+00:00"
+     "elev_m": -0.466,
+     "pct_pt": -2.6,
+     "from_as_of": "2026-11-16T02:00:00+00:00"
     },
     "outflow_cfs": null,
     "source": "cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV",
@@ -2403,18 +2403,18 @@
     "lat": 50.25,
     "lon": -116.94,
     "note": "Storage only: no generators. Energy is realized downstream on the Kootenay.",
-    "as_of": "2026-11-22T06:00:00+00:00",
-    "elev_m": 569.942,
-    "elev_ft": 1869.89,
-    "pct": 77.4,
-    "live_m3": 1335931615.0,
-    "live_acft": 1083059.0,
+    "as_of": "2026-11-22T14:00:00+00:00",
+    "elev_m": 569.915,
+    "elev_ft": 1869.8,
+    "pct": 77.3,
+    "live_m3": 1334346594.0,
+    "live_acft": 1081774.0,
     "live_capacity_m3": 1725145128.0,
     "gwh": null,
     "d7": {
-     "elev_m": -0.509,
+     "elev_m": -0.494,
      "pct_pt": -1.7,
-     "from_as_of": "2026-11-15T18:00:00+00:00"
+     "from_as_of": "2026-11-16T02:00:00+00:00"
     },
     "outflow_cfs": null,
     "source": "cwms:DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV",
@@ -2432,18 +2432,18 @@
     "lat": 49.654,
     "lon": -116.93,
     "note": "Natural lake regulated by Corra Linn (FortisBC) under the IJC 1938 Order of Approval. Percent is of the 6-ft IJC band (1739.32\u20131745.32 ft at Queens Bay). The dashed mark is the Order maximum for this date, not a historical median. No stored-energy figure: the lake is not a simple plant head-pond.",
-    "as_of": "2026-11-22T07:00:00+00:00",
-    "elev_m": 531.62,
-    "elev_ft": 1744.16,
-    "pct": 80.7,
+    "as_of": "2026-11-22T16:00:00+00:00",
+    "elev_m": 531.639,
+    "elev_ft": 1744.22,
+    "pct": 81.7,
     "live_m3": null,
     "live_acft": null,
     "live_capacity_m3": null,
     "gwh": null,
     "d7": {
-     "elev_m": 0.215,
-     "pct_pt": 11.8,
-     "from_as_of": "2026-11-15T19:00:00+00:00"
+     "elev_m": 0.242,
+     "pct_pt": 13.2,
+     "from_as_of": "2026-11-16T04:00:00+00:00"
     },
     "outflow_cfs": null,
     "source": "wsc:08NH064",
@@ -2458,10 +2458,10 @@
     "min_ft": 1739.32,
     "max_ft": 1745.32,
     "ijc_max_ft": 1745.32,
-    "ft_below_ijc_max": 1.16
+    "ft_below_ijc_max": 1.1
    }
   },
-  "total_gwh": 17350.0,
+  "total_gwh": 17341.0,
   "total_gwh_note": "Sum of local stored-energy estimates for projects with a head assumption (Williston, Dinosaur, Site C, Mica, Arrow). Duncan is excluded.",
   "series": {
    "williston": [
@@ -2705,7 +2705,7 @@
     },
     {
      "t": "2026-11-22T00:00:00+00:00",
-     "pct": 79.6
+     "pct": 79.5
     }
    ],
    "arrow": [
@@ -2939,7 +2939,7 @@
     },
     {
      "t": "2026-11-22T00:00:00+00:00",
-     "pct": 74.5
+     "pct": 74.4
     }
    ],
    "duncan": [
@@ -3173,7 +3173,7 @@
     },
     {
      "t": "2026-11-22T00:00:00+00:00",
-     "pct": 77.4
+     "pct": 77.3
     }
    ],
    "kootenay": [
@@ -3407,7 +3407,7 @@
     },
     {
      "t": "2026-11-22T00:00:00+00:00",
-     "pct": 80.7
+     "pct": 81.7
     }
    ]
   },
@@ -3493,7 +3493,7 @@
     },
     {
      "t": "2026-11-22T00:00:00+00:00",
-     "pct": 63.7
+     "pct": 76.5
     }
    ],
    "sitec": [
@@ -3535,7 +3535,7 @@
     },
     {
      "t": "2026-11-22T00:00:00+00:00",
-     "pct": 86.5
+     "pct": 85.2
     }
    ],
    "mica": [
@@ -4021,7 +4021,7 @@
     },
     {
      "t": "2026-11-22T00:00:00+00:00",
-     "pct": 79.6
+     "pct": 79.5
     }
    ],
    "arrow": [
@@ -4507,7 +4507,7 @@
     },
     {
      "t": "2026-11-22T00:00:00+00:00",
-     "pct": 74.5
+     "pct": 74.4
     }
    ],
    "duncan": [
@@ -4993,7 +4993,7 @@
     },
     {
      "t": "2026-11-22T00:00:00+00:00",
-     "pct": 77.4
+     "pct": 77.3
     }
    ],
    "kootenay": [
@@ -5479,114 +5479,114 @@
     },
     {
      "t": "2026-11-22T00:00:00+00:00",
-     "pct": 80.7
+     "pct": 81.7
     }
    ]
   },
   "data_through": {
    "res_williston": {
     "label": "Williston (BC Hydro hydromet, Schooler Creek)",
-    "t": "2026-11-22T07:00:00+00:00"
+    "t": "2026-11-22T15:00:00+00:00"
    },
    "res_dinosaur": {
     "label": "Dinosaur / Peace Canyon (BC Hydro hydromet)",
-    "t": "2026-11-22T08:00:00+00:00"
+    "t": "2026-11-22T16:00:00+00:00"
    },
    "res_sitec": {
     "label": "Site C / Naache Mege (BC Hydro hydromet)",
-    "t": "2026-11-22T08:00:00+00:00"
+    "t": "2026-11-22T16:00:00+00:00"
    },
    "res_mica": {
     "label": "Mica / Kinbasket (Corps CWMS, confirmed by BC Hydro grt.txt)",
-    "t": "2026-11-22T07:00:00+00:00"
+    "t": "2026-11-22T15:00:00+00:00"
    },
    "res_arrow": {
     "label": "Arrow / Keenleyside (Corps CWMS)",
-    "t": "2026-11-22T06:00:00+00:00"
+    "t": "2026-11-22T14:00:00+00:00"
    },
    "res_duncan": {
     "label": "Duncan (Corps CWMS)",
-    "t": "2026-11-22T06:00:00+00:00"
+    "t": "2026-11-22T14:00:00+00:00"
    },
    "res_kootenay": {
     "label": "Kootenay Lake at Queens Bay (WSC 08NH064)",
-    "t": "2026-11-22T07:00:00+00:00"
+    "t": "2026-11-22T16:00:00+00:00"
    }
   },
   "sources": {
    "wsc": {
     "ok": true,
     "url": "https://www.bchydro.com/info/res_hydromet/data/wsc.txt",
-    "n": 2009,
+    "n": 2105,
     "from": "2026-11-15T08:00:00+00:00",
-    "to": "2026-11-22T07:00:00+00:00",
-    "last_elev_m": 668.8
+    "to": "2026-11-22T15:00:00+00:00",
+    "last_elev_m": 668.796
    },
    "dir": {
     "ok": true,
     "url": "https://www.bchydro.com/info/res_hydromet/data/dir.txt",
-    "n": 2017,
+    "n": 2113,
     "from": "2026-11-15T08:00:00+00:00",
-    "to": "2026-11-22T08:00:00+00:00",
-    "last_elev_m": 501.861
+    "to": "2026-11-22T16:00:00+00:00",
+    "last_elev_m": 502.235
    },
    "cwy": {
     "ok": true,
     "url": "https://www.bchydro.com/info/res_hydromet/data/cwy.txt",
-    "n": 2011,
+    "n": 2107,
     "from": "2026-11-15T08:00:00+00:00",
-    "to": "2026-11-22T08:00:00+00:00",
-    "last_elev_m": 461.557
+    "to": "2026-11-22T16:00:00+00:00",
+    "last_elev_m": 461.533
    },
    "grt": {
     "ok": true,
     "url": "https://www.bchydro.com/info/res_hydromet/data/grt.txt",
-    "n": 2012,
+    "n": 2108,
     "from": "2026-11-15T08:00:00+00:00",
-    "to": "2026-11-22T07:00:00+00:00",
-    "last_elev_m": 746.925
+    "to": "2026-11-22T15:00:00+00:00",
+    "last_elev_m": 746.881
    },
    "cfc": {
     "ok": true,
     "url": "https://www.bchydro.com/info/res_hydromet/data/cfc.txt",
-    "last_elev_m": 461.548,
-    "to": "2026-11-22T08:00:00+00:00"
+    "last_elev_m": 461.527,
+    "to": "2026-11-22T16:00:00+00:00"
    },
    "mica elev": {
     "ok": true,
-    "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV&office=NWDP&begin=2026-11-08T08%3A08%3A36Z&end=2026-11-22T08%3A08%3A36Z&page-size=20000&units=ft",
+    "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV&office=NWDP&begin=2026-11-08T16%3A24%3A29Z&end=2026-11-22T16%3A24%3A29Z&page-size=20000&units=ft",
     "n": 334,
-    "from": "2026-11-08T09:00:00+00:00",
-    "to": "2026-11-22T06:00:00+00:00",
-    "last": 2450.65
+    "from": "2026-11-08T17:00:00+00:00",
+    "to": "2026-11-22T14:00:00+00:00",
+    "last": 2450.52
    },
    "mica outflow": {
     "ok": true,
-    "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=MCDB.Flow-Out.Ave.1Hour.1Hour.BCHYDRO-REV&office=NWDP&begin=2026-11-08T08%3A08%3A36Z&end=2026-11-22T08%3A08%3A36Z&page-size=20000&units=cfs",
+    "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=MCDB.Flow-Out.Ave.1Hour.1Hour.BCHYDRO-REV&office=NWDP&begin=2026-11-08T16%3A24%3A29Z&end=2026-11-22T16%3A24%3A29Z&page-size=20000&units=cfs",
     "n": 334,
-    "from": "2026-11-08T09:00:00+00:00",
-    "to": "2026-11-22T06:00:00+00:00",
-    "last": 18150.0
+    "from": "2026-11-08T17:00:00+00:00",
+    "to": "2026-11-22T14:00:00+00:00",
+    "last": 26800.0
    },
    "arrow elev": {
     "ok": true,
-    "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV&office=NWDP&begin=2026-11-08T08%3A08%3A36Z&end=2026-11-22T08%3A08%3A36Z&page-size=20000&units=ft",
+    "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV&office=NWDP&begin=2026-11-08T16%3A24%3A29Z&end=2026-11-22T16%3A24%3A29Z&page-size=20000&units=ft",
     "n": 334,
-    "from": "2026-11-08T09:00:00+00:00",
-    "to": "2026-11-22T06:00:00+00:00",
-    "last": 1427.17
+    "from": "2026-11-08T17:00:00+00:00",
+    "to": "2026-11-22T14:00:00+00:00",
+    "last": 1427.13
    },
    "arrow stor": {
     "ok": true,
-    "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Stor.Inst.0.0.BCHYDRO-REV&office=NWDP&begin=2026-11-08T08%3A08%3A36Z&end=2026-11-22T08%3A08%3A36Z&page-size=20000&units=ac-ft",
-    "n": 333,
-    "from": "2026-11-08T09:00:00+00:00",
-    "to": "2026-11-22T05:00:00+00:00",
-    "last": 5228176.336
+    "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Stor.Inst.0.0.BCHYDRO-REV&office=NWDP&begin=2026-11-08T16%3A24%3A29Z&end=2026-11-22T16%3A24%3A29Z&page-size=20000&units=ac-ft",
+    "n": 334,
+    "from": "2026-11-08T17:00:00+00:00",
+    "to": "2026-11-22T14:00:00+00:00",
+    "last": 5224592.998
    },
    "arrow outflow": {
     "ok": true,
-    "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Flow-Out.Ave.~1Day.1Day.BCHYDRO-REV&office=NWDP&begin=2026-11-08T08%3A08%3A36Z&end=2026-11-22T08%3A08%3A36Z&page-size=20000&units=cfs",
+    "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=ARDB.Flow-Out.Ave.~1Day.1Day.BCHYDRO-REV&office=NWDP&begin=2026-11-08T16%3A24%3A29Z&end=2026-11-22T16%3A24%3A29Z&page-size=20000&units=cfs",
     "n": 12,
     "from": "2026-11-09T07:00:00+00:00",
     "to": "2026-11-20T07:00:00+00:00",
@@ -5594,15 +5594,15 @@
    },
    "duncan elev": {
     "ok": true,
-    "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV&office=NWDP&begin=2026-11-08T08%3A08%3A36Z&end=2026-11-22T08%3A08%3A36Z&page-size=20000&units=ft",
+    "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV&office=NWDP&begin=2026-11-08T16%3A24%3A29Z&end=2026-11-22T16%3A24%3A29Z&page-size=20000&units=ft",
     "n": 334,
-    "from": "2026-11-08T09:00:00+00:00",
-    "to": "2026-11-22T06:00:00+00:00",
-    "last": 1869.89
+    "from": "2026-11-08T17:00:00+00:00",
+    "to": "2026-11-22T14:00:00+00:00",
+    "last": 1869.8
    },
    "duncan outflow": {
     "ok": true,
-    "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=DCDB.Flow-Out.Ave.~1Day.1Day.BCHYDRO-REV&office=NWDP&begin=2026-11-08T08%3A08%3A36Z&end=2026-11-22T08%3A08%3A36Z&page-size=20000&units=cfs",
+    "url": "https://cwms-data.usace.army.mil/cwms-data/timeseries?name=DCDB.Flow-Out.Ave.~1Day.1Day.BCHYDRO-REV&office=NWDP&begin=2026-11-08T16%3A24%3A29Z&end=2026-11-22T16%3A24%3A29Z&page-size=20000&units=cfs",
     "n": 12,
     "from": "2026-11-09T07:00:00+00:00",
     "to": "2026-11-20T07:00:00+00:00",
@@ -5613,17 +5613,17 @@
     "url": "https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline",
     "station": "08NH064",
     "n": 4028,
-    "hourly": 336,
-    "from": "2026-11-08T08:00:00+00:00",
-    "to": "2026-11-22T07:00:00+00:00",
-    "last_elev_m": 531.62
+    "hourly": 337,
+    "from": "2026-11-08T16:00:00+00:00",
+    "to": "2026-11-22T16:00:00+00:00",
+    "last_elev_m": 531.639
    },
    "kootenay_fortis": {
     "ok": true,
     "url": "https://secure.fortisbc.com/lakelevel/lakes.jsp",
-    "nelson_ft": 1744.13,
-    "nelson_m": 531.61,
-    "nelson_as_of": "Nov 22 2026 01:00:01",
+    "nelson_ft": 1744.27,
+    "nelson_m": 531.65,
+    "nelson_as_of": "Nov 22 2026 09:21:02",
     "forecast": "Nov 20, 2026: Kootenay Lake is forecast to increase to 1744.40 at Queens Bay by November 29, 2026."
    }
   },
@@ -5636,9 +5636,9 @@
    "kootenay": "Level is WSC 08NH064 Kootenay Lake at Queens Bay, geodetic (GSC Datum 1928 Adjustment), via the ECCC / wateroffice APIs. This is the IJC reference gauge and matches FortisBC's Queen's Bay reading. 08NJ158 is 'Kootenay Lake Outflow near Corra Linn' (assumed datum, not realtime) and is not used. FortisBC also publishes a Nelson reading on secure.fortisbc.com/lakelevel/lakes.jsp (scraped as a supplement only). CWMS CORB is Corra Linn forebay, which is not the same as Queens Bay lake level and returned no points in a test pull. No stored-energy estimate is published for the lake.",
    "eta": 0.88
   },
-  "history_rows": 39118,
+  "history_rows": 39183,
   "history_from": "2025-10-17T02:00:00+00:00",
-  "history_to": "2026-11-22T08:00:00+00:00"
+  "history_to": "2026-11-22T16:00:00+00:00"
  },
  "peak_events": {
   "events": [
@@ -6392,7 +6392,7 @@
        "ab_price_cad": 66.92,
        "ab_price_hours": 4,
        "bc_load_avg_mw": null,
-       "net_export_mw": 137
+       "net_export_mw": 142
       },
       {
        "date": "2026-11-18",
