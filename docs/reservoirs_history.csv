@@ -9522,6 +9522,14 @@ t_utc,project,elev_m,elev_ft,storage_acft,outflow_cfs,source
 2026-11-23T18:00Z,arrow,434.9313,1426.9400,5201898.5000,,cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV
 2026-11-23T19:00Z,arrow,434.9374,1426.9600,5204287.4000,,cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV
 2026-11-23T20:00Z,arrow,434.9405,1426.9700,5205481.9000,,cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV
+2026-11-23T21:00Z,arrow,434.9405,1426.9700,5205481.9000,,cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV
+2026-11-23T22:00Z,arrow,434.9374,1426.9600,5204287.4000,,cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV
+2026-11-23T23:00Z,arrow,434.9313,1426.9400,5201898.5000,,cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV
+2026-11-24T00:00Z,arrow,434.9130,1426.8800,5194731.8000,,cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV
+2026-11-24T01:00Z,arrow,434.9161,1426.8900,5195926.3000,,cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV
+2026-11-24T02:00Z,arrow,434.9039,1426.8500,5191148.5000,,cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV
+2026-11-24T03:00Z,arrow,434.9039,1426.8500,5191148.5000,,cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV
+2026-11-24T04:00Z,arrow,434.9100,1426.8700,5193537.4000,,cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV
 2026-11-13T08:00Z,dinosaur,502.1320,1647.4150,,,hydromet:dir
 2026-11-13T09:00Z,dinosaur,502.1390,1647.4380,,,hydromet:dir
 2026-11-13T10:00Z,dinosaur,502.1840,1647.5850,,,hydromet:dir
@@ -9778,6 +9786,14 @@ t_utc,project,elev_m,elev_ft,storage_acft,outflow_cfs,source
 2026-11-23T21:00Z,dinosaur,501.9650,1646.8670,,,hydromet:dir
 2026-11-23T22:00Z,dinosaur,501.9550,1646.8340,,,hydromet:dir
 2026-11-23T23:00Z,dinosaur,501.9610,1646.8540,,,hydromet:dir
+2026-11-24T00:00Z,dinosaur,501.9240,1646.7320,,,hydromet:dir
+2026-11-24T01:00Z,dinosaur,501.9220,1646.7260,,,hydromet:dir
+2026-11-24T02:00Z,dinosaur,501.9180,1646.7130,,,hydromet:dir
+2026-11-24T03:00Z,dinosaur,501.9010,1646.6570,,,hydromet:dir
+2026-11-24T04:00Z,dinosaur,501.8830,1646.5980,,,hydromet:dir
+2026-11-24T05:00Z,dinosaur,501.8740,1646.5680,,,hydromet:dir
+2026-11-24T06:00Z,dinosaur,501.8540,1646.5030,,,hydromet:dir
+2026-11-24T07:00Z,dinosaur,501.8550,1646.5060,,,hydromet:dir
 2025-10-17T02:00Z,duncan,571.2165,1874.0700,,,cwms:DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
 2025-10-17T03:00Z,duncan,571.2165,1874.0700,,,cwms:DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
 2025-10-17T04:00Z,duncan,571.2135,1874.0600,,,cwms:DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
@@ -19394,6 +19410,14 @@ t_utc,project,elev_m,elev_ft,storage_acft,outflow_cfs,source
 2026-11-23T18:00Z,duncan,569.8053,1869.4400,,,cwms:DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
 2026-11-23T19:00Z,duncan,569.7992,1869.4200,,,cwms:DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
 2026-11-23T20:00Z,duncan,569.8023,1869.4300,,,cwms:DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
+2026-11-23T21:00Z,duncan,569.7962,1869.4100,,,cwms:DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
+2026-11-23T22:00Z,duncan,569.7992,1869.4200,,,cwms:DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
+2026-11-23T23:00Z,duncan,569.7901,1869.3900,,,cwms:DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
+2026-11-24T00:00Z,duncan,569.7809,1869.3600,,,cwms:DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
+2026-11-24T01:00Z,duncan,569.7840,1869.3700,,,cwms:DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
+2026-11-24T02:00Z,duncan,569.7840,1869.3700,,,cwms:DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
+2026-11-24T03:00Z,duncan,569.7809,1869.3600,,,cwms:DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
+2026-11-24T04:00Z,duncan,569.7718,1869.3300,,,cwms:DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
 2026-11-13T08:00Z,kinbasket,747.5040,2452.4410,,,hydromet:grt
 2026-11-13T09:00Z,kinbasket,747.5090,2452.4570,,,hydromet:grt
 2026-11-13T10:00Z,kinbasket,747.5100,2452.4610,,,hydromet:grt
@@ -19649,6 +19673,14 @@ t_utc,project,elev_m,elev_ft,storage_acft,outflow_cfs,source
 2026-11-23T20:00Z,kinbasket,746.6940,2449.7830,,,hydromet:grt
 2026-11-23T21:00Z,kinbasket,746.6870,2449.7600,,,hydromet:grt
 2026-11-23T22:00Z,kinbasket,746.6800,2449.7380,,,hydromet:grt
+2026-11-23T23:00Z,kinbasket,746.6710,2449.7080,,,hydromet:grt
+2026-11-24T00:00Z,kinbasket,746.6600,2449.6720,,,hydromet:grt
+2026-11-24T01:00Z,kinbasket,746.6530,2449.6490,,,hydromet:grt
+2026-11-24T02:00Z,kinbasket,746.6480,2449.6330,,,hydromet:grt
+2026-11-24T03:00Z,kinbasket,746.6360,2449.5930,,,hydromet:grt
+2026-11-24T04:00Z,kinbasket,746.6320,2449.5800,,,hydromet:grt
+2026-11-24T05:00Z,kinbasket,746.6280,2449.5670,,,hydromet:grt
+2026-11-24T06:00Z,kinbasket,746.6220,2449.5470,,,hydromet:grt
 2025-10-17T03:00Z,kootenay,531.2600,1742.9790,,,wsc:08NH064
 2025-10-17T04:00Z,kootenay,531.2540,1742.9590,,,wsc:08NH064
 2025-10-17T05:00Z,kootenay,531.2690,1743.0090,,,wsc:08NH064
@@ -29317,6 +29349,14 @@ t_utc,project,elev_m,elev_ft,storage_acft,outflow_cfs,source
 2026-11-23T20:00Z,kootenay,531.6870,1744.3800,,,wsc:08NH064
 2026-11-23T21:00Z,kootenay,531.6860,1744.3770,,,wsc:08NH064
 2026-11-23T22:00Z,kootenay,531.6820,1744.3640,,,wsc:08NH064
+2026-11-23T23:00Z,kootenay,531.6860,1744.3770,,,wsc:08NH064
+2026-11-24T00:00Z,kootenay,531.6880,1744.3830,,,wsc:08NH064
+2026-11-24T01:00Z,kootenay,531.6860,1744.3770,,,wsc:08NH064
+2026-11-24T02:00Z,kootenay,531.6900,1744.3900,,,wsc:08NH064
+2026-11-24T03:00Z,kootenay,531.6900,1744.3900,,,wsc:08NH064
+2026-11-24T04:00Z,kootenay,531.6930,1744.4000,,,wsc:08NH064
+2026-11-24T05:00Z,kootenay,531.6930,1744.4000,,,wsc:08NH064
+2026-11-24T06:00Z,kootenay,531.6970,1744.4130,,,wsc:08NH064
 2025-10-17T02:00Z,mica,751.5149,2465.6000,,27090.0000,cwms:MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
 2025-10-17T03:00Z,mica,751.5210,2465.6200,,29490.0000,cwms:MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
 2025-10-17T04:00Z,mica,751.5210,2465.6200,,24510.0000,cwms:MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
@@ -38914,8 +38954,16 @@ t_utc,project,elev_m,elev_ft,storage_acft,outflow_cfs,source
 2026-11-23T18:00Z,mica,746.7417,2449.9400,,24650.0000,cwms:MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
 2026-11-23T19:00Z,mica,746.7326,2449.9100,,31920.0000,cwms:MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
 2026-11-23T20:00Z,mica,746.7265,2449.8900,,36230.0000,cwms:MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
-2026-11-23T21:00Z,mica,746.6870,2449.7600,,,"hydromet:grt (Kinbasket gauge, used as Mica pool)"
-2026-11-23T22:00Z,mica,746.6800,2449.7380,,,"hydromet:grt (Kinbasket gauge, used as Mica pool)"
+2026-11-23T21:00Z,mica,746.6870,2449.7600,,32910.0000,"hydromet:grt (Kinbasket gauge, used as Mica pool)"
+2026-11-23T22:00Z,mica,746.6800,2449.7380,,34610.0000,"hydromet:grt (Kinbasket gauge, used as Mica pool)"
+2026-11-23T23:00Z,mica,746.7082,2449.8300,,34110.0000,cwms:MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
+2026-11-24T00:00Z,mica,746.6990,2449.8000,,36060.0000,cwms:MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
+2026-11-24T01:00Z,mica,746.6868,2449.7600,,36130.0000,cwms:MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
+2026-11-24T02:00Z,mica,746.6716,2449.7100,,29910.0000,cwms:MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
+2026-11-24T03:00Z,mica,746.6655,2449.6900,,29490.0000,cwms:MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
+2026-11-24T04:00Z,mica,746.6655,2449.6900,,27550.0000,cwms:MCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV
+2026-11-24T05:00Z,mica,746.6280,2449.5670,,,"hydromet:grt (Kinbasket gauge, used as Mica pool)"
+2026-11-24T06:00Z,mica,746.6220,2449.5470,,,"hydromet:grt (Kinbasket gauge, used as Mica pool)"
 2026-11-13T08:00Z,sitec,461.5540,1514.2850,,,hydromet:cwy
 2026-11-13T09:00Z,sitec,461.5480,1514.2650,,,hydromet:cwy
 2026-11-13T10:00Z,sitec,461.5450,1514.2550,,,hydromet:cwy
@@ -39172,6 +39220,14 @@ t_utc,project,elev_m,elev_ft,storage_acft,outflow_cfs,source
 2026-11-23T21:00Z,sitec,461.4400,1513.9110,,,hydromet:cwy
 2026-11-23T22:00Z,sitec,461.4340,1513.8910,,,hydromet:cwy
 2026-11-23T23:00Z,sitec,461.4330,1513.8880,,,hydromet:cwy
+2026-11-24T00:00Z,sitec,461.4160,1513.8320,,,hydromet:cwy
+2026-11-24T01:00Z,sitec,461.4110,1513.8160,,,hydromet:cwy
+2026-11-24T02:00Z,sitec,461.4020,1513.7860,,,hydromet:cwy
+2026-11-24T03:00Z,sitec,461.3970,1513.7700,,,hydromet:cwy
+2026-11-24T04:00Z,sitec,461.3900,1513.7470,,,hydromet:cwy
+2026-11-24T05:00Z,sitec,461.3770,1513.7040,,,hydromet:cwy
+2026-11-24T06:00Z,sitec,461.3860,1513.7340,,,hydromet:cwy
+2026-11-24T07:00Z,sitec,461.3920,1513.7530,,,hydromet:cwy
 2026-11-13T08:00Z,williston,669.0280,2194.9740,,,hydromet:wsc
 2026-11-13T09:00Z,williston,669.0190,2194.9440,,,hydromet:wsc
 2026-11-13T10:00Z,williston,669.0090,2194.9110,,,hydromet:wsc
@@ -39427,3 +39483,11 @@ t_utc,project,elev_m,elev_ft,storage_acft,outflow_cfs,source
 2026-11-23T20:00Z,williston,668.7350,2194.0120,,,hydromet:wsc
 2026-11-23T21:00Z,williston,668.7200,2193.9630,,,hydromet:wsc
 2026-11-23T22:00Z,williston,668.7490,2194.0580,,,hydromet:wsc
+2026-11-23T23:00Z,williston,668.7450,2194.0450,,,hydromet:wsc
+2026-11-24T00:00Z,williston,668.7400,2194.0290,,,hydromet:wsc
+2026-11-24T01:00Z,williston,668.7400,2194.0290,,,hydromet:wsc
+2026-11-24T02:00Z,williston,668.7300,2193.9960,,,hydromet:wsc
+2026-11-24T03:00Z,williston,668.7440,2194.0420,,,hydromet:wsc
+2026-11-24T04:00Z,williston,668.7360,2194.0160,,,hydromet:wsc
+2026-11-24T05:00Z,williston,668.7370,2194.0190,,,hydromet:wsc
+2026-11-24T06:00Z,williston,668.7410,2194.0320,,,hydromet:wsc
