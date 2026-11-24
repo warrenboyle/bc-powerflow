@@ -199,6 +199,281 @@
      }
     }
    }
+  ],
+  "2026-11-25 16:00-18:00": [
+   {
+    "captured_at": "2026-11-24T23:17+00:00",
+    "noticed_at": "2026-11-24T16:14:22-07:00",
+    "retroactive": false,
+    "event_hours_utc": [
+     "2026-11-25T23:00:00+00:00",
+     "2026-11-26T00:00:00+00:00"
+    ],
+    "hour_ending_bc": [
+     17,
+     18
+    ],
+    "alberta": {
+     "forecast_pool": {
+      "value": null,
+      "source": "AESO API (poolprice-api v1.1, actualforecast-api v1)",
+      "as_of": "2026-11-24T23:17+00:00",
+      "reason": "none published for the event hours at capture time",
+      "label": "forecast pool price C$/MWh"
+     },
+     "forecast_ail": {
+      "value": {
+       "hourly": [
+        11837.0,
+        11796.0
+       ],
+       "avg": 11816.5,
+       "max": 11837.0,
+       "hours": 2
+      },
+      "source": "AESO API (poolprice-api v1.1, actualforecast-api v1)",
+      "as_of": "2026-11-24T23:17+00:00",
+      "label": "forecast Alberta internal load MW"
+     },
+     "forecast_ail_day_max": {
+      "value": 11837.0,
+      "source": "AESO API (poolprice-api v1.1, actualforecast-api v1)",
+      "as_of": "2026-11-24T23:17+00:00",
+      "label": "forecast AIL, day max MW"
+     },
+     "actual_pool": {
+      "value": null,
+      "source": "AESO API (poolprice-api v1.1, actualforecast-api v1)",
+      "as_of": "2026-11-24T23:17+00:00",
+      "reason": "not settled yet",
+      "label": "actual pool price C$/MWh"
+     },
+     "note": "AESO publishes a forecast pool price only a few hours ahead, so at notice time (usually the evening before) the event hours normally have none; forecast AIL (Alberta load) is published about a day ahead.",
+     "grid_condition": {
+      "value": "Normal",
+      "source": "https://www.aeso.ca/grid/understanding-grid-conditions/",
+      "as_of": "Nov. 24, 2026, 5:16:16 ABT",
+      "level": 0
+     },
+     "supply_cushion_derived": {
+      "value": 7185,
+      "source": "AESO API currentsupplydemand-api v2",
+      "as_of": "2026-11-24 17:16",
+      "label": "unused dispatchable capability MW (derived)",
+      "note": "Sum of (maximum capability - net generation) for all non-wind, non-solar fuel types in AESO's Current Supply Demand report. A rough stand-in: AESO does not publish its supply cushion as a number, and capability includes units on outage/long lead time."
+     },
+     "alberta_load_now": {
+      "value": 11855.0,
+      "source": "AESO API currentsupplydemand-api v2",
+      "as_of": "2026-11-24 17:16",
+      "label": "Alberta internal load now MW"
+     },
+     "wind": {
+      "value": {
+       "hourly_most_likely": [
+        4648.23,
+        4700.99
+       ],
+       "avg": 4675,
+       "min_of_low_case": 4437.17,
+       "capacity_mw": 5684.0,
+       "day_avg": 4548
+      },
+      "source": "http://ets.aeso.ca/Market/Reports/Manual/Operations/prodweb_reports/wind_solar_forecast/wind_rpt_longterm.csv",
+      "as_of": "2026-11-24T23:17+00:00",
+      "label": "Alberta wind forecast MW (most likely)"
+     },
+     "solar": {
+      "value": {
+       "hourly_most_likely": [
+        13.38,
+        0.0
+       ],
+       "avg": 7,
+       "min_of_low_case": 0.0,
+       "capacity_mw": 1892.0,
+       "day_avg": 167
+      },
+      "source": "http://ets.aeso.ca/Market/Reports/Manual/Operations/prodweb_reports/wind_solar_forecast/solar_rpt_longterm.csv",
+      "as_of": "2026-11-24T23:17+00:00",
+      "label": "Alberta solar forecast MW (most likely)"
+     }
+    },
+    "weather": {
+     "value": {
+      "cities": {
+       "Vancouver": {
+        "hourly": [
+         11.0,
+         10.5
+        ],
+        "min": 10.5,
+        "avg": 10.8
+       },
+       "Victoria": {
+        "hourly": [
+         12.6,
+         11.4
+        ],
+        "min": 11.4,
+        "avg": 12.0
+       },
+       "Kelowna": {
+        "hourly": [
+         9.7,
+         9.3
+        ],
+        "min": 9.3,
+        "avg": 9.5
+       },
+       "Prince George": {
+        "hourly": [
+         3.6,
+         2.2
+        ],
+        "min": 2.2,
+        "avg": 2.9
+       }
+      },
+      "min_all": 2.2,
+      "avg_4city": 8.8
+     },
+     "source": "https://api.open-meteo.com/v1/forecast?latitude=49.2827,48.4284,49.888,53.9171&longitude=-123.1207,-123.3656,-119.496,-122.7497&timezone=America%2FVancouver&start_date=2026-11-25&end_date=2026-11-25&hourly=temperature_2m",
+     "as_of": "2026-11-24T23:17+00:00",
+     "label": "Open-Meteo forecast API (current forecast)",
+     "note": null
+    },
+    "bc": {
+     "bc_load_latest_day": {
+      "value": {
+       "date": "2026-11-22",
+       "peak_mw": 9399,
+       "peak_pct_of_365d": 86.8,
+       "through": "2026-11-23T00:00:00-07:00"
+      },
+      "source": "docs/load_hourly.csv (BC Hydro balancing-authority hourly load)",
+      "as_of": "2026-11-24T23:17+00:00",
+      "note": "Latest posted day at capture time."
+     },
+     "bc_load_365d_peak": {
+      "value": {
+       "mw": 10823,
+       "t": "2026-01-26T17:00:00-08:00"
+      },
+      "source": "docs/load_hourly.csv (BC Hydro balancing-authority hourly load)",
+      "as_of": "2026-11-24T23:17+00:00"
+     },
+     "midc_latest": {
+      "value": {
+       "delivery_date": "2026-11-12",
+       "usd_mwh": 43.33
+      },
+      "source": "docs/daily_prices.csv (EIA/ICE Mid-C day-ahead peak)",
+      "as_of": "2026-11-24T23:17+00:00",
+      "note": "Latest delivery day published at capture time."
+     },
+     "bc_reservoirs": {
+      "value": {
+       "projects": [
+        {
+         "id": "williston",
+         "name": "Williston",
+         "plant": "G.M. Shrum / W.A.C. Bennett",
+         "river": "Peace",
+         "elev_m": 668.681,
+         "pct": 88.7,
+         "outflow_cfs": null,
+         "gwh": 12874.0,
+         "as_of": "2026-11-24T22:00:00+00:00",
+         "source": "hydromet:wsc",
+         "ok": true
+        },
+        {
+         "id": "dinosaur",
+         "name": "Dinosaur",
+         "plant": "Peace Canyon",
+         "river": "Peace",
+         "elev_m": 502.005,
+         "pct": 68.7,
+         "outflow_cfs": null,
+         "gwh": 1.6,
+         "as_of": "2026-11-24T23:00:00+00:00",
+         "source": "hydromet:dir",
+         "ok": true
+        },
+        {
+         "id": "sitec",
+         "name": "Site C",
+         "plant": "Naache Mege",
+         "river": "Peace",
+         "elev_m": 461.333,
+         "pct": 74.1,
+         "outflow_cfs": null,
+         "gwh": 15.2,
+         "as_of": "2026-11-24T23:00:00+00:00",
+         "source": "hydromet:cwy",
+         "ok": true
+        },
+        {
+         "id": "mica",
+         "name": "Mica",
+         "plant": "Kinbasket",
+         "river": "Columbia",
+         "elev_m": 746.586,
+         "pct": 78.7,
+         "outflow_cfs": 0.0,
+         "gwh": 4018.0,
+         "as_of": "2026-11-24T22:00:00+00:00",
+         "source": "hydromet:grt (Kinbasket gauge, used as Mica pool)",
+         "ok": true
+        },
+        {
+         "id": "arrow",
+         "name": "Arrow",
+         "plant": "Hugh Keenleyside",
+         "river": "Columbia",
+         "elev_m": 434.876,
+         "pct": 69.8,
+         "outflow_cfs": 37710.0,
+         "gwh": 322.0,
+         "as_of": "2026-11-24T21:00:00+00:00",
+         "source": "cwms:ARDB.Elev-Forebay.Inst.0.0.BCHYDRO-REV",
+         "ok": true
+        },
+        {
+         "id": "duncan",
+         "name": "Duncan",
+         "plant": "Duncan Dam",
+         "river": "Columbia",
+         "elev_m": 569.72,
+         "pct": 76.7,
+         "outflow_cfs": 3080.0,
+         "gwh": null,
+         "as_of": "2026-11-24T21:00:00+00:00",
+         "source": "cwms:DCDB.Elev-Forebay.Inst.1Hour.0.BCHYDRO-REV",
+         "ok": true
+        },
+        {
+         "id": "kootenay",
+         "name": "Kootenay Lake",
+         "plant": "Corra Linn (FortisBC)",
+         "river": "Kootenay",
+         "elev_m": 531.691,
+         "pct": 84.6,
+         "outflow_cfs": null,
+         "gwh": null,
+         "as_of": "2026-11-24T22:00:00+00:00",
+         "source": "wsc:08NH064",
+         "ok": true
+        }
+       ],
+       "total_gwh": 17231.0
+      },
+      "source": "docs/reservoirs_history.csv (BC Hydro hydromet text files + USACE CWMS NWDP; hourly)",
+      "as_of": "2026-11-24T23:00:00+00:00"
+     }
+    }
+   }
   ]
  }
 }
