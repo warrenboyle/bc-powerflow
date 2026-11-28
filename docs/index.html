@@ -1018,7 +1018,7 @@ function kpiSec(d){
  if(small)bits.push('Site C and Dinosaur add only ~'+fmtGwh(small));
  const ld=d.load_context&&d.load_context.latest_day;
  const evs=(d.peak_events&&d.peak_events.events)||[];
- const last=[...evs].reverse().find(e=>e.status&&e.status!=='upcoming');
+ const last=[...evs].filter(e=>e.status&&e.status!=='upcoming').sort((a,b)=>(b.date+'T'+(b.start||'')).localeCompare(a.date+'T'+(a.start||'')))[0];
  const evDelta=last&&last.trade&&last.trade.total&&last.trade.total.delta?last.trade.total.delta.value_cad:null;
  const evDay=last?new Date(last.date+'T12:00:00Z').toLocaleDateString('en-CA',{timeZone:'UTC',month:'short',day:'numeric'}):'';
  const evWin=last?((+last.start.slice(0,2)%12||12)+'–'+(+last.end.slice(0,2)%12||12)+' p.m.'):'';
